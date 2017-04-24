@@ -1,0 +1,5 @@
+
+*.txt.user
+*.autosave
+build-*-Desktop-Default/
+*-build/
