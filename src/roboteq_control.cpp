@@ -18,8 +18,9 @@
 #include <ros/ros.h>
 #include <controller_manager/controller_manager.h>
 #include <ros/callback_queue.h>
+#include <signal.h>
 
-#include "roboteq/serial_controller.h"
+#include "roboteq/roboteq.h"
 
 #include <boost/chrono.hpp>
 
@@ -35,11 +36,11 @@ bool status = true;
 // >>>>> Ctrl+C handler
 void siginthandler(int param)
 {
-  ROS_INFO("User pressed Ctrl+C Shutting down...");
+    ROS_INFO("User pressed Ctrl+C Shutting down...");
 
-  ROS_INFO("Control and diagnostic loop stopped");
-  ROS_INFO_STREAM("--------- ROBOTEQ_NODE STOPPED ----------");
-  ros::shutdown();
+    ROS_INFO("Control and diagnostic loop stopped");
+    ROS_INFO_STREAM("--------- ROBOTEQ_NODE STOPPED ---------");
+    ros::shutdown();
 
 }
 // <<<<< Ctrl+C handler
@@ -65,11 +66,39 @@ int main(int argc, char **argv) {
     private_nh.param<int32_t>("serial_rate", baud_rate, 115200);
     ROS_INFO_STREAM("Open Serial " << serial_port_string << ":" << baud_rate);
 
-    std::string name_node = ros::this_node::getName();
-    ROS_INFO("Started %s", name_node.c_str());
+    roboteq::Roboteq roboteq(nh, private_nh, serial_port_string, baud_rate);
+    // Run the serial controller
+    bool start = roboteq.start();
+    // Check connection started
+    if(start) {
+        const std::string eol("\r");
+        const size_t max_line_length(128);
+        std::stringstream tx_buffer_;
+        tx_buffer_ << "?FID" << eol;
 
-    // Process remainder of ROS callbacks separately, mainly ControlManager related
-    ros::spin();
+        roboteq.mSerial.write(tx_buffer_.str());
 
+        if( !roboteq.mSerial.waitReadable() )
+        {
+            //mStatus = SERIAL_TIMEOUT;
+            ROS_ERROR_STREAM( "Serial timeout connecting");
+        }
+
+        ROS_INFO_STREAM_NAMED("serial", "Bytes waiting: " << roboteq.mSerial.available());
+        std::string msg = roboteq.mSerial.readline(max_line_length, eol);
+        if (!msg.empty()) {
+          ROS_INFO_STREAM_NAMED("serial", "RX: " << msg);
+        }
+
+        std::string name_node = ros::this_node::getName();
+        ROS_INFO("Started %s", name_node.c_str());
+
+        // Process remainder of ROS callbacks separately, mainly ControlManager related
+        // ros::spin();
+    } else {
+
+        ROS_ERROR_STREAM("Error connection, shutting down");
+    }
     return 0;
+
 }

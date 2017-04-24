@@ -153,7 +153,8 @@ include_directories(
 
 set(roboteq_control_SRC
   src/roboteq_control.cpp
-  src/roboteq/serial_controller.cpp
+  src/roboteq/roboteq.cpp
+  src/roboteq/motor.cpp
 )
 
 
