@@ -1,14 +1,14 @@
 <?xml version="1.0"?>
 <package>
   <name>roboteq_control</name>
-  <version>0.0.0</version>
+  <version>0.0.1</version>
   <description>The roboteq_control package connect all type of Roboteq boards in ROS using the ros control</description>
 
     <maintainer email="raffaello@rnext.it">Raffaello Bonghi</maintainer>
 
     <license>MIT</license>
 
-    <url type="website">http://rnext.it/project/unav</url>
+    <url type="website">http://rnext.it/project/roboteq</url>
 
     <author email="raffaello@rnext.it">Raffaello Bonghi</author>
 
