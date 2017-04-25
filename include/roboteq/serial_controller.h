@@ -11,6 +11,9 @@ using namespace std;
 
 namespace roboteq {
 
+/// Read complete callback - Array of callback
+typedef function<void (string data) > callback_data_t;
+
 class serial_controller
 {
 public:
@@ -33,7 +36,9 @@ public:
      */
     bool stop();
 
-    bool send(string msg);
+    bool command(string msg);
+
+    bool query(string msg);
 
     // Async reader from serial
     void async_reader();
@@ -42,7 +47,7 @@ public:
      * @param callback
      * @param type
      */
-    // bool addCallback(const string data);
+    bool addCallback(const callback_data_t &callback, const string data);
 
 protected:
 
@@ -59,8 +64,13 @@ private:
     bool mStopping;
     // Last message sent
     string mMessage;
+    string sub_data;
+    bool unlock;
     // Async reader controller
     std::thread first;
+
+    // Hashmap with all type of message
+    map<string, callback_data_t> hashmap;
 
 };
 

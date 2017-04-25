@@ -24,7 +24,9 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
         private_nh.setParam("joint", joint_list);
     }
 
-    mSerial->send("FID");
+    mSerial->query("FID");
+
+    mSerial->query("TRN");
 
 }
 
