@@ -25,9 +25,9 @@
 
 #include <boost/chrono.hpp>
 
-
 using namespace std;
 
+typedef boost::chrono::steady_clock time_source;
 
 ros::Timer control_loop;
 ros::Timer diagnostic_loop;
@@ -40,6 +40,8 @@ bool status = true;
 void siginthandler(int param)
 {
     ROS_INFO("User pressed Ctrl+C Shutting down...");
+    control_loop.stop();
+    diagnostic_loop.stop();
     rSerial->stop();
     ROS_INFO("Control and diagnostic loop stopped");
     ROS_INFO_STREAM("--------- ROBOTEQ_NODE STOPPED ---------");
@@ -47,13 +49,53 @@ void siginthandler(int param)
 
 }
 // <<<<< Ctrl+C handler
+/**
+* Control loop not realtime safe
+*/
+void controlLoop(roboteq::Roboteq &orb,
+                 controller_manager::ControllerManager &cm,
+                 time_source::time_point &last_time)
+{
 
-void dataRead1(string data) {
-    ROS_INFO_STREAM("Motor1 " << data);
+    // Calculate monotonic time difference
+    time_source::time_point this_time = time_source::now();
+    boost::chrono::duration<double> elapsed_duration = this_time - last_time;
+    ros::Duration elapsed(elapsed_duration.count());
+    last_time = this_time;
+
+    //ROS_INFO_STREAM("CONTROL - running");
+    // Process control loop
+    orb.read(ros::Time::now(), elapsed);
+    cm.update(ros::Time::now(), elapsed);
+    orb.write(ros::Time::now(), elapsed);
 }
 
-void dataRead2(string data) {
-    ROS_INFO_STREAM("Motor2 " << data);
+/**
+* Diagnostics loop for ORB boards, not realtime safe
+*/
+void diagnosticLoop(roboteq::Roboteq &orb)
+{
+    //ROS_INFO_STREAM("DIAGNOSTIC - running");
+//    bool diagnostic = orb.updateDiagnostics();
+//    // Set true if the diagnostic change with the before status
+//    //ROS_INFO_STREAM("Status:" << status << "- Diagnostic:" << diagnostic);
+//    if(status != diagnostic)
+//    {
+//        if(diagnostic)
+//        {
+//            ROS_INFO_STREAM("DIAGNOSTIC - Initialize again the unav and restart control loop");
+//            orb.initialize();
+//            control_loop.start();
+//        }
+//        else
+//        {
+//            // Stopping control node
+//            ROS_ERROR_STREAM("DIAGNOSTIC - Stop control loop");
+//            control_loop.stop();
+//        }
+//    }
+//    status = diagnostic;
+//    //ROS_INFO_STREAM("New status:" << status);
 }
 
 int main(int argc, char **argv) {
@@ -82,17 +124,37 @@ int main(int argc, char **argv) {
     bool start = rSerial->start();
     // Check connection started
     if(start) {
-
-        rSerial->addCallback(&dataRead1, "F1");
-        rSerial->addCallback(&dataRead2, "F2");
         // Initialize roboteq controller
-        roboteq::Roboteq roboteq(nh, private_nh, rSerial);
+        roboteq::Roboteq interface(nh, private_nh, rSerial);
+        // Initialize the motor parameters
+        interface.initialize();
+        //Initialize all interfaces and setup diagnostic messages
+        interface.initializeInterfaces();
 
-//        ROS_INFO_STREAM_NAMED("serial", "Bytes waiting: " << roboteq.mSerial.available());
-//        std::string msg = roboteq.mSerial.readline(max_line_length, eol);
-//        if (!msg.empty()) {
-//          ROS_INFO_STREAM_NAMED("serial", "RX: " << msg);
-//        }
+        controller_manager::ControllerManager cm(&interface, nh);
+
+        // Setup separate queue and single-threaded spinner to process timer callbacks
+        // that interface with uNav hardware.
+        // This avoids having to lock around hardware access, but precludes realtime safety
+        // in the control loop.
+        ros::CallbackQueue unav_queue;
+        ros::AsyncSpinner unav_spinner(1, &unav_queue);
+
+        time_source::time_point last_time = time_source::now();
+        ros::TimerOptions control_timer(
+                    ros::Duration(1 / control_frequency),
+                    boost::bind(controlLoop, boost::ref(interface), boost::ref(cm), boost::ref(last_time)),
+                    &unav_queue);
+        // Global variable
+        control_loop = nh.createTimer(control_timer);
+
+        ros::TimerOptions diagnostic_timer(
+                    ros::Duration(1 / diagnostic_frequency),
+                    boost::bind(diagnosticLoop, boost::ref(interface)),
+                    &unav_queue);
+        diagnostic_loop = nh.createTimer(diagnostic_timer);
+
+        unav_spinner.start();
 
         std::string name_node = ros::this_node::getName();
         ROS_INFO("Started %s", name_node.c_str());

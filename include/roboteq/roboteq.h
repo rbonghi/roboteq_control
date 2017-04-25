@@ -6,15 +6,27 @@
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
+#include <hardware_interface/robot_hw.h>
 
 #include "roboteq/serial_controller.h"
+#include "roboteq/motor.h"
 
 using namespace std;
 
 namespace roboteq
 {
 
-class Roboteq : public diagnostic_updater::DiagnosticTask
+typedef struct joint
+{
+    Motor *motor;
+    // State of the motor
+    double position;
+    double velocity;
+    double effort;
+    double velocity_command;
+} joint_t;
+
+class Roboteq : public hardware_interface::RobotHW, public diagnostic_updater::DiagnosticTask
 {
 public:
     /**
@@ -26,10 +38,13 @@ public:
 
     ~Roboteq();
 
-    void initializeDiagnostic();
-
     void run(diagnostic_updater::DiagnosticStatusWrapper &stat);
 
+    /**
+     * @brief script Run and stop the script inside the Roboteq
+     * @param status The status of the script
+     * @return the status of command
+     */
     bool script(bool status) {
         if(status)
         {
@@ -40,6 +55,27 @@ public:
         }
     }
 
+    /**
+     * @brief initialize
+     */
+    void initialize();
+
+    /**
+     * @brief initializeInterfaces Initialize all motors.
+     * Add all Control Interface availbles and add in diagnostic task
+     */
+    void initializeInterfaces();
+    /**
+     * @brief updateDiagnostics
+     */
+    bool updateDiagnostics();
+
+    void initializeDiagnostic();
+
+    void write(const ros::Time& time, const ros::Duration& period);
+
+    void read(const ros::Time& time, const ros::Duration& period);
+
 private:
     //Initialization object
     //NameSpace for bridge controller
@@ -49,6 +85,17 @@ private:
     serial_controller *mSerial;
     // Diagnostic
     diagnostic_updater::Updater diagnostic_updater;
+
+    /// URDF information about robot
+    urdf::Model model;
+
+    /// ROS Control interfaces
+    hardware_interface::JointStateInterface joint_state_interface;
+    hardware_interface::VelocityJointInterface velocity_joint_interface;
+
+    // Motor definition
+    map<string, Motor*> mMotor;
+    map<int, string> mMotorName;
 
 };
 

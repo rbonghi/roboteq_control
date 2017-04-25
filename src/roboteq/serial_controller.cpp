@@ -108,10 +108,10 @@ bool serial_controller::command(string msg) {
     return sub_data_cmd;
 }
 
-bool serial_controller::query(string msg) {
+bool serial_controller::query(string msg, string type) {
     mWriteMutex.lock();
     mMessage = msg;
-    string msg2 = "?" + msg + eol;
+    string msg2 = type + msg + eol;
 
     unsigned int counter = 0;
     while (counter < 5)
@@ -180,7 +180,6 @@ void serial_controller::async_reader()
               // Find in all callback a data to send
               if (hashmap.find(sub_cmd) != hashmap.end())
               {
-                  ROS_INFO("Launch callback");
                   // Get callback from hashmap
                   callback_data_t callback = hashmap[sub_cmd];
                   // Launch callback with return query

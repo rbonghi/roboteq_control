@@ -40,7 +40,7 @@ public:
 
     bool command(string msg);
 
-    bool query(string msg);
+    bool query(string msg, string type="?");
 
     string get()
     {
