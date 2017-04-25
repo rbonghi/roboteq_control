@@ -48,6 +48,14 @@ void siginthandler(int param)
 }
 // <<<<< Ctrl+C handler
 
+void dataRead1(string data) {
+    ROS_INFO_STREAM("Motor1 " << data);
+}
+
+void dataRead2(string data) {
+    ROS_INFO_STREAM("Motor2 " << data);
+}
+
 int main(int argc, char **argv) {
 
     ros::init(argc, argv, "roboteq_control");
@@ -74,6 +82,9 @@ int main(int argc, char **argv) {
     bool start = rSerial->start();
     // Check connection started
     if(start) {
+
+        rSerial->addCallback(&dataRead1, "F1");
+        rSerial->addCallback(&dataRead2, "F2");
         // Initialize roboteq controller
         roboteq::Roboteq roboteq(nh, private_nh, rSerial);
 

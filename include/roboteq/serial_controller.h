@@ -5,6 +5,8 @@
 #include <serial/serial.h>
 
 #include <mutex>
+#include <condition_variable>  // std::condition_variable
+
 #include <thread>
 
 using namespace std;
@@ -40,14 +42,23 @@ public:
 
     bool query(string msg);
 
-    // Async reader from serial
-    void async_reader();
+    string get()
+    {
+        return sub_data;
+    }
+
     /**
      * @brief addCallback
      * @param callback
      * @param type
      */
     bool addCallback(const callback_data_t &callback, const string data);
+    /**
+     *
+     */
+    template <class T> bool addCallback(void(T::*fp)(const string), T* obj, const string data) {
+        return addCallback(bind(fp, obj, _1), data);
+    }
 
 protected:
 
@@ -65,13 +76,19 @@ private:
     // Last message sent
     string mMessage;
     string sub_data;
-    bool unlock;
+    bool sub_data_cmd;
+    bool data;
     // Async reader controller
     std::thread first;
-
+    // Mutex to sto concurent sending
+    mutex mWriteMutex;
+    mutex mReaderMutex;
+    std::condition_variable cv;
     // Hashmap with all type of message
     map<string, callback_data_t> hashmap;
 
+    // Async reader from serial
+    void async_reader();
 };
 
 }

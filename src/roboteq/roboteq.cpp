@@ -24,9 +24,19 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
         private_nh.setParam("joint", joint_list);
     }
 
-    mSerial->query("FID");
+    if(mSerial->query("FID"))
+    {
+        ROS_INFO_STREAM("Data=" << mSerial->get());
+    }
 
-    mSerial->query("TRN");
+    if(mSerial->query("TRN"))
+    {
+        ROS_INFO_STREAM("Data=" << mSerial->get());
+    }
+
+    ROS_INFO_STREAM("Script: " << script(true));
+
+    // ROS_INFO_STREAM("Script: " << script(false));
 
 }
 

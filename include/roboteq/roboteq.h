@@ -30,6 +30,16 @@ public:
 
     void run(diagnostic_updater::DiagnosticStatusWrapper &stat);
 
+    bool script(bool status) {
+        if(status)
+        {
+            return mSerial->command("R");
+        } else
+        {
+            return mSerial->command("R 0");
+        }
+    }
+
 private:
     //Initialization object
     //NameSpace for bridge controller

@@ -16,9 +16,6 @@ serial_controller::serial_controller(string port, unsigned long baudrate)
 {
     // Default timeout
     mTimeout = 500;
-
-
-    unlock = true;
 }
 
 serial_controller::~serial_controller()
@@ -56,15 +53,6 @@ bool serial_controller::start()
     // Launch async reader thread
     first = std::thread(&serial_controller::async_reader, this);
 
-//    if(this->isAlive()){
-//        ROS_DEBUG_STREAM("ORBUS Connection started: " << mSerialPort );
-//    }
-//    else
-//    {
-//        ROS_ERROR_STREAM("ORBUS does not found: " << mSerialPort );
-//        return false;
-//    }
-
     ROS_DEBUG_STREAM( "Serial port ready" );
     return true;
 }
@@ -93,35 +81,84 @@ bool serial_controller::addCallback(const callback_data_t &callback, const strin
 }
 
 bool serial_controller::command(string msg) {
-    return false;
+    mWriteMutex.lock();
+    data = false;
+    string msg2 = "!" + msg + eol;
+
+    unsigned int counter = 0;
+    while (counter < 5)
+    {
+        mSerial.write(msg2.c_str());
+        data = false;
+        // Set lock variable and wait a data to return
+        std::unique_lock<std::mutex> lck(mReaderMutex);
+        cv.wait_for(lck, std::chrono::seconds(1));
+        if(data)
+        {
+            ROS_DEBUG_STREAM("N:" << (counter+1) << " CMD:" << msg << " DATA:" << sub_data_cmd);
+            break;
+        } else
+        {
+            // Increase counter
+            counter++;
+        }
+    }
+    // Unlock mutex
+    mWriteMutex.unlock();
+    return sub_data_cmd;
 }
 
 bool serial_controller::query(string msg) {
+    mWriteMutex.lock();
     mMessage = msg;
     string msg2 = "?" + msg + eol;
-    ROS_INFO_STREAM_NAMED("serial", "TX: " << msg);
-    mSerial.write(msg2.c_str());
-    while(unlock) {
-        return true;
+
+    unsigned int counter = 0;
+    while (counter < 5)
+    {
+        ROS_DEBUG_STREAM("N:" << (counter+1) << " TX: " << msg);
+        mSerial.write(msg2.c_str());
+        data = false;
+        // Set lock variable and wait a data to return
+        std::unique_lock<std::mutex> lck(mReaderMutex);
+        cv.wait_for(lck, std::chrono::seconds(1));
+        if(data)
+        {
+            ROS_DEBUG_STREAM("N:" << (counter+1) << " CMD:" << msg << " DATA:" << sub_data);
+            break;
+        } else
+        {
+            // Increase counter
+            counter++;
+        }
     }
-    return false;
+    // Clear last query request
+    mMessage = "";
+    // Unlock mutex
+    mWriteMutex.unlock();
+    return data;
 }
 
 void serial_controller::async_reader()
 {
     while (!mStopping) {
         // Read how many byte waiting to read
-        ROS_INFO_STREAM_NAMED("serial", "Bytes waiting: " << mSerial.available());
+        ROS_DEBUG_STREAM_NAMED("serial", "Bytes waiting: " << mSerial.available());
         // Read line
         std::string msg = mSerial.readline(max_line_length, eol);
         // Decode message
         if (!msg.empty())
         {
-          ROS_INFO_STREAM_NAMED("serial", "RX: " << msg);
+          ROS_DEBUG_STREAM_NAMED("serial", "RX: " << msg);
           if (std::regex_match(msg, rgx_cmd))
           {
-              ROS_INFO("Command message");
-              // TODO
+              // Decode if command return true
+              if(msg[0] == '+') sub_data_cmd = true;
+              else sub_data_cmd = false;
+              // Unlock command
+              data = true;
+              // Unlock query request
+              cv.notify_one();
           }
           else if(std::regex_match(msg, rgx_query))
           {
@@ -129,15 +166,13 @@ void serial_controller::async_reader()
               string sub_cmd = msg.substr(0, msg.find('='));
               // Get data
               sub_data = msg.substr(msg.find('=') + 1);
-              ROS_INFO_STREAM("CMD=" << sub_cmd << " DATA=" << sub_data);
+              // ROS_INFO_STREAM("CMD=" << sub_cmd << " DATA=" << sub_data);
               // Check first of all a message sent require a data to return
               if(mMessage.compare("") != 0) {
                   if(mMessage.compare(sub_cmd) == 0) {
-                      ROS_INFO("Return a data");
-                      // Clear last query request
-                      mMessage = "";
+                      data = true;
                       // Unlock query request
-                      unlock = false;
+                      cv.notify_one();
                       // Skip other request
                       continue;
                   }
@@ -158,7 +193,7 @@ void serial_controller::async_reader()
           }
         }
     }
-    ROS_INFO("Exit");
+    ROS_INFO("Async serial reader closed");
 }
 
 }
