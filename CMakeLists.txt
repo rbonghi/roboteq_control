@@ -106,6 +106,12 @@ add_message_files(
     MotorStatus.msg
 )
 
+# dynamic reconfigure
+generate_dynamic_reconfigure_options(
+    cfg/RoboteqParameter.cfg
+)
+
+
 ## Generate added messages and services
 generate_messages(DEPENDENCIES std_msgs)
 
@@ -150,6 +156,7 @@ set(roboteq_control_SRC
   src/roboteq/serial_controller.cpp
   src/roboteq/roboteq.cpp
   src/roboteq/motor.cpp
+  src/configurator/motor_param.cpp
 )
 
 

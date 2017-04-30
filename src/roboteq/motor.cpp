@@ -21,6 +21,8 @@ Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, 
     mMotorName = name;
     command = 0;
 
+    parameter = new MotorParamConfigurator(nh, serial, mMotorName, number);
+
     // Add a status motor publisher
     pub_status = mNh.advertise<roboteq_control::MotorStatus>(mMotorName + "/status", 10);
 
@@ -134,7 +136,7 @@ void Motor::writeCommandsToHardware(ros::Duration period)
     vel_limits_interface.enforceLimits(period);
     long long int roboteq_velocity = static_cast<long long int>(to_rpm(command*16.0) / 4096 *1000.0);
 
-    ROS_INFO_STREAM("Velocity" << mNumber << " val=" << command << " " << roboteq_velocity);
+    // ROS_INFO_STREAM("Velocity" << mNumber << " val=" << command << " " << roboteq_velocity);
 
     mSerial->command("G " + std::to_string(mNumber) + " " + std::to_string(roboteq_velocity));
 }

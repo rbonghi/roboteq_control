@@ -134,7 +134,7 @@ int main(int argc, char **argv) {
         controller_manager::ControllerManager cm(&interface, nh);
 
         // Setup separate queue and single-threaded spinner to process timer callbacks
-        // that interface with uNav hardware.
+        // that interface with RoboTeq hardware.
         // This avoids having to lock around hardware access, but precludes realtime safety
         // in the control loop.
         ros::CallbackQueue unav_queue;

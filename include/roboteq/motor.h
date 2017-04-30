@@ -16,6 +16,8 @@
 
 #include "roboteq/serial_controller.h"
 
+#include "configurator/motor_param.h"
+
 namespace roboteq
 {
 
@@ -104,6 +106,8 @@ private:
     // Message
     roboteq_control::MotorStatus msg_status;
     roboteq_control::ControlStatus msg_reference, msg_measure, msg_control;
+
+    MotorParamConfigurator *parameter;
 
     // Reader motor message
     void read(string data);
