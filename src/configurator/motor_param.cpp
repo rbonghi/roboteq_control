@@ -214,8 +214,13 @@ void MotorParamConfigurator::reconfigureCBParam(roboteq_control::RoboteqParamete
       return;
     }
 
-    ROS_INFO_STREAM("HELLO");
-
+    if(config.restore_defaults)
+    {
+        //if someone sets restore defaults on the parameter server, prevent looping
+        config.restore_defaults = false;
+        // Overload config with default
+        config = default_param_config;
+    }
 
     if(config.load_roboteq)
     {
@@ -223,12 +228,69 @@ void MotorParamConfigurator::reconfigureCBParam(roboteq_control::RoboteqParamete
         config.load_roboteq = false;
         // Launch param load
         getParamFromRoboteq();
+        // Skip other read
+        return;
     }
 
-    if(config.restore_defaults)
+    if(_last_param_config.operating_mode != config.operating_mode)
     {
-        //if someone sets restore defaults on the parameter server, prevent looping
-        config.restore_defaults = false;
+        // Update operative mode
+        mSerial->setParam("MMOD", std::to_string(mNumber) + " " + std::to_string(config.operating_mode));
+    }
+
+    if(_last_param_config.rotation != config.rotation)
+    {
+        // Update direction
+        int direction = (config.rotation == -1) ? 1 : 0;
+        mSerial->setParam("MDIR", std::to_string(mNumber) + " " + std::to_string(direction));
+    }
+    // Stall detection [pag. 310]
+    if(_last_param_config.stall_detection != config.stall_detection)
+    {
+        // Update stall detection value
+        mSerial->setParam("BLSTD", std::to_string(mNumber) + " " + std::to_string(config.stall_detection));
+    }
+    // Get Max Amper limit = alim * 10 [pag 306]
+    if(_last_param_config.amper_limit != config.amper_limit)
+    {
+        // Update stall detection value
+        int alim = config.amper_limit * 10;
+        mSerial->setParam("ALIM", std::to_string(mNumber) + " " + std::to_string(alim));
+    }
+    // Max power forward [pag. 323]
+    if(_last_param_config.max_forward != config.max_forward)
+    {
+        // Update max forward
+        mSerial->setParam("MXPF", std::to_string(mNumber) + " " + std::to_string(config.max_forward));
+    }
+    // Max power forward reverse [pag. 324]
+    if(_last_param_config.max_forward != config.max_reverse)
+    {
+        // Update max forward reverse
+        mSerial->setParam("MXPR", std::to_string(mNumber) + " " + std::to_string(config.max_reverse));
+    }
+
+    // Set Max RPM motor
+    if(_last_param_config.max_speed != config.max_speed)
+    {
+        // Update max RPM motor
+        long int max_speed_motor = config.ratio * config.max_speed;
+        mSerial->setParam("MXRPM", std::to_string(mNumber) + " " + std::to_string(max_speed_motor));
+    }
+
+    // Set Max RPM acceleration rate
+    if(_last_param_config.max_acceleration != config.max_acceleration)
+    {
+        // Update max acceleration RPM/s motor
+        long int max_acceleration_motor = config.ratio * config.max_acceleration;
+        mSerial->setParam("MAC", std::to_string(mNumber) + " " + std::to_string(max_acceleration_motor));
+    }
+    // Set Max RPM deceleration rate
+    if(_last_param_config.max_deceleration != config.max_deceleration)
+    {
+        // Update max deceleration RPM/s motor
+        long int max_deceleration_motor = config.ratio * config.max_deceleration;
+        mSerial->setParam("MDEC", std::to_string(mNumber) + " " + std::to_string(max_deceleration_motor));
     }
 
     // Update last configuration
@@ -247,7 +309,13 @@ void MotorParamConfigurator::reconfigureCBEncoder(roboteq_control::RoboteqEncode
       return;
     }
 
-    ROS_INFO_STREAM("HELLO");
+    if(config.restore_defaults)
+    {
+        //if someone sets restore defaults on the parameter server, prevent looping
+        config.restore_defaults = false;
+        // Overload default configuration
+        config = default_encoder_config;
+    }
 
     if(config.load_roboteq)
     {
@@ -256,11 +324,35 @@ void MotorParamConfigurator::reconfigureCBEncoder(roboteq_control::RoboteqEncode
         config.load_roboteq = false;
     }
 
-    if(config.restore_defaults)
+    // Set Encoder PPR
+    if(_last_encoder_config.PPR != config.PPR)
     {
-        //if someone sets restore defaults on the parameter server, prevent looping
-        config.restore_defaults = false;
+        // Update operative mode
+        mSerial->setParam("EPPR", std::to_string(mNumber) + " " + std::to_string(config.PPR));
     }
+    // Set Encoder Usage - reference pag. 315
+    if(_last_encoder_config.channels != config.channels)
+    {
+        int channels;
+        switch(config.channels)
+        {
+        case 1:
+            // set in feedback mode with one channel
+            channels = 2 + 16;
+            break;
+        case 2:
+            // set in feedback mode with one channel
+            channels = 2 + 48;
+            break;
+        default:
+            channels = 0;
+            break;
+        }
+        // Update operative mode
+        mSerial->setParam("EMOD", std::to_string(mNumber) + " " + std::to_string(channels));
+    }
+
+
 
     // Update last configuration
     _last_encoder_config = config;
