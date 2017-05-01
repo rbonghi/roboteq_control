@@ -11,6 +11,9 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     , private_mNh(private_nh)
     , mSerial(serial)
 {
+    // First run dynamic reconfigurator
+    setup_controller = false;
+
     _first = false;
     std::vector<std::string> joint_list;
     if(private_nh.hasParam("joint"))
@@ -77,6 +80,12 @@ Roboteq::~Roboteq()
 
 void Roboteq::initialize()
 {
+
+    // Initialize parameter dynamic reconfigure
+    ds_controller = new dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>(private_mNh);
+    dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>::CallbackType cb_controller = boost::bind(&Roboteq::reconfigureCBController, this, _1, _2);
+    ds_controller->setCallback(cb_controller);
+
     // Initialize all motors in list
     for( map<string, Motor*>::iterator ii=mMotor.begin(); ii!=mMotor.end(); ++ii)
     {
@@ -132,7 +141,7 @@ void Roboteq::initializeDiagnostic() {
 }
 
 void Roboteq::read(const ros::Time& time, const ros::Duration& period) {
-    //ROS_DEBUG_STREAM("Get measure from uNav");
+    //ROS_DEBUG_STREAM("Get measure from Roboteq");
     for( map<string, Motor*>::iterator ii=mMotor.begin(); ii!=mMotor.end(); ++ii)
     {
         // Not required now
@@ -143,7 +152,7 @@ void Roboteq::read(const ros::Time& time, const ros::Duration& period) {
 }
 
 void Roboteq::write(const ros::Time& time, const ros::Duration& period) {
-    //ROS_DEBUG_STREAM("Write command to uNav");
+    //ROS_DEBUG_STREAM("Write command to Roboteq");
     for( map<string, Motor*>::iterator ii=mMotor.begin(); ii!=mMotor.end(); ++ii)
     {
         (*ii).second->writeCommandsToHardware(period);
@@ -193,6 +202,42 @@ void Roboteq::doSwitch(const std::list<hardware_interface::ControllerInfo>& star
 
 void Roboteq::run(diagnostic_updater::DiagnosticStatusWrapper &stat) {
 
+}
+
+void Roboteq::getControllerFromRoboteq()
+{
+
+}
+
+void Roboteq::reconfigureCBController(roboteq_control::RoboteqControllerConfig &config, uint32_t level)
+{
+    //The first time we're called, we just want to make sure we have the
+    //original configuration
+    if(!setup_controller)
+    {
+      _last_controller_config = config;
+      default_controller_config = _last_controller_config;
+      setup_controller = true;
+      return;
+    }
+
+    if(config.restore_defaults)
+    {
+        //if someone sets restore defaults on the parameter server, prevent looping
+        config.restore_defaults = false;
+        // Overload config with default
+        config = default_controller_config;
+    }
+
+    if(config.load_roboteq)
+    {
+        //if someone sets again the request on the parameter server, prevent looping
+        config.load_roboteq = false;
+        // Launch param load
+        getControllerFromRoboteq();
+        // Skip other read
+        return;
+    }
 }
 
 }

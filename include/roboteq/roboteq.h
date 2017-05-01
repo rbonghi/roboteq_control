@@ -8,6 +8,8 @@
 #include <diagnostic_updater/publisher.h>
 #include <hardware_interface/robot_hw.h>
 
+#include <roboteq_control/RoboteqControllerConfig.h>
+
 #include "roboteq/serial_controller.h"
 #include "roboteq/motor.h"
 
@@ -87,6 +89,26 @@ private:
     // Motor definition
     map<string, Motor*> mMotor;
     map<int, string> mMotorName;
+
+    /// Setup variable
+    bool setup_controller;
+
+    /// Dynamic reconfigure PID
+    dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig> *ds_controller;
+    /**
+     * @brief reconfigureCBEncoder when the dynamic reconfigurator change some values start this method
+     * @param config variable with all configuration from dynamic reconfigurator
+     * @param level
+     */
+    void reconfigureCBController(roboteq_control::RoboteqControllerConfig &config, uint32_t level);
+
+    // Default parameter config
+    roboteq_control::RoboteqControllerConfig default_controller_config, _last_controller_config;
+
+    /**
+     * @brief getPIDFromRoboteq Load PID parameters from Roboteq board
+     */
+    void getControllerFromRoboteq();
 
 };
 

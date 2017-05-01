@@ -117,25 +117,52 @@ void MotorPIDConfigurator::reconfigureCBPID(roboteq_control::RoboteqPIDConfig &c
         return;
     }
 
+    // Set Position velocity [pag. 322]
+    if(_last_pid_config.position_mode_velocity != config.position_mode_velocity)
+    {
+        // Update position velocity
+        mSerial->setParam("MVEL", std::to_string(mNumber) + " " + std::to_string(config.position_mode_velocity));
+    }
+    // Set number of turn between limits [pag. 325]
+    if(_last_pid_config.turn_min_to_max != config.turn_min_to_max)
+    {
+        // Update position velocity
+        int gain = config.turn_min_to_max * 100;
+        mSerial->setParam("MXTRN", std::to_string(mNumber) + " " + std::to_string(gain));
+    }
     // Set KP gain = kp * 10 [pag 319]
     if(_last_pid_config.gain_proportional != config.gain_proportional)
     {
-        // Update direction
+        // Update gain
         int gain = config.gain_proportional * 10;
         mSerial->setParam("KP", std::to_string(mNumber) + " " + std::to_string(gain));
     }
     // Set KI gain = ki * 10 [pag 318]
     if(_last_pid_config.gain_integral != config.gain_integral)
     {
-        // Update direction
+        // Update gain
         int gain = config.gain_integral * 10;
         mSerial->setParam("KI", std::to_string(mNumber) + " " + std::to_string(gain));
     }
     // Set KD gain = kd * 10 [pag 317]
     if(_last_pid_config.gain_differential != config.gain_differential)
     {
-        // Update direction
+        // Update gain
         int gain = config.gain_differential * 10;
         mSerial->setParam("KD", std::to_string(mNumber) + " " + std::to_string(gain));
     }
+
+    // Set Integral cap [pag. 317]
+    if(_last_pid_config.integrator_limit != config.integrator_limit)
+    {
+        // Update integral cap
+        mSerial->setParam("ICAP", std::to_string(mNumber) + " " + std::to_string(config.integrator_limit));
+    }
+    // Set closed loop error detection [pag. 311]
+    if(_last_pid_config.loop_error_detection != config.loop_error_detection)
+    {
+        // Update integral cap
+        mSerial->setParam("CLERD", std::to_string(mNumber) + " " + std::to_string(config.loop_error_detection));
+    }
+
 }
