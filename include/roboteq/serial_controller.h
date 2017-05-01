@@ -87,10 +87,10 @@ public:
      */
     bool echo(bool type) {
         if(type) {
-            return command("ECHOF", "1");
+            return setParam("ECHOF", "0");
         } else
         {
-            return command("ECHOF", "0");
+            return setParam("ECHOF", "1");
         }
     }
     /**

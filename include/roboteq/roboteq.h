@@ -61,6 +61,10 @@ public:
 
     void read(const ros::Time& time, const ros::Duration& period);
 
+    bool prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list, const std::list<hardware_interface::ControllerInfo>& stop_list);
+
+    void doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list, const std::list<hardware_interface::ControllerInfo>& stop_list);
+
 private:
     //Initialization object
     //NameSpace for bridge controller

@@ -70,19 +70,31 @@ void MotorParamConfigurator::initConfigurator(bool load_from_board)
     ds_encoder->setCallback(cb_encoder);
 }
 
-void MotorParamConfigurator::getParamFromRoboteq() {
+void MotorParamConfigurator::setOperativeMode(int type)
+{
+    // Update operative mode
+    mSerial->setParam("MMOD", std::to_string(mNumber) + " " + std::to_string(type));
+}
+
+int MotorParamConfigurator::getOperativeMode()
+{
+    // Operative mode reference in [pag 321]
+    string str_mode = mSerial->getParam("MMOD", std::to_string(mNumber));
+    // Get sign from roboteq board
+    int mode = boost::lexical_cast<int>(str_mode);
+    // Set parameter
+    nh_.setParam(mName + "/operating_mode", mode);
+
+    return mode;
+}
+
+void MotorParamConfigurator::getParamFromRoboteq()
+{
     try
     {
         // Load Ratio
         double ratio;
         nh_.getParam(mName + "/ratio", ratio);
-
-        // Operative mode reference in [pag 321]
-        string str_mode = mSerial->getParam("MMOD", std::to_string(mNumber));
-        // Get sign from roboteq board
-        int mode = boost::lexical_cast<int>(str_mode);
-        // Set parameter
-        nh_.setParam(mName + "/operating_mode", mode);
 
         // Motor direction {1 (Clockwise), -1 (Underclockwise)}
         string str_mdir = mSerial->getParam("MDIR", std::to_string(mNumber));
@@ -230,12 +242,6 @@ void MotorParamConfigurator::reconfigureCBParam(roboteq_control::RoboteqParamete
         getParamFromRoboteq();
         // Skip other read
         return;
-    }
-
-    if(_last_param_config.operating_mode != config.operating_mode)
-    {
-        // Update operative mode
-        mSerial->setParam("MMOD", std::to_string(mNumber) + " " + std::to_string(config.operating_mode));
     }
 
     if(_last_param_config.rotation != config.rotation)

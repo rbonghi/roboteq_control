@@ -45,6 +45,20 @@ public:
 
     void initConfigurator(bool load_from_board);
 
+    int getOperativeMode();
+    /**
+     * @brief setOperativeMode Reference in page 321 - MMOD
+     * @param type The operating_mode
+     * 0 - open_loop
+     * 1 - closed_loop_speed
+     * 2 - closed_loop_position_relative
+     * 3 - closed_loop_count_position
+     * 4 - closed_loop_position_tracking
+     * 5 - torque
+     * 6 - closed_loop_speed_position
+     */
+    void setOperativeMode(int type);
+
     // void setParam(motor_parameter_t parameter);
 
     /**

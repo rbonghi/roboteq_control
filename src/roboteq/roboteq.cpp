@@ -36,6 +36,8 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     mSerial->echo(false);
     // Disable Script and wait to load all parameters
     mSerial->script(false);
+    // Stop motors
+    mSerial->command("EX");
 
     // Initialize Joints
     for(unsigned i=0; i < joint_list.size(); ++i)
@@ -66,8 +68,6 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     {
         ROS_INFO_STREAM("Data=" << mSerial->get());
     }
-
-    mSerial->command("MG");
 }
 
 Roboteq::~Roboteq()
@@ -149,6 +149,46 @@ void Roboteq::write(const ros::Time& time, const ros::Duration& period) {
         (*ii).second->writeCommandsToHardware(period);
         ROS_DEBUG_STREAM("Motor [" << (*ii).first << "] Send commands");
     }
+}
+
+bool Roboteq::prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list, const std::list<hardware_interface::ControllerInfo>& stop_list)
+{
+    ROS_INFO_STREAM("Prepare to switch!");
+    return true;
+}
+
+void Roboteq::doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list, const std::list<hardware_interface::ControllerInfo>& stop_list)
+{
+    // Stop all controller in list
+    for(std::list<hardware_interface::ControllerInfo>::const_iterator it = stop_list.begin(); it != stop_list.end(); ++it)
+    {
+        //ROS_INFO_STREAM("DO SWITCH STOP name: " << it->name << " - type: " << it->type);
+        const hardware_interface::InterfaceResources& iface_res = it->claimed_resources.front();
+        for (std::set<std::string>::const_iterator res_it = iface_res.resources.begin(); res_it != iface_res.resources.end(); ++res_it)
+        {
+            ROS_INFO_STREAM(it->name << "[" << *res_it << "] STOP");
+            mMotor[*res_it]->switchController("disable");
+        }
+    }
+    // Stop script
+    mSerial->script(false);
+    // Stop motors
+    mSerial->command("EX");
+    // Run all new controllers
+    for(std::list<hardware_interface::ControllerInfo>::const_iterator it = start_list.begin(); it != start_list.end(); ++it)
+    {
+        //ROS_INFO_STREAM("DO SWITCH START name: " << it->name << " - type: " << it->type);
+        const hardware_interface::InterfaceResources& iface_res = it->claimed_resources.front();
+        for (std::set<std::string>::const_iterator res_it = iface_res.resources.begin(); res_it != iface_res.resources.end(); ++res_it)
+        {
+            ROS_INFO_STREAM(it->name << "[" << *res_it << "] START");
+            mMotor[*res_it]->switchController(it->type);
+        }
+    }
+    // Run script
+    mSerial->script(true);
+    // Enable motor
+    mSerial->command("MG");
 }
 
 void Roboteq::run(diagnostic_updater::DiagnosticStatusWrapper &stat) {

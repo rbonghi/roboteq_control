@@ -148,11 +148,27 @@ void Motor::run(diagnostic_updater::DiagnosticStatusWrapper &stat)
 
 }
 
+void Motor::switchController(string type)
+{
+    if(type.compare("diff_drive_controller/DiffDriveController") == 0)
+    {
+        // Set in speed position mode
+        parameter->setOperativeMode(6);
+    }
+    else
+    {
+        // set to zero the reference
+        mSerial->command("G ", std::to_string(mNumber) + " 0");
+        // Stop motor [pag 222]
+        mSerial->command("MS", std::to_string(mNumber));
+    }
+}
+
 void Motor::resetPosition(double position)
 {
     // Send reset position
     // TODO Convert position in tick and send - now send only 0
-    mSerial->command("C " + std::to_string(mNumber) + " " + std::to_string(0));
+    mSerial->command("C ", std::to_string(mNumber) + " " + std::to_string(0));
 }
 
 void Motor::writeCommandsToHardware(ros::Duration period)
@@ -168,7 +184,7 @@ void Motor::writeCommandsToHardware(ros::Duration period)
 
     // ROS_INFO_STREAM("Velocity" << mNumber << " val=" << command << " " << roboteq_velocity);
 
-    mSerial->command("G " + std::to_string(mNumber) + " " + std::to_string(roboteq_velocity));
+    mSerial->command("G ", std::to_string(mNumber) + " " + std::to_string(roboteq_velocity));
 }
 
 void Motor::read(string data) {

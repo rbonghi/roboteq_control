@@ -36,6 +36,8 @@ public:
 
     void writeCommandsToHardware(ros::Duration period);
 
+    void switchController(string type);
+
     hardware_interface::JointStateHandle joint_state_handle;
     hardware_interface::JointHandle joint_handle;
 
