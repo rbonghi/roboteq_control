@@ -71,6 +71,9 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     {
         ROS_INFO_STREAM("Data=" << mSerial->get());
     }
+
+    // Add callback
+    mSerial->addCallback(&Roboteq::status, this, "S1");
 }
 
 Roboteq::~Roboteq()
@@ -210,6 +213,11 @@ void Roboteq::run(diagnostic_updater::DiagnosticStatusWrapper &stat) {
 
 }
 
+void Roboteq::status(string data) {
+    // Temporary plot status
+    // ROS_INFO_STREAM("STATUS=" << data);
+}
+
 void Roboteq::getControllerFromRoboteq()
 {
     try
@@ -250,7 +258,7 @@ void Roboteq::getControllerFromRoboteq()
 
         // Get Mixing mode MXMD [pag. 322]
         string str_mxd = mSerial->getParam("MXMD", "1");
-        ROS_INFO_STREAM("MXMD "<< str_mxd);
+        // ROS_INFO_STREAM("MXMD "<< str_mxd);
         int mixed = boost::lexical_cast<unsigned int>(str_mxd);
         // Set params
         private_mNh.setParam("mixing", mixed);
