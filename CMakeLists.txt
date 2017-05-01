@@ -109,6 +109,7 @@ add_message_files(
 # dynamic reconfigure
 generate_dynamic_reconfigure_options(
     cfg/RoboteqParameter.cfg
+    cfg/RoboteqEncoder.cfg
 )
 
 

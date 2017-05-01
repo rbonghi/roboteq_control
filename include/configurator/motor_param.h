@@ -32,40 +32,32 @@
 #include <ros/ros.h>
 
 #include <roboteq_control/RoboteqParameterConfig.h>
+#include <roboteq_control/RoboteqAmperConfig.h>
+#include <roboteq_control/RoboteqEncoderConfig.h>
 #include <dynamic_reconfigure/server.h>
 
 #include "roboteq/serial_controller.h"
-
-typedef struct _motor_params {
-    // Ratio gear
-    double ratio;
-    // Number of ppr configured [0, 5000]
-    unsigned int ppr;
-    // Motor direction {1 (Clockwise), -1 (Underclockwise)}
-    int direction;
-    // Max RPM motor axis (before reduction)
-    unsigned int max_rpm;
-} motor_params_t;
 
 class MotorParamConfigurator
 {
 public:
     MotorParamConfigurator(const ros::NodeHandle& nh, roboteq::serial_controller *serial, std::string name, unsigned int number);
 
-    motor_params_t initConfigurator();
+    void initConfigurator(bool load_from_board);
 
     // void setParam(motor_parameter_t parameter);
 
-    void getParam();
-
-    motor_params_t params;
+    /**
+     * @brief getReduction Get motor reduction
+     * @return the value of reduction before encoder
+     */
+    double getReduction() {
+        return _reduction;
+    }
 
 private:
     /// Setup variable
     bool setup_param;
-
-    dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig> *ds_param;
-    void reconfigureCBParam(roboteq_control::RoboteqParameterConfig &config, uint32_t level);
 
     /// Associate name space
     string mName;
@@ -77,4 +69,34 @@ private:
     roboteq::serial_controller* mSerial;
     /// Setup variable
     bool setup_;
+
+    // reduction value
+    double _reduction;
+
+    /// Dynamic reconfigure parameters
+    dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig> *ds_param;
+    /**
+     * @brief reconfigureCBParam when the dynamic reconfigurator change some values start this method
+     * @param config variable with all configuration from dynamic reconfigurator
+     * @param level
+     */
+    void reconfigureCBParam(roboteq_control::RoboteqParameterConfig &config, uint32_t level);
+    /// Dynamic reconfigure encoder
+    dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig> *ds_encoder;
+    /**
+     * @brief reconfigureCBEncoder when the dynamic reconfigurator change some values start this method
+     * @param config variable with all configuration from dynamic reconfigurator
+     * @param level
+     */
+    void reconfigureCBEncoder(roboteq_control::RoboteqEncoderConfig &config, uint32_t level);
+
+
+    /**
+     * @brief getParamFromRoboteq Load Encoder parameters from Roboteq board
+     */
+    void getParamFromRoboteq();
+    /**
+     * @brief getEncoderFromRoboteq Load Encoder parameters from Roboteq board
+     */
+    void getEncoderFromRoboteq();
 };

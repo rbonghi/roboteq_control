@@ -26,7 +26,7 @@ class Motor : public diagnostic_updater::DiagnosticTask
 public:
     explicit Motor(const ros::NodeHandle &nh, serial_controller *serial, string name, unsigned int number);
 
-    void initializeMotor();
+    void initializeMotor(bool load_from_board);
 
     void run(diagnostic_updater::DiagnosticStatusWrapper &stat);
 
@@ -64,10 +64,7 @@ protected:
    * @param x Angular position in radians.
    * @return Angular position in encoder ticks.
    */
-  double to_encoder_ticks(double x)
-  {
-    return x * (4 * params.ppr * params.ratio) / (2 * M_PI);
-  }
+  double to_encoder_ticks(double x);
 
   /**
    * Conversion of encoder ticks to radians.
@@ -75,10 +72,7 @@ protected:
    * @param x Angular position in encoder ticks.
    * @return Angular position in radians.
    */
-  double from_encoder_ticks(double x)
-  {
-    return x * (2 * M_PI) / (4 * params.ppr * params.ratio);
-  }
+  double from_encoder_ticks(double x);
 
 private:
     //Initialization object
@@ -95,9 +89,6 @@ private:
     double velocity, max_velocity;
     double effort, max_effort;
     double command;
-
-    // motor parameters
-    motor_params_t params;
 
     /// ROS joint limits interface
     joint_limits_interface::VelocityJointSoftLimitsInterface vel_limits_interface;

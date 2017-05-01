@@ -78,6 +78,8 @@ private:
     hardware_interface::JointStateInterface joint_state_interface;
     hardware_interface::VelocityJointInterface velocity_joint_interface;
 
+    // Check if is the first run
+    bool _first;
     // Motor definition
     map<string, Motor*> mMotor;
     map<int, string> mMotorName;

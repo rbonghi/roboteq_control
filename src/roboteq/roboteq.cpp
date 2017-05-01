@@ -11,6 +11,7 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     , private_mNh(private_nh)
     , mSerial(serial)
 {
+    _first = false;
     std::vector<std::string> joint_list;
     if(private_nh.hasParam("joint"))
     {
@@ -18,11 +19,18 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     }
     else
     {
+        _first = true;
         ROS_WARN("No joint list!");
         joint_list.push_back("joint_0");
         joint_list.push_back("joint_1");
         private_nh.setParam("joint", joint_list);
     }
+
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    // TODO MUST TO BE REMOVE
+    // ONLY FOR TEST
+    _first = true;
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Disable ECHO
     mSerial->echo(false);
@@ -60,9 +68,6 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     }
 
     mSerial->command("MG");
-
-    // Enable script
-    mSerial->script(true);
 }
 
 Roboteq::~Roboteq()
@@ -76,9 +81,11 @@ void Roboteq::initialize()
     for( map<string, Motor*>::iterator ii=mMotor.begin(); ii!=mMotor.end(); ++ii)
     {
         // Launch initialization motors
-        (*ii).second->initializeMotor();
+        (*ii).second->initializeMotor(_first);
         ROS_DEBUG_STREAM("Motor [" << (*ii).first << "] Initialized");
     }
+    // Enable script
+    mSerial->script(true);
 }
 
 void Roboteq::initializeInterfaces()

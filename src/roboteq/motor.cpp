@@ -41,11 +41,35 @@ void Motor::connectionCallback(const ros::SingleSubscriberPublisher& pub)
     ROS_DEBUG_STREAM("Update: " << pub.getSubscriberName() << " - " << pub.getTopic());
 }
 
-void Motor::initializeMotor()
+void Motor::initializeMotor(bool load_from_board)
 {
     // Initialize parameters
-    params = parameter->initConfigurator();
-    ROS_INFO_STREAM("[" << mNumber << "]" << "R=" << params.ratio << " PPR=" << params.ppr << " MDIR=" << params.direction << " MXRPM=" << params.max_rpm);
+    parameter->initConfigurator(load_from_board);
+    // ROS_INFO_STREAM("[" << mNumber << "]" << "R=" << params.ratio << " PPR=" << params.ppr << " MDIR=" << params.direction << " MXRPM=" << params.max_rpm);
+}
+
+/**
+ * Conversion of radians to encoder ticks.
+ *
+ * @param x Angular position in radians.
+ * @return Angular position in encoder ticks.
+ */
+double Motor::to_encoder_ticks(double x)
+{
+    double reduction = parameter->getReduction();
+    return x * (4 * reduction) / (2 * M_PI);
+}
+
+/**
+ * Conversion of encoder ticks to radians.
+ *
+ * @param x Angular position in encoder ticks.
+ * @return Angular position in radians.
+ */
+double Motor::from_encoder_ticks(double x)
+{
+    double reduction = parameter->getReduction();
+    return x * (2 * M_PI) / (4 * reduction);
 }
 
 void Motor::setupLimits(urdf::Model model)
@@ -103,13 +127,14 @@ void Motor::setupLimits(urdf::Model model)
     {
         limits.max_position = 6.28;
     }
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    // TODO CHECK HOW TO INITIALIZE
     // Update limits
-    max_position = limits.max_position;
-    max_velocity = limits.max_velocity * params.ratio;
-    max_effort = limits.max_effort;
-
-
-    //updateLimits(limits.max_position, limits.max_velocity, limits.max_effort);
+    // max_position = limits.max_position;
+    // max_velocity = limits.max_velocity * params.ratio;
+    // max_effort = limits.max_effort;
+    // updateLimits(limits.max_position, limits.max_velocity, limits.max_effort);
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     joint_limits_interface::VelocityJointSoftLimitsHandle handle(joint_handle, // We read the state and read/write the command
                                                                  limits,       // Limits spec
@@ -135,8 +160,11 @@ void Motor::writeCommandsToHardware(ros::Duration period)
     // Enforce joint limits for all registered handles
     // Note: one can also enforce limits on a per-handle basis: handle.enforceLimits(period)
     vel_limits_interface.enforceLimits(period);
+    // Get encoder max speed parameter
+    double max_rpm;
+    mNh.getParam(mMotorName + "/max_speed", max_rpm);
     // Build a command message
-    long long int roboteq_velocity = static_cast<long long int>(to_rpm(command * params.ratio) / params.max_rpm * 1000.0);
+    long long int roboteq_velocity = static_cast<long long int>(to_rpm(command) / max_rpm * 1000.0);
 
     // ROS_INFO_STREAM("Velocity" << mNumber << " val=" << command << " " << roboteq_velocity);
 
