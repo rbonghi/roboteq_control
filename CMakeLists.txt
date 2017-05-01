@@ -110,8 +110,8 @@ add_message_files(
 generate_dynamic_reconfigure_options(
     cfg/RoboteqParameter.cfg
     cfg/RoboteqEncoder.cfg
+    cfg/RoboteqPID.cfg
 )
-
 
 ## Generate added messages and services
 generate_messages(DEPENDENCIES std_msgs)
@@ -158,6 +158,7 @@ set(roboteq_control_SRC
   src/roboteq/roboteq.cpp
   src/roboteq/motor.cpp
   src/configurator/motor_param.cpp
+  src/configurator/motor_pid.cpp
 )
 
 

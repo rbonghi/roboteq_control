@@ -22,6 +22,8 @@ Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, 
     command = 0;
     // Initialize Dynamic reconfigurator for generic parameters
     parameter = new MotorParamConfigurator(nh, serial, mMotorName, number);
+    // Initialize Dynamic reconfigurator for generic parameters
+    pid_velocity = new MotorPIDConfigurator(nh, serial, mMotorName, "velocity", number);
 
     // Add a status motor publisher
     pub_status = mNh.advertise<roboteq_control::MotorStatus>(mMotorName + "/status", 10);
@@ -45,6 +47,8 @@ void Motor::initializeMotor(bool load_from_board)
 {
     // Initialize parameters
     parameter->initConfigurator(load_from_board);
+    // Initialize pid loader
+    pid_velocity->initConfigurator(load_from_board);
     // ROS_INFO_STREAM("[" << mNumber << "]" << "R=" << params.ratio << " PPR=" << params.ppr << " MDIR=" << params.direction << " MXRPM=" << params.max_rpm);
 }
 

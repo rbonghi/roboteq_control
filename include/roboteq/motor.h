@@ -17,6 +17,7 @@
 #include "roboteq/serial_controller.h"
 
 #include "configurator/motor_param.h"
+#include "configurator/motor_pid.h"
 
 namespace roboteq
 {
@@ -102,6 +103,7 @@ private:
     roboteq_control::ControlStatus msg_reference, msg_measure, msg_control;
 
     MotorParamConfigurator *parameter;
+    MotorPIDConfigurator *pid_velocity;
 
     // Reader motor message
     void read(string data);
