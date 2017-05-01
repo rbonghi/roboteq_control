@@ -38,23 +38,53 @@ public:
      */
     bool stop();
 
-    bool command(string msg);
+    bool command(string msg, string params="");
 
-    bool query(string msg, string type="?");
-
+    bool query(string msg, string params="", string type="?");
+    /**
+     * @brief get Get the message parsed
+     * @return Return the string received
+     */
     string get()
     {
         return sub_data;
     }
 
     /**
-     * @brief addCallback
-     * @param callback
-     * @param type
+     * @brief script Run and stop the script inside the Roboteq
+     * @param status The status of the script
+     * @return the status of command
+     */
+    bool script(bool status) {
+        if(status)
+        {
+            return command("R");
+        } else
+        {
+            return command("R", "0");
+        }
+    }
+    /**
+     * @brief echo Enable or disable the echo message
+     * @param type status of echo
+     * @return The status of command
+     */
+    bool echo(bool type) {
+        if(type) {
+            return command("ECHOF", "1");
+        } else
+        {
+            return command("ECHOF", "0");
+        }
+    }
+    /**
+     * @brief addCallback Add callback message
+     * @param callback The callback function
+     * @param type The type of message to check
      */
     bool addCallback(const callback_data_t &callback, const string data);
     /**
-     *
+     * Template to connect a method in callback
      */
     template <class T> bool addCallback(void(T::*fp)(const string), T* obj, const string data) {
         return addCallback(bind(fp, obj, _1), data);

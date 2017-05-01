@@ -36,16 +36,29 @@
 
 #include "roboteq/serial_controller.h"
 
+typedef struct _motor_params {
+    // Ratio gear
+    double ratio;
+    // Number of ppr configured [0, 5000]
+    unsigned int ppr;
+    // Motor direction {1 (Clockwise), -1 (Underclockwise)}
+    int direction;
+    // Max RPM motor axis (before reduction)
+    unsigned int max_rpm;
+} motor_params_t;
+
 class MotorParamConfigurator
 {
 public:
     MotorParamConfigurator(const ros::NodeHandle& nh, roboteq::serial_controller *serial, std::string name, unsigned int number);
 
-    //void initConfigurator();
+    motor_params_t initConfigurator();
 
     // void setParam(motor_parameter_t parameter);
 
-    // motor_parameter_t getParam();
+    void getParam();
+
+    motor_params_t params;
 
 private:
     /// Setup variable
@@ -56,6 +69,8 @@ private:
 
     /// Associate name space
     string mName;
+    /// Number motor
+    unsigned int mNumber;
     /// Private namespace
     ros::NodeHandle nh_;
     /// Serial port

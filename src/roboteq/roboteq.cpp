@@ -24,6 +24,11 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
         private_nh.setParam("joint", joint_list);
     }
 
+    // Disable ECHO
+    mSerial->echo(false);
+    // Disable Script and wait to load all parameters
+    mSerial->script(false);
+
     // Initialize Joints
     for(unsigned i=0; i < joint_list.size(); ++i)
     {
@@ -54,14 +59,10 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
         ROS_INFO_STREAM("Data=" << mSerial->get());
     }
 
-    if(mSerial->query("EPPR", "~"))
-    {
-        ROS_INFO_STREAM("Data=" << mSerial->get());
-    }
-
     mSerial->command("MG");
 
-    ROS_INFO_STREAM("Script: " << script(true));
+    // Enable script
+    mSerial->script(true);
 }
 
 Roboteq::~Roboteq()
@@ -71,10 +72,11 @@ Roboteq::~Roboteq()
 
 void Roboteq::initialize()
 {
+    // Initialize all motors in list
     for( map<string, Motor*>::iterator ii=mMotor.begin(); ii!=mMotor.end(); ++ii)
     {
-        // TODO Check
-        //(*ii).second->initializeMotor();
+        // Launch initialization motors
+        (*ii).second->initializeMotor();
         ROS_DEBUG_STREAM("Motor [" << (*ii).first << "] Initialized");
     }
 }

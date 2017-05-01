@@ -59,27 +59,25 @@ protected:
   }
 
   /**
-   * Conversion of radians to encoder ticks. Note that this assumes a
-   * 1024-line quadrature encoder (hence 4096).
+   * Conversion of radians to encoder ticks.
    *
    * @param x Angular position in radians.
    * @return Angular position in encoder ticks.
    */
-  static double to_encoder_ticks(double x)
+  double to_encoder_ticks(double x)
   {
-    return x * 25600 / (2 * M_PI);
+    return x * (4 * params.ppr * params.ratio) / (2 * M_PI);
   }
 
   /**
-   * Conversion of encoder ticks to radians. Note that this assumes a
-   * 1024-line quadrature encoder (hence 4096).
+   * Conversion of encoder ticks to radians.
    *
    * @param x Angular position in encoder ticks.
    * @return Angular position in radians.
    */
-  static double from_encoder_ticks(double x)
+  double from_encoder_ticks(double x)
   {
-    return x * (2 * M_PI) / 25600;
+    return x * (2 * M_PI) / (4 * params.ppr * params.ratio);
   }
 
 private:
@@ -97,6 +95,9 @@ private:
     double velocity, max_velocity;
     double effort, max_effort;
     double command;
+
+    // motor parameters
+    motor_params_t params;
 
     /// ROS joint limits interface
     joint_limits_interface::VelocityJointSoftLimitsInterface vel_limits_interface;

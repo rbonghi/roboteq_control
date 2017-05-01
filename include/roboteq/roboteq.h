@@ -41,21 +41,6 @@ public:
     void run(diagnostic_updater::DiagnosticStatusWrapper &stat);
 
     /**
-     * @brief script Run and stop the script inside the Roboteq
-     * @param status The status of the script
-     * @return the status of command
-     */
-    bool script(bool status) {
-        if(status)
-        {
-            return mSerial->command("R");
-        } else
-        {
-            return mSerial->command("R 0");
-        }
-    }
-
-    /**
      * @brief initialize
      */
     void initialize();

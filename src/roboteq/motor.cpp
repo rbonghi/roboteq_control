@@ -20,7 +20,7 @@ Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, 
     mNumber = number+1;
     mMotorName = name;
     command = 0;
-
+    // Initialize Dynamic reconfigurator for generic parameters
     parameter = new MotorParamConfigurator(nh, serial, mMotorName, number);
 
     // Add a status motor publisher
@@ -31,7 +31,6 @@ Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, 
     pub_measure = mNh.advertise<roboteq_control::ControlStatus>(mMotorName + "/measure", 10);
     pub_control = mNh.advertise<roboteq_control::ControlStatus>(mMotorName + "/control", 10,
             boost::bind(&Motor::connectionCallback, this, _1), boost::bind(&Motor::connectionCallback, this, _1));
-
 
     // Add callback
     mSerial->addCallback(&Motor::read, this, "F" + std::to_string(mNumber));
@@ -44,7 +43,9 @@ void Motor::connectionCallback(const ros::SingleSubscriberPublisher& pub)
 
 void Motor::initializeMotor()
 {
-
+    // Initialize parameters
+    params = parameter->initConfigurator();
+    ROS_INFO_STREAM("[" << mNumber << "]" << "R=" << params.ratio << " PPR=" << params.ppr << " MDIR=" << params.direction << " MXRPM=" << params.max_rpm);
 }
 
 void Motor::setupLimits(urdf::Model model)
@@ -104,7 +105,7 @@ void Motor::setupLimits(urdf::Model model)
     }
     // Update limits
     max_position = limits.max_position;
-    max_velocity = limits.max_velocity * 16.0; // TODO Multiply with ration
+    max_velocity = limits.max_velocity * params.ratio;
     max_effort = limits.max_effort;
 
 
@@ -134,7 +135,8 @@ void Motor::writeCommandsToHardware(ros::Duration period)
     // Enforce joint limits for all registered handles
     // Note: one can also enforce limits on a per-handle basis: handle.enforceLimits(period)
     vel_limits_interface.enforceLimits(period);
-    long long int roboteq_velocity = static_cast<long long int>(to_rpm(command*16.0) / 4096 *1000.0);
+    // Build a command message
+    long long int roboteq_velocity = static_cast<long long int>(to_rpm(command * params.ratio) / params.max_rpm * 1000.0);
 
     // ROS_INFO_STREAM("Velocity" << mNumber << " val=" << command << " " << roboteq_velocity);
 

@@ -59,6 +59,8 @@ bool serial_controller::start()
 
 bool serial_controller::stop()
 {
+    // Stop script
+    script(false);
     // Stop the reader
     mStopping = true;
     // Close the serial port
@@ -80,10 +82,15 @@ bool serial_controller::addCallback(const callback_data_t &callback, const strin
     }
 }
 
-bool serial_controller::command(string msg) {
+bool serial_controller::command(string msg, string params) {
     mWriteMutex.lock();
     data = false;
-    string msg2 = "!" + msg + eol;
+    string msg2;
+    if(params.compare("") == 0) {
+        msg2 = "!" + msg + eol;
+    } else {
+        msg2 = "!" + msg + " " + params + eol;
+    }
 
     unsigned int counter = 0;
     while (counter < 5)
@@ -92,6 +99,7 @@ bool serial_controller::command(string msg) {
         data = false;
         // Set lock variable and wait a data to return
         std::unique_lock<std::mutex> lck(mReaderMutex);
+        // TODO change timeout
         cv.wait_for(lck, std::chrono::seconds(1));
         if(data)
         {
@@ -108,10 +116,15 @@ bool serial_controller::command(string msg) {
     return sub_data_cmd;
 }
 
-bool serial_controller::query(string msg, string type) {
+bool serial_controller::query(string msg, string params, string type) {
     mWriteMutex.lock();
     mMessage = msg;
-    string msg2 = type + msg + eol;
+    string msg2;
+    if(params.compare("") == 0) {
+        msg2 = type + msg + eol;
+    } else {
+        msg2 = type + msg + " " + params + eol;
+    }
 
     unsigned int counter = 0;
     while (counter < 5)
@@ -164,8 +177,10 @@ void serial_controller::async_reader()
           {
               // Get command
               string sub_cmd = msg.substr(0, msg.find('='));
+              // Evaluate end position string
+              long end_string = (msg.size()-1) - (msg.find('=') + 1);
               // Get data
-              sub_data = msg.substr(msg.find('=') + 1);
+              sub_data = msg.substr(msg.find('=') + 1, end_string);
               // ROS_INFO_STREAM("CMD=" << sub_cmd << " DATA=" << sub_data);
               // Check first of all a message sent require a data to return
               if(mMessage.compare("") != 0) {
@@ -188,7 +203,7 @@ void serial_controller::async_reader()
           }
           else
           {
-              ROS_INFO("Other message");
+              ROS_INFO_STREAM("Other message " << msg);
           }
         }
     }
