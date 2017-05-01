@@ -38,9 +38,25 @@ public:
      */
     bool stop();
 
-    bool command(string msg, string params="");
+    bool command(string msg, string params="", string type="!");
 
     bool query(string msg, string params="", string type="?");
+
+    bool setParam(string msg, string params="") {
+        return command(msg, params, "^");
+    }
+
+    string getParam(string msg, string params="") {
+        if(query(msg, params, "~"))
+        {
+            return get();
+        }
+        else
+        {
+            return "";
+        }
+    }
+
     /**
      * @brief get Get the message parsed
      * @return Return the string received

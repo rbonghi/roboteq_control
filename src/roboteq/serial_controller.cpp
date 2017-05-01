@@ -82,14 +82,14 @@ bool serial_controller::addCallback(const callback_data_t &callback, const strin
     }
 }
 
-bool serial_controller::command(string msg, string params) {
+bool serial_controller::command(string msg, string params, string type) {
     mWriteMutex.lock();
     data = false;
     string msg2;
     if(params.compare("") == 0) {
-        msg2 = "!" + msg + eol;
+        msg2 = type + msg + eol;
     } else {
-        msg2 = "!" + msg + " " + params + eol;
+        msg2 = type + msg + " " + params + eol;
     }
 
     unsigned int counter = 0;

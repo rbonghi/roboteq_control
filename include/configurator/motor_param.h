@@ -57,7 +57,7 @@ public:
 
 private:
     /// Setup variable
-    bool setup_param;
+    bool setup_param, setup_encoder;
 
     /// Associate name space
     string mName;
@@ -67,8 +67,6 @@ private:
     ros::NodeHandle nh_;
     /// Serial port
     roboteq::serial_controller* mSerial;
-    /// Setup variable
-    bool setup_;
 
     // reduction value
     double _reduction;
@@ -90,6 +88,9 @@ private:
      */
     void reconfigureCBEncoder(roboteq_control::RoboteqEncoderConfig &config, uint32_t level);
 
+    // Default parameter config
+    roboteq_control::RoboteqParameterConfig default_param_config, _last_param_config;
+    roboteq_control::RoboteqEncoderConfig default_encoder_config, _last_encoder_config;
 
     /**
      * @brief getParamFromRoboteq Load Encoder parameters from Roboteq board
