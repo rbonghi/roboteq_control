@@ -165,4 +165,7 @@ void MotorPIDConfigurator::reconfigureCBPID(roboteq_control::RoboteqPIDConfig &c
         mSerial->setParam("CLERD", std::to_string(mNumber) + " " + std::to_string(config.loop_error_detection));
     }
 
+
+    // Update last configuration
+    _last_pid_config = config;
 }
