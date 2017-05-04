@@ -76,7 +76,7 @@ void Motor::initializeMotor(bool load_from_board)
 double Motor::to_encoder_ticks(double x)
 {
     double reduction = parameter->getReduction();
-    return x * (4 * reduction) / (2 * M_PI);
+    return x * reduction / (2 * M_PI);
 }
 
 /**
@@ -88,7 +88,7 @@ double Motor::to_encoder_ticks(double x)
 double Motor::from_encoder_ticks(double x)
 {
     double reduction = parameter->getReduction();
-    return x * (2 * M_PI) / (4 * reduction);
+    return x * (2 * M_PI) / reduction;
 }
 
 void Motor::setupLimits(urdf::Model model)
@@ -216,6 +216,9 @@ void Motor::read(string data) {
     std::vector<std::string> fields;
     boost::split(fields, data, boost::algorithm::is_any_of(":"));
 
+    double ratio;
+    mNh.getParam(mMotorName + "/ratio", ratio);
+
     msg_status.header.stamp = ros::Time::now();
     msg_measure.header.stamp = ros::Time::now();
     msg_control.header.stamp = ros::Time::now();
@@ -226,9 +229,9 @@ void Motor::read(string data) {
     try
     {
         msg_measure.current = boost::lexical_cast<float>(fields[0]) / 10;
-        msg_reference.velocity = from_rpm(boost::lexical_cast<double>(fields[1]));
+        msg_reference.velocity = from_rpm(boost::lexical_cast<double>(fields[1])) / ratio;
 //      msg.motor_power = boost::lexical_cast<float>(fields[2]) / 1000.0;
-        msg_measure.velocity = from_rpm(boost::lexical_cast<double>(fields[3]));
+        msg_measure.velocity = from_rpm(boost::lexical_cast<double>(fields[3])) / ratio;
         msg_measure.position = from_encoder_ticks(boost::lexical_cast<double>(fields[4]));
 //      msg.supply_voltage = boost::lexical_cast<float>(fields[5]) / 10.0;
 //      msg.supply_current = boost::lexical_cast<float>(fields[6]) / 10.0;

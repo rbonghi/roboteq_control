@@ -58,6 +58,9 @@ void MotorParamConfigurator::initConfigurator(bool load_from_board)
             _reduction *= ratio;
         }
     }
+    // Multiply for quadrature
+    // TODO check for encoder with single channel
+    _reduction *= 4;
 
     // Initialize parameter dynamic reconfigure
     ds_param = new dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>(ros::NodeHandle(mName));
