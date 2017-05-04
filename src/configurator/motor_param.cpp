@@ -43,25 +43,6 @@ void MotorParamConfigurator::initConfigurator(bool load_from_board)
         getEncoderFromRoboteq();
     }
 
-    // Get PPR Encoder parameter
-    double ppr;
-    nh_.getParam(mName + PARAM_ENCODER_STRING + "/PPR", ppr);
-    _reduction = ppr;
-
-    // Check if exist ratio variable
-    if(nh_.hasParam(mName + PARAM_ENCODER_STRING + "/position"))
-    {
-        int position;
-        nh_.getParam(mName + PARAM_ENCODER_STRING + "/position", position);
-        // Read position if before (1) multiply with ratio
-        if(position) {
-            _reduction *= ratio;
-        }
-    }
-    // Multiply for quadrature
-    // TODO check for encoder with single channel
-    _reduction *= 4;
-
     // Initialize parameter dynamic reconfigure
     ds_param = new dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>(ros::NodeHandle(mName));
     dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>::CallbackType cb_param = boost::bind(&MotorParamConfigurator::reconfigureCBParam, this, _1, _2);
@@ -76,6 +57,26 @@ void MotorParamConfigurator::initConfigurator(bool load_from_board)
     ds_pid_type = new dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>(ros::NodeHandle(mName + "/pid"));
     dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>::CallbackType cb_pid_type = boost::bind(&MotorParamConfigurator::reconfigureCBPIDtype, this, _1, _2);
     ds_pid_type->setCallback(cb_pid_type);
+
+    // Get PPR Encoder parameter
+    double ppr;
+    nh_.getParam(mName + PARAM_ENCODER_STRING + "/PPR", ppr);
+    _reduction = ppr;
+    // Check if exist ratio variable
+    if(nh_.hasParam(mName + PARAM_ENCODER_STRING + "/position"))
+    {
+        int position;
+        nh_.getParam(mName + PARAM_ENCODER_STRING + "/position", position);
+        // Read position if before (1) multiply with ratio
+        if(position) {
+            _reduction *= ratio;
+        }
+    }
+    // Multiply for quadrature
+    // TODO check for encoder with single channel
+    _reduction *= 4;
+
+    //ROS_INFO_STREAM("reduction:" << _reduction);
 }
 
 void MotorParamConfigurator::setOperativeMode(int type)
@@ -294,6 +295,32 @@ void MotorParamConfigurator::reconfigureCBParam(roboteq_control::RoboteqParamete
         getParamFromRoboteq();
         // Skip other read
         return;
+    }
+
+    // Update ratio
+    // Get old max speed, acceleration and deceleartion and evaluate new equivalent value
+    if(_last_param_config.ratio != config.ratio)
+    {
+        // Get Max RPM motor
+        string str_rpm_motor = mSerial->getParam("MXRPM", std::to_string(mNumber));
+        // Get RPM from board
+        unsigned int rpm_motor = boost::lexical_cast<unsigned int>(str_rpm_motor);
+        // Update with new max speed
+        config.max_speed = ((double) rpm_motor) / config.ratio;
+
+        // Get Max RPM acceleration rate
+        string str_rpm_acceleration_motor = mSerial->getParam("MAC", std::to_string(mNumber));
+        // Get RPM from board
+        unsigned int rpm_acceleration_motor = boost::lexical_cast<unsigned int>(str_rpm_acceleration_motor);
+        // Convert in max RPM
+        config.max_acceleration = ((double) rpm_acceleration_motor) / config.ratio;
+
+        // Get Max RPM deceleration rate
+        string str_rpm_deceleration_motor = mSerial->getParam("MDEC", std::to_string(mNumber));
+        // Get RPM from board
+        unsigned int rpm_deceleration_motor = boost::lexical_cast<unsigned int>(str_rpm_deceleration_motor);
+        // Convert in max RPM
+        config.max_deceleration = ((double) rpm_deceleration_motor) / config.ratio;
     }
 
     if(_last_param_config.rotation != config.rotation)

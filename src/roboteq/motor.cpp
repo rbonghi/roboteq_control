@@ -76,7 +76,7 @@ void Motor::initializeMotor(bool load_from_board)
 double Motor::to_encoder_ticks(double x)
 {
     double reduction = parameter->getReduction();
-    return x * reduction / (2 * M_PI);
+    return x * (reduction) / (2 * M_PI);
 }
 
 /**
@@ -88,7 +88,7 @@ double Motor::to_encoder_ticks(double x)
 double Motor::from_encoder_ticks(double x)
 {
     double reduction = parameter->getReduction();
-    return x * (2 * M_PI) / reduction;
+    return x * (2 * M_PI) / (reduction);
 }
 
 void Motor::setupLimits(urdf::Model model)
@@ -215,10 +215,10 @@ void Motor::read(string data) {
 
     std::vector<std::string> fields;
     boost::split(fields, data, boost::algorithm::is_any_of(":"));
-
+    // Get ratio
     double ratio;
     mNh.getParam(mMotorName + "/ratio", ratio);
-
+    // Build messages
     msg_status.header.stamp = ros::Time::now();
     msg_measure.header.stamp = ros::Time::now();
     msg_control.header.stamp = ros::Time::now();
