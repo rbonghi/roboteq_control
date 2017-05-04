@@ -34,6 +34,7 @@
 #include <roboteq_control/RoboteqParameterConfig.h>
 #include <roboteq_control/RoboteqAmperConfig.h>
 #include <roboteq_control/RoboteqEncoderConfig.h>
+#include <roboteq_control/RoboteqPIDtypeConfig.h>
 #include <dynamic_reconfigure/server.h>
 
 #include "roboteq/serial_controller.h"
@@ -71,7 +72,7 @@ public:
 
 private:
     /// Setup variable
-    bool setup_param, setup_encoder;
+    bool setup_param, setup_encoder, setup_pid_type;
 
     /// Associate name space
     string mName;
@@ -102,9 +103,19 @@ private:
      */
     void reconfigureCBEncoder(roboteq_control::RoboteqEncoderConfig &config, uint32_t level);
 
+    /// Dynamic reconfigure PID
+    dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig> *ds_pid_type;
+    /**
+     * @brief reconfigureCBEncoder when the dynamic reconfigurator change some values start this method
+     * @param config variable with all configuration from dynamic reconfigurator
+     * @param level
+     */
+    void reconfigureCBPIDtype(roboteq_control::RoboteqPIDtypeConfig &config, uint32_t level);
+
     // Default parameter config
     roboteq_control::RoboteqParameterConfig default_param_config, _last_param_config;
     roboteq_control::RoboteqEncoderConfig default_encoder_config, _last_encoder_config;
+    roboteq_control::RoboteqPIDtypeConfig default_pid_type_config, _last_pid_type_config;
 
     /**
      * @brief getParamFromRoboteq Load Encoder parameters from Roboteq board

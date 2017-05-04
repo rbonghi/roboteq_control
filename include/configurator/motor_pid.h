@@ -51,12 +51,15 @@ public:
 
     void initConfigurator(bool load_from_board);
 
+    void setPIDconfiguration();
+
 private:
     /// Setup variable
     bool setup_pid;
 
     /// Associate name space
     string mName;
+    string mType;
     /// Number motor
     unsigned int mNumber;
     /// Private namespace

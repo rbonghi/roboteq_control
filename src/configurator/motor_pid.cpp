@@ -7,6 +7,7 @@ MotorPIDConfigurator::MotorPIDConfigurator(const ros::NodeHandle& nh, roboteq::s
 {
     // Find path param
     mName = nh_.getNamespace() + "/" + path + "/pid/" + name;
+    mType = name;
     ROS_DEBUG_STREAM("Param " << path + "/pid/" + name << " has " << mName << " N:" << number);
     // Roboteq motor number
     mNumber = number + 1;
@@ -87,6 +88,58 @@ void MotorPIDConfigurator::getPIDFromRoboteq()
 
 }
 
+void MotorPIDConfigurator::setPIDconfiguration()
+{
+    // Set Position velocity [pag. 322]
+    int pos_vel;
+    // Set params
+    nh_.getParam(mName + "/position_mode_velocity", pos_vel);
+    // Update position velocity
+    mSerial->setParam("MVEL", std::to_string(mNumber) + " " + std::to_string(pos_vel));
+
+    // Set number of turn between limits [pag. 325]
+    double mxtrn;
+    // Set params
+    nh_.getParam(mName + "/turn_min_to_max", mxtrn);
+    // Update position velocity
+    mSerial->setParam("MXTRN", std::to_string(mNumber) + " " + std::to_string(mxtrn * 100));
+
+    // Set KP gain = kp * 10 [pag 319]
+    double kp;
+    // Set params
+    nh_.getParam(mName + "/gain_proportional", kp);
+    // Update gain position
+    mSerial->setParam("KP", std::to_string(mNumber) + " " + std::to_string(kp * 10));
+
+    // Set KI gain = ki * 10 [pag 318]
+    double ki;
+    // Set params
+    nh_.getParam(mName + "/gain_integral", ki);
+    // Set KI parameter
+    mSerial->setParam("KI", std::to_string(mNumber) + " " + std::to_string(ki * 10));
+
+    // Set KD gain = kd * 10 [pag 317]
+    double kd;
+    // Set params
+    nh_.getParam(mName + "/gain_differential", kd);
+    // Set KD parameter
+    mSerial->setParam("KD", std::to_string(mNumber) + " " + std::to_string(kd * 10));
+
+    // Set Integral cap [pag. 317]
+    int icap;
+    // Set params
+    nh_.getParam(mName + "/integrator_limit", icap);
+    // Update integral cap
+    mSerial->setParam("ICAP", std::to_string(mNumber) + " " + std::to_string(icap));
+
+    // Set closed loop error detection [pag. 311]
+    int clerd;
+    // Set params
+    nh_.getParam(mName + "/loop_error_detection", clerd);
+    // Update integral cap
+    mSerial->setParam("CLERD", std::to_string(mNumber) + " " + std::to_string(clerd));
+}
+
 void MotorPIDConfigurator::reconfigureCBPID(roboteq_control::RoboteqPIDConfig &config, uint32_t level)
 {
     //The first time we're called, we just want to make sure we have the
@@ -97,6 +150,24 @@ void MotorPIDConfigurator::reconfigureCBPID(roboteq_control::RoboteqPIDConfig &c
       default_pid_config = _last_pid_config;
       setup_pid = true;
       return;
+    }
+
+    // Check type if the PID selected is right
+    // Operative mode reference in [pag 321]
+    string str_mode = mSerial->getParam("MMOD", std::to_string(mNumber));
+    // Get sign from roboteq board
+    int mode = boost::lexical_cast<int>(str_mode);
+    // Check if the roboteq board is set in right configuration for this PID controller
+    bool check1 = (mType.compare("velocity") == 0 && ((mode == 1) || (mode == 6)));
+    bool check2 = (mType.compare("position") == 0 && ((mode == 2) || (mode == 3) || (mode == 4)));
+    bool check3 = (mType.compare("torque") == 0 && ((mode == 5)));
+    bool status = check1 | check2 | check3;
+    // ROS_INFO_STREAM("[" << mode << "]" << mType << " ck1:" << check1 << " ck2:" << check2 << " ck3:" << check3 << " status:" << (status ? "true" : "false"));
+    if(!status)
+    {
+        // Restore old configuration
+        config = _last_pid_config;
+        return;
     }
 
     if(config.restore_defaults)

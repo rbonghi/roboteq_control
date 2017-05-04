@@ -68,6 +68,11 @@ void MotorParamConfigurator::initConfigurator(bool load_from_board)
     ds_encoder = new dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>(ros::NodeHandle(mName + PARAM_ENCODER_STRING));
     dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>::CallbackType cb_encoder = boost::bind(&MotorParamConfigurator::reconfigureCBEncoder, this, _1, _2);
     ds_encoder->setCallback(cb_encoder);
+
+    // Initialize pid type dynamic reconfigure
+    ds_pid_type = new dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>(ros::NodeHandle(mName + "/pid"));
+    dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>::CallbackType cb_pid_type = boost::bind(&MotorParamConfigurator::reconfigureCBPIDtype, this, _1, _2);
+    ds_pid_type->setCallback(cb_pid_type);
 }
 
 void MotorParamConfigurator::setOperativeMode(int type)
@@ -86,6 +91,27 @@ int MotorParamConfigurator::getOperativeMode()
     nh_.setParam(mName + "/operating_mode", mode);
 
     return mode;
+}
+
+void MotorParamConfigurator::reconfigureCBPIDtype(roboteq_control::RoboteqPIDtypeConfig &config, uint32_t level)
+{
+    //The first time we're called, we just want to make sure we have the
+    //original configuration
+    if(!setup_pid_type)
+    {
+      _last_pid_type_config = config;
+      default_pid_type_config = _last_pid_type_config;
+      setup_pid_type = true;
+      return;
+    }
+
+    if(config.restore_defaults)
+    {
+        //if someone sets restore defaults on the parameter server, prevent looping
+        config.restore_defaults = false;
+        // Overload config with default
+        config = default_pid_type_config;
+    }
 }
 
 void MotorParamConfigurator::getParamFromRoboteq()

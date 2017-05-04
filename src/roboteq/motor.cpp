@@ -20,10 +20,13 @@ Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, 
     mNumber = number+1;
     mMotorName = name;
     command = 0;
+
     // Initialize Dynamic reconfigurator for generic parameters
     parameter = new MotorParamConfigurator(nh, serial, mMotorName, number);
     // Initialize Dynamic reconfigurator for generic parameters
     pid_velocity = new MotorPIDConfigurator(nh, serial, mMotorName, "velocity", number);
+    pid_torque = new MotorPIDConfigurator(nh, serial, mMotorName, "torque", number);
+    pid_position = new MotorPIDConfigurator(nh, serial, mMotorName, "position", number);
 
     // Add a status motor publisher
     pub_status = mNh.advertise<roboteq_control::MotorStatus>(mMotorName + "/status", 10);
@@ -47,9 +50,21 @@ void Motor::initializeMotor(bool load_from_board)
 {
     // Initialize parameters
     parameter->initConfigurator(load_from_board);
+    // Load PID configuration from roboteq board
+    // Get operative mode
+    int mode = parameter->getOperativeMode();
+    bool tmp_pos = load_from_board & ((mode == 2) || (mode == 3) || (mode == 4));
+    bool tmp_vel = load_from_board & ((mode == 1) || (mode == 6));
+    bool tmp_tor = load_from_board & (mode == 5);
+
+    // ROS_INFO_STREAM("Type pos:" << tmp_pos << " vel:" << tmp_vel << " tor:" << tmp_tor);
+
     // Initialize pid loader
-    pid_velocity->initConfigurator(load_from_board);
-    // ROS_INFO_STREAM("[" << mNumber << "]" << "R=" << params.ratio << " PPR=" << params.ppr << " MDIR=" << params.direction << " MXRPM=" << params.max_rpm);
+    pid_position->initConfigurator(tmp_pos);
+    // Initialize pid loader
+    pid_velocity->initConfigurator(tmp_vel);
+    // Initialize pid loader
+    pid_torque->initConfigurator(tmp_tor);
 }
 
 /**
@@ -156,8 +171,12 @@ void Motor::switchController(string type)
 {
     if(type.compare("diff_drive_controller/DiffDriveController") == 0)
     {
+        // Load type of PID velocity
+        int pid_vel;
+        mNh.getParam(mMotorName + "/pid/closed_loop_velocity", pid_vel);
+        // ROS_INFO_STREAM("VEL mode:" << pid_vel);
         // Set in speed position mode
-        parameter->setOperativeMode(6);
+        parameter->setOperativeMode(pid_vel);
     }
     else
     {

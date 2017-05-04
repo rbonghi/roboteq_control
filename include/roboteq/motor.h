@@ -13,7 +13,6 @@
 #include <roboteq_control/MotorStatus.h>
 #include <roboteq_control/ControlStatus.h>
 
-
 #include "roboteq/serial_controller.h"
 
 #include "configurator/motor_param.h"
@@ -102,8 +101,10 @@ private:
     roboteq_control::MotorStatus msg_status;
     roboteq_control::ControlStatus msg_reference, msg_measure, msg_control;
 
-    MotorParamConfigurator *parameter;
-    MotorPIDConfigurator *pid_velocity;
+    MotorParamConfigurator* parameter;
+    MotorPIDConfigurator* pid_velocity;
+    MotorPIDConfigurator* pid_torque;
+    MotorPIDConfigurator* pid_position;
 
     // Reader motor message
     void read(string data);
