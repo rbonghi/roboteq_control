@@ -167,7 +167,7 @@ set(roboteq_control_SRC
 ## Declare a cpp executable
 add_executable(roboteq_node ${roboteq_control_SRC})
 target_link_libraries(roboteq_node ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-# add_dependencies(roboteq_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
+add_dependencies(roboteq_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 #############
 ## Install ##
