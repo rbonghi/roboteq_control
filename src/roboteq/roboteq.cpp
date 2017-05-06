@@ -41,7 +41,7 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     for(unsigned i=0; i < joint_list.size(); ++i)
     {
         string motor_name = joint_list.at(i);
-        int number = i;
+        int number = i + 1;
 
         if(!private_nh.hasParam(motor_name))
         {
@@ -63,7 +63,7 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
 
         ROS_INFO_STREAM("Motor[" << number << "] name: " << motor_name);
         mMotor[motor_name] = new Motor(private_mNh, serial, motor_name, number);
-        mMotorName[number] = motor_name;
+        //mMotorName[number] = motor_name;
     }
 
     // Add callback

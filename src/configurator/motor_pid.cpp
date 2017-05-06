@@ -10,7 +10,7 @@ MotorPIDConfigurator::MotorPIDConfigurator(const ros::NodeHandle& nh, roboteq::s
     mType = name;
     ROS_DEBUG_STREAM("Param " << path + "/pid/" + name << " has " << mName << " N:" << number);
     // Roboteq motor number
-    mNumber = number + 1;
+    mNumber = number;
     // Set false on first run
     setup_pid = false;
 

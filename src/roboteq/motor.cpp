@@ -17,7 +17,7 @@ Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, 
     , mSerial(serial)
 {
     // Initialize all variables
-    mNumber = number+1;
+    mNumber = number;
     mMotorName = name;
     command = 0;
     // Reset variables
@@ -163,17 +163,6 @@ void Motor::setupLimits(urdf::Model model)
     vel_limits_interface.registerHandle(handle);
 }
 
-//closed_loop_vel = gen.enum([ gen.const("closed_loop_speed",          int_t, 1, "Closed loop speed (Sec. 9 pag. 113)"),
-//                             gen.const("closed_loop_speed_position", int_t, 6, "Closed loop speed position (Sec. 9 pag. 114)")],
-//                            "Type fo velocity control mode")
-//gen.add("closed_loop_velocity", int_t, 0, "Configuration closed loop", 6, 1, 6, edit_method=closed_loop_vel)
-
-//closed_loop_pos = gen.enum([ gen.const("closed_loop_position_relative",  int_t, 2, "Closed loop position relative (Sec. 10 pag. 121)"),
-//                             gen.const("closed_loop_count_position",     int_t, 3, "Closed loop count position (Sec. 10 pag. 121)"),
-//                             gen.const("closed_loop_position_tracking",  int_t, 4, "Closed loop position tracking (Sec. 10 pag. 122)")],
-//                            "Type fo position control mode")
-//gen.add("closed_loop_position", int_t, 0, "Configuration closed loop", 2, 2, 4, edit_method=closed_loop_pos)
-
 void Motor::run(diagnostic_updater::DiagnosticStatusWrapper &stat)
 {
     string control;
@@ -209,6 +198,7 @@ void Motor::run(diagnostic_updater::DiagnosticStatusWrapper &stat)
     }
     stat.add("Control", control);
 
+    stat.add("Motor number", mNumber);
     stat.add("PWM rate (%)", msg_control.pwm);
     stat.add("Voltage (V)", msg_status.volts);
     stat.add("Battery (A)", msg_status.amps_batt);

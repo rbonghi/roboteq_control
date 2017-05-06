@@ -11,7 +11,7 @@ MotorParamConfigurator::MotorParamConfigurator(const ros::NodeHandle& nh, robote
     // Find path param
     mName = nh_.getNamespace() + "/" + name;
     // Roboteq motor number
-    mNumber = number + 1;
+    mNumber = number;
     // Set false on first run
     setup_param = false;
     setup_encoder = false;

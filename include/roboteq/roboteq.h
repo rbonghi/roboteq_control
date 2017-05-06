@@ -109,7 +109,7 @@ private:
     bool _first;
     // Motor definition
     map<string, Motor*> mMotor;
-    map<int, string> mMotorName;
+    //map<int, string> mMotorName;
 
     string _type, _model;
     string _version;
