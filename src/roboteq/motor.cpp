@@ -9,17 +9,6 @@
 
 namespace roboteq {
 
-typedef struct _motor_status {
-    uint8_t amps_limit : 1;
-    uint8_t motor_stalled : 1;
-    uint8_t loop_error_detect : 1;
-    uint8_t safety_stop_active : 1;
-    uint8_t forward_limit_triggered : 1;
-    uint8_t reverse_limit_triggered : 1;
-    uint8_t amps_triggered_active : 1;
-    uint8_t : 1;
-} motor_status_t;
-
 Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, unsigned int number)
     : DiagnosticTask(name + "_status")
     , joint_state_handle(name, &position, &velocity, &effort)
@@ -35,6 +24,8 @@ Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, 
     position = 0;
     velocity = 0;
     effort = 0;
+    // Initialize control mode
+    _control_mode = -1;
 
     // Initialize Dynamic reconfigurator for generic parameters
     parameter = new MotorParamConfigurator(nh, serial, mMotorName, number);
@@ -62,10 +53,10 @@ void Motor::initializeMotor(bool load_from_board)
     parameter->initConfigurator(load_from_board);
     // Load PID configuration from roboteq board
     // Get operative mode
-    int mode = parameter->getOperativeMode();
-    bool tmp_pos = load_from_board & ((mode == 2) || (mode == 3) || (mode == 4));
-    bool tmp_vel = load_from_board & ((mode == 1) || (mode == 6));
-    bool tmp_tor = load_from_board & (mode == 5);
+    _control_mode = parameter->getOperativeMode();
+    bool tmp_pos = load_from_board & ((_control_mode == 2) || (_control_mode == 3) || (_control_mode == 4));
+    bool tmp_vel = load_from_board & ((_control_mode == 1) || (_control_mode == 6));
+    bool tmp_tor = load_from_board & (_control_mode == 5);
 
     // ROS_INFO_STREAM("Type pos:" << tmp_pos << " vel:" << tmp_vel << " tor:" << tmp_tor);
 
@@ -172,22 +163,101 @@ void Motor::setupLimits(urdf::Model model)
     vel_limits_interface.registerHandle(handle);
 }
 
+//closed_loop_vel = gen.enum([ gen.const("closed_loop_speed",          int_t, 1, "Closed loop speed (Sec. 9 pag. 113)"),
+//                             gen.const("closed_loop_speed_position", int_t, 6, "Closed loop speed position (Sec. 9 pag. 114)")],
+//                            "Type fo velocity control mode")
+//gen.add("closed_loop_velocity", int_t, 0, "Configuration closed loop", 6, 1, 6, edit_method=closed_loop_vel)
+
+//closed_loop_pos = gen.enum([ gen.const("closed_loop_position_relative",  int_t, 2, "Closed loop position relative (Sec. 10 pag. 121)"),
+//                             gen.const("closed_loop_count_position",     int_t, 3, "Closed loop count position (Sec. 10 pag. 121)"),
+//                             gen.const("closed_loop_position_tracking",  int_t, 4, "Closed loop position tracking (Sec. 10 pag. 122)")],
+//                            "Type fo position control mode")
+//gen.add("closed_loop_position", int_t, 0, "Configuration closed loop", 2, 2, 4, edit_method=closed_loop_pos)
+
 void Motor::run(diagnostic_updater::DiagnosticStatusWrapper &stat)
 {
-    stat.add("State ", 11);
+    string control;
+    switch(_control_mode)
+    {
+    case -1:
+        control = "unset";
+        break;
+    case 0:
+        control = "Open loop";
+        break;
+    case 1:
+        control = "Closed loop speed";
+        break;
+    case 2:
+        control = "Closed loop position relative";
+        break;
+    case 3:
+        control = "Closed loop count position";
+        break;
+    case 4:
+        control = "Closed loop position tracking";
+        break;
+    case 5:
+        control = "Closed loop torque";
+        break;
+    case 6:
+        control = "Closed loop speed position";
+        break;
+    default:
+        control = "Error";
+        break;
+    }
+    stat.add("Control", control);
+
+    stat.add("PWM rate (%)", msg_control.pwm);
+    stat.add("Voltage (V)", msg_status.volts);
+    stat.add("Battery (A)", msg_status.amps_batt);
+    stat.add("Watt motor (W)", msg_status.volts * msg_status.amps_motor);
+    stat.add("Watt batt (W)", msg_status.volts * msg_status.amps_batt);
+    stat.add("Loop error", msg_control.loop_error);
+    stat.add("Track", msg_status.track);
+    stat.add("Position (deg)", position);
+    stat.add("Velociy (RPM)", to_rpm(velocity));
+    stat.add("Current (A)", msg_status.amps_motor);
+    stat.add("Torque (Nm)", effort);
+
 
     stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Motor Ready!");
 
-//    stat.add("PWM rate (%)", msg_measure.pwm);
-//    stat.add("Voltage (V)", msg_status.voltage);
-//    stat.add("Watt (W)", msg_status.watt);
-//    stat.add("Temperature (°C)", msg_status.temperature);
-//    stat.add("Time execution (nS)", msg_status.time_execution);
+    if(_status.amps_limit)
+    {
+        stat.mergeSummaryf(diagnostic_msgs::DiagnosticStatus::ERROR, "Amps limits motor=%.2f", msg_status.amps_motor);
+    }
 
-//    stat.add("Position (deg)", ((double)msg_measure.position) * 180.0/M_PI);
-//    stat.add("Velociy (RPM)", ((double)msg_measure.velocity) * (30.0 / M_PI));
-//    stat.add("Current (A)", fabs(msg_measure.current));
-//    stat.add("Torque (Nm)", msg_measure.effort);
+    if(_status.amps_triggered_active)
+    {
+        stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::WARN, "Amps trigger active");
+    }
+
+    if(_status.forward_limit_triggered)
+    {
+        stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::WARN, "Forward limit triggered");
+    }
+
+    if(_status.reverse_limit_triggered)
+    {
+        stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::WARN, "Reverse limit triggered");
+    }
+
+    if(_status.loop_error_detect)
+    {
+        stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::ERROR, "Loop error detection");
+    }
+
+    if(_status.motor_stalled)
+    {
+        stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::ERROR, "Motor stalled");
+    }
+
+    if(_status.safety_stop_active)
+    {
+        stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::WARN, "Safety stop active");
+    }
 }
 
 void Motor::switchController(string type)
@@ -200,9 +270,11 @@ void Motor::switchController(string type)
         // ROS_INFO_STREAM("VEL mode:" << pid_vel);
         // Set in speed position mode
         parameter->setOperativeMode(pid_vel);
+        _control_mode = pid_vel;
     }
     else
     {
+        _control_mode = -1;
         // set to zero the reference
         mSerial->command("G ", std::to_string(mNumber) + " 0");
         // Stop motor [pag 222]
@@ -252,7 +324,8 @@ void Motor::read(string data) {
     try
     {
         // reference command FM <-> _MOTFLAG [pag. 246]
-        unsigned char status = boost::lexical_cast<uint8_t>(fields[0]);
+        unsigned char status = boost::lexical_cast<unsigned int>(fields[0]);
+        memcpy(&_status, &status, sizeof(status));
 
         // reference command M <-> _MOTCMD [pag. 250]
         double cmd = boost::lexical_cast<double>(fields[1]) * max_rpm / 1000.0;
@@ -269,7 +342,7 @@ void Motor::read(string data) {
         msg_control.loop_error = (loop_error / ratio);
 
         // reference command P <-> _MOTPWR [pag. 255]
-        msg_control.pwm = boost::lexical_cast<double>(fields[4]) / 10;
+        msg_control.pwm = boost::lexical_cast<double>(fields[4]);
 
         // reference voltage V <-> _VOLTS [pag. ---]
         msg_status.volts = boost::lexical_cast<double>(fields[5]) / 10;

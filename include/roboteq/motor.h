@@ -21,6 +21,17 @@
 namespace roboteq
 {
 
+typedef struct _motor_status {
+    uint8_t amps_limit : 1;
+    uint8_t motor_stalled : 1;
+    uint8_t loop_error_detect : 1;
+    uint8_t safety_stop_active : 1;
+    uint8_t forward_limit_triggered : 1;
+    uint8_t reverse_limit_triggered : 1;
+    uint8_t amps_triggered_active : 1;
+    uint8_t : 1;
+} motor_status_t;
+
 class Motor : public diagnostic_updater::DiagnosticTask
 {
 public:
@@ -91,6 +102,9 @@ private:
     double velocity, max_velocity;
     double effort, max_effort;
     double command;
+
+    int _control_mode;
+    motor_status_t _status;
 
     /// ROS joint limits interface
     joint_limits_interface::VelocityJointSoftLimitsInterface vel_limits_interface;
