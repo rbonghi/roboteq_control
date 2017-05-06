@@ -13,6 +13,8 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
 {
     // First run dynamic reconfigurator
     setup_controller = false;
+    // Load default configuration roboteq board
+    getRoboteqInformation();
 
     _first = false;
     std::vector<std::string> joint_list;
@@ -64,23 +66,32 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
         mMotorName[number] = motor_name;
     }
 
-    if(mSerial->query("FID"))
-    {
-        ROS_INFO_STREAM("Data=" << mSerial->get());
-    }
+    // Add callback
+    mSerial->addCallback(&Roboteq::status, this, "S");
+}
 
+void Roboteq::getRoboteqInformation()
+{
+    // Load model roboeq board
     if(mSerial->query("TRN"))
     {
-        ROS_INFO_STREAM("Data=" << mSerial->get());
+        string trn = mSerial->get();
+        std::vector<std::string> fields;
+        boost::split(fields, trn, boost::algorithm::is_any_of(":"));
+        _type = fields[0];
+        _model = fields[1];
+        // ROS_INFO_STREAM("Model " << _model);
     }
-
+    // Load firmware version
+    if(mSerial->query("FID"))
+    {
+        _version = mSerial->get();
+    }
+    // Load UID
     if(mSerial->query("UID"))
     {
-        ROS_INFO_STREAM("Data=" << mSerial->get());
+        _uid = mSerial->get();
     }
-
-    // Add callback
-    mSerial->addCallback(&Roboteq::status, this, "S1");
 }
 
 Roboteq::~Roboteq()
@@ -152,8 +163,22 @@ void Roboteq::initializeInterfaces()
     registerInterface(&velocity_joint_interface);
 }
 
-void Roboteq::initializeDiagnostic() {
+void Roboteq::initializeDiagnostic()
+{
+    ROS_INFO_STREAM("Roboteq " << _type << ":" << _model);
+    ROS_INFO_STREAM(_version);
 
+    diagnostic_updater.setHardwareID(_model);
+
+    // Initialize this diagnostic interface
+    diagnostic_updater.add(*this);
+}
+
+void Roboteq::updateDiagnostics()
+{
+    ROS_DEBUG_STREAM("Update diagnostic");
+    // Force update all diagnostic parts
+    diagnostic_updater.force_update();
 }
 
 void Roboteq::read(const ros::Time& time, const ros::Duration& period) {
@@ -216,13 +241,122 @@ void Roboteq::doSwitch(const std::list<hardware_interface::ControllerInfo>& star
     mSerial->command("MG");
 }
 
-void Roboteq::run(diagnostic_updater::DiagnosticStatusWrapper &stat) {
+void Roboteq::run(diagnostic_updater::DiagnosticStatusWrapper &stat)
+{
+    stat.add("Type board", _type);
+    stat.add("Name board", _model);
+    stat.add("Version", _version);
+    stat.add("UID", _uid);
 
+    stat.add("Script", _script_ver);
+
+    stat.add("Temp MCU (deg)", _temp_mcu);
+    stat.add("Temp Bridge (deg)", _temp_bridge);
+
+    stat.add("Internal (V)", _volts_internal);
+    stat.add("5v regulator (V)", _volts_five);
+
+    string mode = "[ ";
+    if(_flag.serial_mode)
+        mode += "serial ";
+    if(_flag.pulse_mode)
+        mode += "pulse ";
+    if(_flag.analog_mode)
+        mode += "analog ";
+    mode += "]";
+    // Mode roboteq board
+    stat.add("Mode", mode);
+    // Spectrum
+    stat.add("Spectrum", (bool)_flag.spectrum);
+    // Microbasic
+    stat.add("Micro basic running", (bool)_flag.microbasic_running);
+
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Board ready!");
+
+    if(_flag.power_stage_off)
+    {
+        stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::WARN, "Power stage OFF");
+    }
+
+    if(_flag.stall_detect)
+    {
+        stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::ERROR, "Stall detect");
+    }
+
+    if(_flag.at_limit)
+    {
+        stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::ERROR, "At limit");
+    }
+
+    if(_fault.brushless_sensor_fault)
+    {
+        stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::ERROR, "Brushless sensor fault");
+    }
+
+    if(_fault.emergency_stop)
+    {
+        stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::WARN, "Emergency stop");
+    }
+
+    if(_fault.mosfet_failure)
+    {
+        stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::ERROR, "MOSFET failure");
+    }
+
+    if(_fault.overheat)
+    {
+        stat.mergeSummaryf(diagnostic_msgs::DiagnosticStatus::ERROR, "Over heat MCU=%f, Bridge=%f", _temp_mcu, _temp_bridge);
+    }
+
+    if(_fault.overvoltage)
+    {
+        stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::ERROR, "Over voltage");
+    }
+
+    if(_fault.undervoltage)
+    {
+        stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::ERROR, "Under voltage");
+    }
+
+    if(_fault.short_circuit)
+    {
+        stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::ERROR, "Short circuit");
+    }
 }
 
-void Roboteq::status(string data) {
+void Roboteq::status(string data)
+{
     // Temporary plot status
     // ROS_INFO_STREAM("STATUS=" << data);
+
+    // Split data
+    std::vector<std::string> fields;
+    boost::split(fields, data, boost::algorithm::is_any_of(":"));
+
+    // Scale factors as outlined in the relevant portions of the user manual, please
+    // see mbs/script.mbs for URL and specific page references.
+    try
+    {
+        // Save script version
+        _script_ver = fields[0];
+        // Status fault flags status_fault_t
+        unsigned char fault = boost::lexical_cast<unsigned int>(fields[1]);
+        memcpy(&_fault, &fault, sizeof(fault));
+        // Status flags status_flag_t
+        unsigned char status = boost::lexical_cast<unsigned int>(fields[2]);
+        memcpy(&_flag, &status, sizeof(status));
+        // Volt controller
+        _volts_internal = boost::lexical_cast<double>(fields[3]) / 10;
+        _volts_five = boost::lexical_cast<double>(fields[4]) / 1000;
+        // Conversion temperature MCU and bridge
+        _temp_mcu = boost::lexical_cast<double>(fields[5]);
+        _temp_bridge = boost::lexical_cast<double>(fields[6]);
+    }
+    catch (std::bad_cast& e)
+    {
+      ROS_WARN("Failure parsing feedback data. Dropping message.");
+      return;
+    }
 }
 
 void Roboteq::getControllerFromRoboteq()

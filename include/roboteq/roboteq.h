@@ -28,6 +28,27 @@ typedef struct joint
     double velocity_command;
 } joint_t;
 
+typedef struct _status_flag {
+    uint8_t serial_mode : 1;
+    uint8_t pulse_mode : 1;
+    uint8_t analog_mode : 1;
+    uint8_t spectrum : 1;
+    uint8_t power_stage_off : 1;
+    uint8_t stall_detect : 1;
+    uint8_t at_limit : 1;
+    uint8_t microbasic_running : 1;
+} status_flag_t;
+// Reference in pag 245
+typedef struct _status_fault {
+    uint8_t overheat : 1;
+    uint8_t overvoltage : 1;
+    uint8_t undervoltage : 1;
+    uint8_t short_circuit : 1;
+    uint8_t emergency_stop : 1;
+    uint8_t brushless_sensor_fault : 1;
+    uint8_t mosfet_failure : 1;
+} status_fault_t;
+
 class Roboteq : public hardware_interface::RobotHW, public diagnostic_updater::DiagnosticTask
 {
 public:
@@ -55,7 +76,7 @@ public:
     /**
      * @brief updateDiagnostics
      */
-    bool updateDiagnostics();
+    void updateDiagnostics();
 
     void initializeDiagnostic();
 
@@ -89,6 +110,21 @@ private:
     // Motor definition
     map<string, Motor*> mMotor;
     map<int, string> mMotorName;
+
+    string _type, _model;
+    string _version;
+    string _uid;
+    string _script_ver;
+
+    status_flag_t _flag;
+    status_fault_t _fault;
+    double _volts_internal, _volts_five;
+    double _temp_mcu, _temp_bridge;
+
+    /**
+     * @brief getRoboteqInformation Load basic information from roboteq board
+     */
+    void getRoboteqInformation();
 
     /// Setup variable
     bool setup_controller;

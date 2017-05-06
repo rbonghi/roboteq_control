@@ -34,8 +34,6 @@ ros::Timer diagnostic_loop;
 
 roboteq::serial_controller *rSerial;
 
-bool status = true;
-
 // >>>>> Ctrl+C handler
 void siginthandler(int param)
 {
@@ -52,7 +50,7 @@ void siginthandler(int param)
 /**
 * Control loop not realtime safe
 */
-void controlLoop(roboteq::Roboteq &orb,
+void controlLoop(roboteq::Roboteq &roboteq,
                  controller_manager::ControllerManager &cm,
                  time_source::time_point &last_time)
 {
@@ -65,37 +63,18 @@ void controlLoop(roboteq::Roboteq &orb,
 
     //ROS_INFO_STREAM("CONTROL - running");
     // Process control loop
-    orb.read(ros::Time::now(), elapsed);
+    roboteq.read(ros::Time::now(), elapsed);
     cm.update(ros::Time::now(), elapsed);
-    orb.write(ros::Time::now(), elapsed);
+    roboteq.write(ros::Time::now(), elapsed);
 }
 
 /**
 * Diagnostics loop for ORB boards, not realtime safe
 */
-void diagnosticLoop(roboteq::Roboteq &orb)
+void diagnosticLoop(roboteq::Roboteq &roboteq)
 {
     //ROS_INFO_STREAM("DIAGNOSTIC - running");
-//    bool diagnostic = orb.updateDiagnostics();
-//    // Set true if the diagnostic change with the before status
-//    //ROS_INFO_STREAM("Status:" << status << "- Diagnostic:" << diagnostic);
-//    if(status != diagnostic)
-//    {
-//        if(diagnostic)
-//        {
-//            ROS_INFO_STREAM("DIAGNOSTIC - Initialize again the unav and restart control loop");
-//            orb.initialize();
-//            control_loop.start();
-//        }
-//        else
-//        {
-//            // Stopping control node
-//            ROS_ERROR_STREAM("DIAGNOSTIC - Stop control loop");
-//            control_loop.stop();
-//        }
-//    }
-//    status = diagnostic;
-//    //ROS_INFO_STREAM("New status:" << status);
+    roboteq.updateDiagnostics();
 }
 
 int main(int argc, char **argv) {

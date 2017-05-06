@@ -174,7 +174,20 @@ void Motor::setupLimits(urdf::Model model)
 
 void Motor::run(diagnostic_updater::DiagnosticStatusWrapper &stat)
 {
+    stat.add("State ", 11);
 
+    stat.summary(diagnostic_msgs::DiagnosticStatus::OK, "Motor Ready!");
+
+//    stat.add("PWM rate (%)", msg_measure.pwm);
+//    stat.add("Voltage (V)", msg_status.voltage);
+//    stat.add("Watt (W)", msg_status.watt);
+//    stat.add("Temperature (°C)", msg_status.temperature);
+//    stat.add("Time execution (nS)", msg_status.time_execution);
+
+//    stat.add("Position (deg)", ((double)msg_measure.position) * 180.0/M_PI);
+//    stat.add("Velociy (RPM)", ((double)msg_measure.velocity) * (30.0 / M_PI));
+//    stat.add("Current (A)", fabs(msg_measure.current));
+//    stat.add("Torque (Nm)", msg_measure.effort);
 }
 
 void Motor::switchController(string type)
