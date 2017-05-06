@@ -59,8 +59,6 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
             private_nh.setParam(motor_name + "/number", number);
         }
 
-        _first = true;
-
         ROS_INFO_STREAM("Motor[" << number << "] name: " << motor_name);
         mMotor[motor_name] = new Motor(private_mNh, serial, motor_name, number);
     }
