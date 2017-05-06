@@ -55,21 +55,25 @@ class Roboteq : public hardware_interface::RobotHW, public diagnostic_updater::D
 {
 public:
     /**
-     * @brief serial_controller Open the serial controller
-     * @param port set the port
-     * @param set the baudrate
+     * @brief Roboteq The Roboteq board controller write and read messages about the motor state
+     * @param nh The ROS public node handle
+     * @param private_nh the ROS  private node handle
+     * @param serial The serial controller
      */
     Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, serial_controller *serial);
-
-    ~Roboteq();
-
-    void run(diagnostic_updater::DiagnosticStatusWrapper &stat);
-
     /**
-     * @brief initialize
+      * @brief The deconstructor
+      */
+    ~Roboteq();
+    /**
+     * @brief run Diagnostic thread called every request
+     * @param stat the status of diagnostic updater
+     */
+    void run(diagnostic_updater::DiagnosticStatusWrapper &stat);
+    /**
+     * @brief initialize the roboteq controller
      */
     void initialize();
-
     /**
      * @brief initializeInterfaces Initialize all motors.
      * Add all Control Interface availbles and add in diagnostic task

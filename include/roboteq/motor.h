@@ -35,6 +35,13 @@ typedef struct _motor_status {
 class Motor : public diagnostic_updater::DiagnosticTask
 {
 public:
+    /**
+     * @brief Motor The motor definition and all ros controller initializations are collected in this place
+     * @param nh The ROS private node handle
+     * @param serial The serial controller
+     * @param name The name of the motor
+     * @param number The number in Roboteq board
+     */
     explicit Motor(const ros::NodeHandle &nh, serial_controller *serial, string name, unsigned int number);
 
     void initializeMotor(bool load_from_board);
