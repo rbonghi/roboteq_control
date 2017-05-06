@@ -53,21 +53,21 @@ void MotorPIDConfigurator::getPIDFromRoboteq()
         unsigned int tmp_kp = boost::lexical_cast<unsigned int>(str_kp);
         double kp = ((double) tmp_kp) / 10.0;
         // Set params
-        nh_.setParam(mName + "/gain_proportional", kp);
+        nh_.setParam(mName + "/Kp", kp);
 
         // Get KI gain = ki / 10 [pag 318]
         string str_ki = mSerial->getParam("KI", std::to_string(mNumber));
         unsigned int tmp_ki = boost::lexical_cast<unsigned int>(str_ki);
         double ki = ((double) tmp_ki) / 10.0;
         // Set params
-        nh_.setParam(mName + "/gain_integral", ki);
+        nh_.setParam(mName + "/Ki", ki);
 
         // Get KD gain = kd / 10 [pag 317]
         string str_kd = mSerial->getParam("KD", std::to_string(mNumber));
         unsigned int tmp_kd = boost::lexical_cast<unsigned int>(str_kd);
         double kd = ((double) tmp_kd) / 10.0;
         // Set params
-        nh_.setParam(mName + "/gain_differential", kd);
+        nh_.setParam(mName + "/Kd", kd);
 
         // Get Integral cap [pag. 317]
         string str_icap = mSerial->getParam("ICAP", std::to_string(mNumber));
@@ -107,21 +107,21 @@ void MotorPIDConfigurator::setPIDconfiguration()
     // Set KP gain = kp * 10 [pag 319]
     double kp;
     // Set params
-    nh_.getParam(mName + "/gain_proportional", kp);
+    nh_.getParam(mName + "/Kp", kp);
     // Update gain position
     mSerial->setParam("KP", std::to_string(mNumber) + " " + std::to_string(kp * 10));
 
     // Set KI gain = ki * 10 [pag 318]
     double ki;
     // Set params
-    nh_.getParam(mName + "/gain_integral", ki);
+    nh_.getParam(mName + "/Ki", ki);
     // Set KI parameter
     mSerial->setParam("KI", std::to_string(mNumber) + " " + std::to_string(ki * 10));
 
     // Set KD gain = kd * 10 [pag 317]
     double kd;
     // Set params
-    nh_.getParam(mName + "/gain_differential", kd);
+    nh_.getParam(mName + "/Kd", kd);
     // Set KD parameter
     mSerial->setParam("KD", std::to_string(mNumber) + " " + std::to_string(kd * 10));
 
@@ -202,24 +202,24 @@ void MotorPIDConfigurator::reconfigureCBPID(roboteq_control::RoboteqPIDConfig &c
         mSerial->setParam("MXTRN", std::to_string(mNumber) + " " + std::to_string(gain));
     }
     // Set KP gain = kp * 10 [pag 319]
-    if(_last_pid_config.gain_proportional != config.gain_proportional)
+    if(_last_pid_config.Kp != config.Kp)
     {
         // Update gain
-        int gain = config.gain_proportional * 10;
+        int gain = config.Kp * 10;
         mSerial->setParam("KP", std::to_string(mNumber) + " " + std::to_string(gain));
     }
     // Set KI gain = ki * 10 [pag 318]
-    if(_last_pid_config.gain_integral != config.gain_integral)
+    if(_last_pid_config.Ki != config.Ki)
     {
         // Update gain
-        int gain = config.gain_integral * 10;
+        int gain = config.Ki * 10;
         mSerial->setParam("KI", std::to_string(mNumber) + " " + std::to_string(gain));
     }
     // Set KD gain = kd * 10 [pag 317]
-    if(_last_pid_config.gain_differential != config.gain_differential)
+    if(_last_pid_config.Kd != config.Kd)
     {
         // Update gain
-        int gain = config.gain_differential * 10;
+        int gain = config.Kd * 10;
         mSerial->setParam("KD", std::to_string(mNumber) + " " + std::to_string(gain));
     }
 

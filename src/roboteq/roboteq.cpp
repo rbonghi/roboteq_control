@@ -22,18 +22,11 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     }
     else
     {
-        _first = true;
         ROS_WARN("No joint list!");
         joint_list.push_back("joint_0");
         joint_list.push_back("joint_1");
         private_nh.setParam("joint", joint_list);
     }
-
-    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    // TODO MUST TO BE REMOVE
-    // ONLY FOR TEST
-    _first = true;
-    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     // Disable ECHO
     mSerial->echo(false);
@@ -47,6 +40,13 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     {
         string motor_name = joint_list.at(i);
         int number = i;
+
+        if(!private_nh.hasParam(motor_name))
+        {
+            _first = true;
+            ROS_WARN_STREAM("Load " << motor_name << " parameters from Roboteq board");
+        }
+
         if(private_nh.hasParam(motor_name + "/number"))
         {
             private_nh.getParam(motor_name + "/number", number);

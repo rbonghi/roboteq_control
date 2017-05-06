@@ -32,6 +32,8 @@ void MotorParamConfigurator::initConfigurator(bool load_from_board)
         nh_.setParam(mName + "/ratio", 1.0);
         // Set Ratio
         ratio = 1.0;
+        // Send alter ratio value
+        ROS_WARN_STREAM("Default Ratio is " << ratio);
     }
 
     // Check if is required load paramers
@@ -92,7 +94,7 @@ int MotorParamConfigurator::getOperativeMode()
     // Get sign from roboteq board
     int mode = boost::lexical_cast<int>(str_mode);
     // Set parameter
-    nh_.setParam(mName + "/operating_mode", mode);
+    // nh_.setParam(mName + "/operating_mode", mode);
 
     return mode;
 }
