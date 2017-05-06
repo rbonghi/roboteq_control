@@ -18,8 +18,8 @@
 #     'wstool', and should be listed in a file named dependencies.rosinstall.
 #
 # There are two variables you may want to change:
-#   - ROS_DISTRO (default is indigo). Note that packages must be available for
-#     ubuntu 16.04 trusty.
+#   - ROS_DISTRO (default is kinetic). Note that packages must be available for
+#     ubuntu 14.04 trusty.
 #   - ROSINSTALL_FILE (default is dependencies.rosinstall inside the repo
 #     root). This should list all necessary repositories in wstool format (see
 #     the ros wiki). If the file does not exists then nothing happens.
@@ -41,8 +41,8 @@
 
 ################################################################################
 
-# Use ubuntu trusty (16.04) with sudo privileges.
-dist: xenial
+# Use ubuntu trusty (14.04) with sudo privileges.
+dist: trusty
 sudo: required
 language:
   - generic
@@ -59,7 +59,7 @@ notifications:
 # trigger a build matrix for different ROS distributions if desired.
 env:
   global:
-    - ROS_DISTRO=kinetic
+    - ROS_DISTRO=indigo
     - ROS_CI_DESKTOP="`lsb_release -cs`"  # e.g. [precise|trusty|...]
     - CI_SOURCE_PATH=$(pwd)
     - REPOSITORY_NAME=${PWD##*/}
