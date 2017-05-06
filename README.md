@@ -1,4 +1,4 @@
-roboteq control
+roboteq control [![Build Status](https://travis-ci.org/rbonghi/roboteq_control.svg?branch=master)](https://travis-ci.org/rbonghi/roboteq_control)
 =======
 
 ### WORKING PROGRESS - NOW WORKS ONLY WITH SDC2130 with two encoders
