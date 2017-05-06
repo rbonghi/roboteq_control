@@ -4,14 +4,11 @@ Header header
 # PWM
 float64 pwm
 
-# position
-float64 position
+# reference
+float64 reference
 
-# velocity
-float64 velocity
+# feedback
+float64 feedback
 
-# current
-float64 current
-
-# Effort
-float64 effort
+# Loop error
+float64 loop_error

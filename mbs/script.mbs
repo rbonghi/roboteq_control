@@ -1,33 +1,34 @@
-SCRIPT_VER=1
+SCRIPT_VER=2
 MAX_CHANNELS=2
-Dim last_mode[2] as Integer
-
-' Mode values are:
-'  -1 stopped
-'  0 speed mode
-'  1 position mode
-' These correspond to the constants in roboteq_msgs/Command. The motor begins in stopped
-' mode, the setup for which is run when last_mode[0] != VAR[1].
-last_mode[0] = -127
-setcommand(_VAR, 1, -1)
 
 ' Motor controller configuration. Page numbers are a reference to this document:
-' www.roboteq.com/index.php/docman/motor-controllers-documents-and-files/documentation/user-manual/7-nextgen-controllers-user-manual/file
+' www.roboteq.com/index.php/docman/motor-controllers-documents-and-files/documentation/user-manual/272-roboteq-controllers-user-manual-v17/file
 
 top:
 	for ch = 1 andwhile ch <= MAX_CHANNELS evaluate ch++
 
 		' Send feedback for this channel at 25Hz.
 		print("F", ch)
-		print("=", getvalue(_MOTAMPS, ch))
+		' motor status flags [pag. 246]
+		print("=", getvalue(_FM, ch))
+		' motor command [pag. 250]
 		print(":", getvalue(_MOTCMD, ch))
+		' motor feedback [pag. 244]
+		print(":", getvalue(_FEEDBK, ch))
+		' motor loop error [pag. 244]
+		print(":", getvalue(_LPERR, ch))
+		' motor power [pag. 255]
 		print(":", getvalue(_MOTPWR, ch))
-		print(":", getvalue(_ABSPEED, ch))
-		print(":", getvalue(_ABCNTR, ch))
+		' power supply voltage
 		print(":", getvalue(_VOLTS, 2))
+		' motor Amps [pag. 230]
+		print(":", getvalue(_MOTAMPS, ch))
+		' motor battery amps [pag. 233]
 		print(":", getvalue(_BATAMPS, ch))
-		print(":", getvalue(_ANAIN, ch))
-		print(":", getvalue(_TEMP, ch+1))
+		' position encoder value [pag. 241]
+		print(":", getvalue(_ABCNTR, ch))
+		' motor track [pag. 260]
+		print(":", getvalue(_TR, ch))
 		print("\r")
 	next
 
@@ -35,12 +36,16 @@ top:
 	c++
 	if c = 5 then
 		' Print status
-		print("S", SCRIPT_VER)
-		print("=", getvalue(_FLTFLAG))
+		print("S")
+		print("=", SCRIPT_VER)
+		print(":", getvalue(_FLTFLAG))
 		print(":", getvalue(_STFLAG))
+		' power supply voltage
 		print(":", getvalue(_VOLTS, 1))
 		print(":", getvalue(_VOLTS, 3))
+		' temperature channels [pag. 259]
 		print(":", getvalue(_TEMP, 1))
+		print(":", getvalue(_TEMP, 2))
 		print("\r")
 		' Reset counter
 		c = 0
@@ -48,4 +53,3 @@ top:
 
 	wait(19)
 	goto top
-

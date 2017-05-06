@@ -204,35 +204,11 @@ void MotorParamConfigurator::getEncoderFromRoboteq() {
         int emod = boost::lexical_cast<unsigned int>(str_emode);
         // 3 modes:
         // 0 - Unsed
-        // 1 - Command mode
+        // 1 - Command
         // 2 - Feedback
         int command = (emod & 0b11);
-        int type = 0;
-        if(command == 2)
-        {
-            switch(emod - command)
-            {
-            // One channel
-            case 16:
-                type = 1;
-                break;
-            // Two channel mode
-            case 48:
-                type = 2;
-                break;
-            // Other configurations
-            default:
-                type = 0;
-                break;
-            }
-        } else
-        {
-            // Set unused
-            type = 0;
-        }
-        // ROS_INFO_STREAM("command:" << command << " type=" << type);
         // Set parameter
-        nh_.setParam(mName + PARAM_ENCODER_STRING + "/channels", type);
+        nh_.setParam(mName + PARAM_ENCODER_STRING + "/configuration", command);
 
         // Get Encoder PPR (Pulse/rev) [pag. 316]
         string str_ppr = mSerial->getParam("EPPR", std::to_string(mNumber));
@@ -416,25 +392,11 @@ void MotorParamConfigurator::reconfigureCBEncoder(roboteq_control::RoboteqEncode
     }
 
     // Set Encoder Usage - reference pag. 315
-    if(_last_encoder_config.channels != config.channels)
+    if(_last_encoder_config.configuration != config.configuration)
     {
-        int channels;
-        switch(config.channels)
-        {
-        case 1:
-            // set in feedback mode with one channel
-            channels = 2 + 16;
-            break;
-        case 2:
-            // set in feedback mode with one channel
-            channels = 2 + 48;
-            break;
-        default:
-            channels = 0;
-            break;
-        }
+        int configuration = config.configuration + mNumber*16;
         // Update operative mode
-        mSerial->setParam("EMOD", std::to_string(mNumber) + " " + std::to_string(channels));
+        mSerial->setParam("EMOD", std::to_string(mNumber) + " " + std::to_string(configuration));
     }
     // Set Encoder PPR
     if(_last_encoder_config.PPR != config.PPR)

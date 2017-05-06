@@ -9,6 +9,17 @@
 
 namespace roboteq {
 
+typedef struct _motor_status {
+    uint8_t amps_limit : 1;
+    uint8_t motor_stalled : 1;
+    uint8_t loop_error_detect : 1;
+    uint8_t safety_stop_active : 1;
+    uint8_t forward_limit_triggered : 1;
+    uint8_t reverse_limit_triggered : 1;
+    uint8_t amps_triggered_active : 1;
+    uint8_t : 1;
+} motor_status_t;
+
 Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, unsigned int number)
     : DiagnosticTask(name + "_status")
     , joint_state_handle(name, &position, &velocity, &effort)
@@ -20,6 +31,10 @@ Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, 
     mNumber = number+1;
     mMotorName = name;
     command = 0;
+    // Reset variables
+    position = 0;
+    velocity = 0;
+    effort = 0;
 
     // Initialize Dynamic reconfigurator for generic parameters
     parameter = new MotorParamConfigurator(nh, serial, mMotorName, number);
@@ -30,12 +45,7 @@ Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, 
 
     // Add a status motor publisher
     pub_status = mNh.advertise<roboteq_control::MotorStatus>(mMotorName + "/status", 10);
-
-    pub_reference = mNh.advertise<roboteq_control::ControlStatus>(mMotorName + "/reference", 10,
-            boost::bind(&Motor::connectionCallback, this, _1), boost::bind(&Motor::connectionCallback, this, _1));
-    pub_measure = mNh.advertise<roboteq_control::ControlStatus>(mMotorName + "/measure", 10);
-    pub_control = mNh.advertise<roboteq_control::ControlStatus>(mMotorName + "/control", 10,
-            boost::bind(&Motor::connectionCallback, this, _1), boost::bind(&Motor::connectionCallback, this, _1));
+    pub_control = mNh.advertise<roboteq_control::ControlStatus>(mMotorName + "/control", 10);
 
     // Add callback
     mSerial->addCallback(&Motor::read, this, "F" + std::to_string(mNumber));
@@ -190,8 +200,8 @@ void Motor::switchController(string type)
 void Motor::resetPosition(double position)
 {
     // Send reset position
-    // TODO Convert position in tick and send - now send only 0
-    mSerial->command("C ", std::to_string(mNumber) + " " + std::to_string(0));
+    double enc_conv = to_encoder_ticks(position);
+    mSerial->command("C ", std::to_string(mNumber) + " " + std::to_string(enc_conv));
 }
 
 void Motor::writeCommandsToHardware(ros::Duration period)
@@ -211,47 +221,77 @@ void Motor::writeCommandsToHardware(ros::Duration period)
 }
 
 void Motor::read(string data) {
+    double ratio, max_rpm;
     // ROS_INFO_STREAM("Motor" << mNumber << " " << data);
 
     std::vector<std::string> fields;
     boost::split(fields, data, boost::algorithm::is_any_of(":"));
     // Get ratio
-    double ratio;
     mNh.getParam(mMotorName + "/ratio", ratio);
+    // Get encoder max speed parameter
+    mNh.getParam(mMotorName + "/max_speed", max_rpm);
     // Build messages
     msg_status.header.stamp = ros::Time::now();
-    msg_measure.header.stamp = ros::Time::now();
     msg_control.header.stamp = ros::Time::now();
-    msg_reference.header.stamp = ros::Time::now();
 
     // Scale factors as outlined in the relevant portions of the user manual, please
     // see mbs/script.mbs for URL and specific page references.
     try
     {
-        msg_measure.current = boost::lexical_cast<float>(fields[0]) / 10;
-        msg_reference.velocity = from_rpm(boost::lexical_cast<double>(fields[1])) / ratio;
-//      msg.motor_power = boost::lexical_cast<float>(fields[2]) / 1000.0;
-        msg_measure.velocity = from_rpm(boost::lexical_cast<double>(fields[3])) / ratio;
-        msg_measure.position = from_encoder_ticks(boost::lexical_cast<double>(fields[4]));
-//      msg.supply_voltage = boost::lexical_cast<float>(fields[5]) / 10.0;
-//      msg.supply_current = boost::lexical_cast<float>(fields[6]) / 10.0;
-//      msg.motor_temperature = boost::lexical_cast<int>(fields[7]) * 0.020153 - 4.1754;
-//      msg.channel_temperature = boost::lexical_cast<int>(fields[8]);
+        // reference command FM <-> _MOTFLAG [pag. 246]
+        unsigned char status = boost::lexical_cast<uint8_t>(fields[0]);
 
-        // Update joint status
-        effort = msg_measure.effort;
-        position = msg_measure.position;
-        velocity = msg_measure.velocity;
+        // reference command M <-> _MOTCMD [pag. 250]
+        double cmd = boost::lexical_cast<double>(fields[1]) * max_rpm / 1000.0;
+        msg_control.reference = (cmd / ratio);
+
+        // reference command F <-> _FEEDBK [pag. 244]
+        double vel = boost::lexical_cast<double>(fields[2]) * max_rpm / 1000.0;
+        msg_control.feedback = (vel / ratio);
+        // Update velocity motor
+        velocity = (vel / ratio);
+
+        // reference command E <-> _LPERR [pag. 243]
+        double loop_error = boost::lexical_cast<double>(fields[3]) * max_rpm / 1000.0;
+        msg_control.loop_error = (loop_error / ratio);
+
+        // reference command P <-> _MOTPWR [pag. 255]
+        msg_control.pwm = boost::lexical_cast<double>(fields[4]) / 10;
+
+        // reference voltage V <-> _VOLTS [pag. ---]
+        msg_status.volts = boost::lexical_cast<double>(fields[5]) / 10;
+
+        // reference command A <-> _MOTAMPS [pag. 230]
+        msg_status.amps_motor = boost::lexical_cast<double>(fields[6]) / 10;
+
+        // Evaluate effort
+        if(velocity != 0) effort = ((msg_status.volts * msg_status.amps_motor) / velocity) * ratio;
+        else effort = 0;
+
+        // reference command BA <-> _BATAMPS [pag. 233]
+        msg_status.amps_motor = boost::lexical_cast<double>(fields[7]) / 10;
+
+        // Reference command CR <-> _RELCNTR [pag. 241]
+        // To check and substitute with C
+        // Reference command C <-> _ABCNTR [pag. ---]
+        position = from_encoder_ticks(boost::lexical_cast<double>(fields[8]));
+
+        // reference command TR <-> _TR [pag. 260]
+        msg_status.track = boost::lexical_cast<long>(fields[9]);
+
+        // ROS_INFO_STREAM("[" << mNumber << "] track:" << msg_status.track);
+        // ROS_INFO_STREAM("[" << mNumber << "] volts:" << msg_status.volts << " - amps:" << msg_status.amps_motor);
+        // ROS_INFO_STREAM("[" << mNumber << "] status:" << status << " - pos:"<< position << " - vel:" << velocity << " - torque:");
     }
     catch (std::bad_cast& e)
     {
       ROS_WARN("Failure parsing feedback data. Dropping message.");
       return;
     }
+    // Publish status motor
     pub_status.publish(msg_status);
-    pub_measure.publish(msg_measure);
+    // Publish status control motor
     pub_control.publish(msg_control);
-    pub_reference.publish(msg_reference);
 }
 
 }
