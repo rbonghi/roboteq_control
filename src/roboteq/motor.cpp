@@ -66,6 +66,9 @@ void Motor::initializeMotor(bool load_from_board)
     pid_velocity->initConfigurator(tmp_vel);
     // Initialize pid loader
     pid_torque->initConfigurator(tmp_tor);
+
+    // stop the motor
+    stopMotor();
 }
 
 /**
@@ -250,6 +253,14 @@ void Motor::run(diagnostic_updater::DiagnosticStatusWrapper &stat)
     }
 }
 
+void Motor::stopMotor()
+{
+    // set to zero the reference
+    mSerial->command("G ", std::to_string(mNumber) + " 0");
+    // Stop motor [pag 222]
+    mSerial->command("MS", std::to_string(mNumber));
+}
+
 void Motor::switchController(string type)
 {
     if(type.compare("diff_drive_controller/DiffDriveController") == 0)
@@ -265,10 +276,8 @@ void Motor::switchController(string type)
     else
     {
         _control_mode = -1;
-        // set to zero the reference
-        mSerial->command("G ", std::to_string(mNumber) + " 0");
-        // Stop motor [pag 222]
-        mSerial->command("MS", std::to_string(mNumber));
+        // stop motor
+        stopMotor();
     }
 }
 

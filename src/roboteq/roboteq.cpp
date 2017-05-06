@@ -63,11 +63,30 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
 
         ROS_INFO_STREAM("Motor[" << number << "] name: " << motor_name);
         mMotor[motor_name] = new Motor(private_mNh, serial, motor_name, number);
-        //mMotorName[number] = motor_name;
     }
+
+    // Add subscriber stop
+    sub_stop = private_mNh.subscribe("emergency_stop", 1, &Roboteq::stop_Callback, this);
 
     // Add callback
     mSerial->addCallback(&Roboteq::status, this, "S");
+}
+
+void Roboteq::stop_Callback(const std_msgs::Bool::ConstPtr& msg)
+{
+    bool status = (int)msg.get()->data;
+    if(status)
+    {
+        // Send emergency stop
+        mSerial->command("EX");
+        ROS_WARN_STREAM("Emergency stop");
+    } else
+    {
+        // Safety release
+        mSerial->command("MG");
+        ROS_WARN_STREAM("Safety release");
+    }
+
 }
 
 void Roboteq::getRoboteqInformation()

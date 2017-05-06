@@ -4,6 +4,8 @@
 #include <ros/ros.h>
 #include <serial/serial.h>
 
+#include <std_msgs/Bool.h>
+
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
 #include <hardware_interface/robot_hw.h>
@@ -97,6 +99,8 @@ private:
     serial_controller *mSerial;
     // Diagnostic
     diagnostic_updater::Updater diagnostic_updater;
+    // stop publisher
+    ros::Subscriber sub_stop;
 
     /// URDF information about robot
     urdf::Model model;
@@ -109,7 +113,6 @@ private:
     bool _first;
     // Motor definition
     map<string, Motor*> mMotor;
-    //map<int, string> mMotorName;
 
     string _type, _model;
     string _version;
@@ -120,6 +123,9 @@ private:
     status_fault_t _fault;
     double _volts_internal, _volts_five;
     double _temp_mcu, _temp_bridge;
+
+    // stop callback
+    void stop_Callback(const std_msgs::Bool::ConstPtr& msg);
 
     /**
      * @brief getRoboteqInformation Load basic information from roboteq board
