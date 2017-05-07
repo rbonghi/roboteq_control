@@ -57,6 +57,11 @@ public:
         }
     }
 
+    bool maintenance(string msg, string params="")
+    {
+        return command(msg, params, "%");
+    }
+
     /**
      * @brief get Get the message parsed
      * @return Return the string received
@@ -72,6 +77,31 @@ public:
     string getVersionScript()
     {
         return "V" + _script_ver;
+    }
+
+    /**
+     * @brief factoryReset Factory reset of Roboteq board
+     * @return the status of write
+     */
+    bool factoryReset()
+    {
+        return maintenance("EERST");
+    }
+    /**
+     * @brief loadFromEEPROM
+     * @return the status of write
+     */
+    bool loadFromEEPROM()
+    {
+        return maintenance("EELD");
+    }
+
+    /**
+     * @brief saveInEEPROM The %EESAV it's a real-time Command must be used to copy the RAM array to Flash. The Flash is copied to RAM every time the device powers up.
+     * @return the status of write
+     */
+    bool saveInEEPROM() {
+        return maintenance("EESAV");
     }
 
     /**
@@ -102,8 +132,8 @@ public:
         }
     }
     /**
-     * @brief downloadScript
-     * @return
+     * @brief downloadScript Launch the script update for the Roboteq board
+     * @return Return true if the script is fully updated
      */
     bool downloadScript();
     /**
