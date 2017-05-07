@@ -5,6 +5,7 @@
 #include <serial/serial.h>
 
 #include <std_msgs/Bool.h>
+#include <roboteq_control/Service.h>
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
@@ -105,6 +106,8 @@ private:
     diagnostic_updater::Updater diagnostic_updater;
     // stop publisher
     ros::Subscriber sub_stop;
+    // Service board
+    ros::ServiceServer srv_board;
 
     /// URDF information about robot
     urdf::Model model;
@@ -161,6 +164,14 @@ private:
      * @brief getPIDFromRoboteq Load PID parameters from Roboteq board
      */
     void getControllerFromRoboteq();
+
+    /**
+     * @brief service_Callback Internal service to require information from the board connected
+     * @param req
+     * @param msg
+     * @return
+     */
+    bool service_Callback(roboteq_control::Service::Request &req, roboteq_control::Service::Response &msg_system);
 
 };
 

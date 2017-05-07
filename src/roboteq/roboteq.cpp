@@ -18,6 +18,9 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     // Load default configuration roboteq board
     getRoboteqInformation();
 
+    //Services
+    srv_board = private_mNh.advertiseService("system", &Roboteq::service_Callback, this);
+
     _first = false;
     std::vector<std::string> joint_list;
     if(private_nh.hasParam("joint"))
@@ -526,6 +529,36 @@ void Roboteq::reconfigureCBController(roboteq_control::RoboteqControllerConfig &
 
     // Update last configuration
     _last_controller_config = config;
+}
+
+bool Roboteq::service_Callback(roboteq_control::Service::Request &req, roboteq_control::Service::Response &msg) {
+    // Convert to lower case
+    std::transform(req.service.begin(), req.service.end(), req.service.begin(), ::tolower);
+    //ROS_INFO_STREAM("Name request: " << req.service);
+    if(req.service.compare("info") == 0)
+    {
+        msg.information = "\nBoard type: " + _type + "\n"
+                          "Name board: " + _model + "\n"
+                          "Version: " + _version + "\n"
+                          "UID: " + _uid + "\n"
+                          "Script: " + _script_ver + "\n";
+    }
+    else if(req.service.compare("reset") == 0)
+    {
+//        packet_information_t frame_reset = CREATE_PACKET_RESPONSE(SYSTEM_RESET, HASHMAP_SYSTEM, PACKET_REQUEST);
+//        // Send reset
+//        mSerial->addFrame(frame_reset)->sendList();
+        // return message
+        msg.information = "System reset";
+    }
+    else
+    {
+        msg.information = "\nList of commands availabes: \n"
+                          "* info  - information about this board \n"
+                          "* reset - " + _model + " board software reset\n"
+                          "* help  - this help.";
+    }
+    return true;
 }
 
 }
