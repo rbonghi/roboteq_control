@@ -65,6 +65,14 @@ public:
     {
         return sub_data;
     }
+    /**
+     * @brief getVersionScript The version of the script loaded
+     * @return The string of roboteq control version
+     */
+    string getVersionScript()
+    {
+        return "V" + _script_ver;
+    }
 
     /**
      * @brief script Run and stop the script inside the Roboteq
@@ -94,6 +102,11 @@ public:
         }
     }
     /**
+     * @brief downloadScript
+     * @return
+     */
+    bool downloadScript();
+    /**
      * @brief addCallback Add callback message
      * @param callback The callback function
      * @param type The type of message to check
@@ -105,9 +118,6 @@ public:
     template <class T> bool addCallback(void(T::*fp)(const string), T* obj, const string data) {
         return addCallback(bind(fp, obj, _1), data);
     }
-
-protected:
-
 private:
     // Serial port object
     serial::Serial mSerial;
@@ -132,9 +142,19 @@ private:
     std::condition_variable cv;
     // Hashmap with all type of message
     map<string, callback_data_t> hashmap;
-
-    // Async reader from serial
+    // HLD mode - To download script - reference [pag. 183]
+    bool isHLD;
+    // Version script
+    string _script_ver;
+    /**
+     * @brief async_reader Thread to read realtime all charachters sent from roboteq board
+     */
     void async_reader();
+    /**
+     * @brief enableDownload Enable writing script
+     * @return Status of HLD reference [pag. 183]
+     */
+    bool enableDownload();
 };
 
 }

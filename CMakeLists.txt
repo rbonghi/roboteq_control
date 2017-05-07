@@ -165,10 +165,16 @@ set(roboteq_control_SRC
 # Include mbs script generator
 add_subdirectory(mbs)
 
+# Declare a cpp executable
+add_executable(${PROJECT_NAME}_node ${roboteq_control_SRC})
+add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_script ${${PROJECT_NAME}_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME}_script ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME driver_node PREFIX "")
+
 ## Declare a cpp executable
-add_executable(roboteq_node ${roboteq_control_SRC})
-target_link_libraries(roboteq_node ${catkin_LIBRARIES} ${Boost_LIBRARIES})
-add_dependencies(roboteq_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
+#add_executable(roboteq_node ${roboteq_control_SRC})
+#target_link_libraries(roboteq_node ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+#add_dependencies(roboteq_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 #############
 ## Install ##
@@ -178,7 +184,7 @@ add_dependencies(roboteq_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
 # See http://ros.org/doc/api/catkin/html/adv_user_guide/variables.html
 
 # Mark executables and/or libraries for installation
- install(TARGETS roboteq_node
+ install(TARGETS ${PROJECT_NAME}_node
    ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
    RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}

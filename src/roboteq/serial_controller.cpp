@@ -3,6 +3,10 @@
 
 #include <regex>
 
+// Link to generated source from Microbasic script file.
+extern const char* script_lines[];
+extern const string script_ver = "2";
+
 namespace roboteq {
 
 const std::string eol("\r");
@@ -52,8 +56,33 @@ bool serial_controller::start()
     mStopping = false;
     // Launch async reader thread
     first = std::thread(&serial_controller::async_reader, this);
-
     ROS_DEBUG_STREAM( "Serial port ready" );
+
+    // Launch script and check version
+    script(true);
+    if(query("VAR", "1"))
+    {
+        _script_ver = get();
+        // Stop script
+        script(false);
+
+        if(_script_ver.compare(script_ver) != 0)
+        {
+            ROS_WARN_STREAM("Script version mismatch. Updating V"  << _script_ver << "->V"<< script_ver << " ...");
+            if(downloadScript())
+            {
+                ROS_WARN_STREAM("...Done!");
+            }
+            else
+            {
+                ROS_ERROR_STREAM("...ERROR to download the script!");
+                return false;
+            }
+        } else
+        {
+            ROS_DEBUG_STREAM("Script V" << _script_ver);
+        }
+    }
     return true;
 }
 
@@ -82,16 +111,64 @@ bool serial_controller::addCallback(const callback_data_t &callback, const strin
     }
 }
 
-bool serial_controller::command(string msg, string params, string type) {
+bool serial_controller::enableDownload()
+{
     mWriteMutex.lock();
-    data = false;
+    // Send SLD.
+    ROS_INFO("Commanding driver to enter download mode.");
+    // Set fals HLD mode
+    isHLD = false;
+    // Send enable write mode
+    mSerial.write("%SLD 321654987" + eol);
+    // Set lock variable and wait a data to return
+    std::unique_lock<std::mutex> lck(mReaderMutex);
+    // TODO change timeout
+    cv.wait_for(lck, std::chrono::seconds(1));
+    // Look for special ack from SLD.
+    // ROS_INFO_STREAM("HLD=" << isHLD);
+    // Unlock mutex
+    mWriteMutex.unlock();
+    // If not received return false
+    if(!isHLD)
+        return false;
+}
+
+bool serial_controller::downloadScript()
+{
+    if(enableDownload())
+    {
+        ROS_DEBUG("Writing script...");
+        // Launch write script
+        int line_num = 0;
+        while(script_lines[line_num]) {
+            // Build string
+            std::string line(script_lines[line_num]);
+            ROS_DEBUG_STREAM("write[" << line_num << "]" << line);
+            bool cmd = command(line, "", "");
+            // ROS_INFO_STREAM("cmd=" << (cmd ? "true" : "false"));
+            // Check data and received a "+"
+            if(!cmd)
+                return false;
+            // Go to second line
+            line_num++;
+        }
+        ROS_DEBUG("...complete!");
+        return true;
+    }
+    return false;
+}
+
+bool serial_controller::command(string msg, string params, string type)
+{
+    // Lock the write mutex
+    mWriteMutex.lock();
+    // Build the string
     string msg2;
     if(params.compare("") == 0) {
         msg2 = type + msg + eol;
     } else {
         msg2 = type + msg + " " + params + eol;
     }
-
     unsigned int counter = 0;
     while (counter < 5)
     {
@@ -171,7 +248,7 @@ void serial_controller::async_reader()
               // Unlock command
               data = true;
               // Unlock query request
-              cv.notify_one();
+              cv.notify_all();
           }
           else if(std::regex_match(msg, rgx_query))
           {
@@ -187,7 +264,7 @@ void serial_controller::async_reader()
                   if(mMessage.compare(sub_cmd) == 0) {
                       data = true;
                       // Unlock query request
-                      cv.notify_one();
+                      cv.notify_all();
                       // Skip other request
                       continue;
                   }
@@ -200,6 +277,12 @@ void serial_controller::async_reader()
                   // Launch callback with return query
                   callback(sub_data);
               }
+          }
+          else if(msg.compare("HLD\r") == 0)
+          {
+              isHLD = true;
+              // Unlock query request
+              cv.notify_one();
           }
           else
           {

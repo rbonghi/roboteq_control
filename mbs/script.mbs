@@ -1,5 +1,9 @@
+' Script version
 SCRIPT_VER=2
+'Number channels
 MAX_CHANNELS=2
+' Set variable version script
+setcommand(_VAR, 1, SCRIPT_VER)
 
 ' Motor controller configuration. Page numbers are a reference to this document:
 ' www.roboteq.com/index.php/docman/motor-controllers-documents-and-files/documentation/user-manual/272-roboteq-controllers-user-manual-v17/file
@@ -37,8 +41,9 @@ top:
 	if c = 5 then
 		' Print status
 		print("S")
-		print("=", SCRIPT_VER)
-		print(":", getvalue(_FLTFLAG))
+		' Fault flag [pag. ---]
+		print("=", getvalue(_FLTFLAG))
+		' Status flag [pag. 247]
 		print(":", getvalue(_STFLAG))
 		' power supply voltage
 		print(":", getvalue(_VOLTS, 1))

@@ -13,6 +13,8 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
 {
     // First run dynamic reconfigurator
     setup_controller = false;
+    // store the script version
+    _script_ver = mSerial->getVersionScript();
     // Load default configuration roboteq board
     getRoboteqInformation();
 
@@ -29,13 +31,12 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
         joint_list.push_back("joint_1");
         private_nh.setParam("joint", joint_list);
     }
-
     // Disable ECHO
     mSerial->echo(false);
     // Disable Script and wait to load all parameters
     mSerial->script(false);
     // Stop motors
-    mSerial->command("EX");
+    ROS_DEBUG_STREAM("Stop motor: " << (mSerial->command("EX") ? "true" : "false"));
 
     // Initialize Joints
     for(unsigned i=0; i < joint_list.size(); ++i)
@@ -354,20 +355,18 @@ void Roboteq::status(string data)
     // see mbs/script.mbs for URL and specific page references.
     try
     {
-        // Save script version
-        _script_ver = fields[0];
         // Status fault flags status_fault_t
-        unsigned char fault = boost::lexical_cast<unsigned int>(fields[1]);
+        unsigned char fault = boost::lexical_cast<unsigned int>(fields[0]);
         memcpy(&_fault, &fault, sizeof(fault));
         // Status flags status_flag_t
-        unsigned char status = boost::lexical_cast<unsigned int>(fields[2]);
+        unsigned char status = boost::lexical_cast<unsigned int>(fields[1]);
         memcpy(&_flag, &status, sizeof(status));
         // Volt controller
-        _volts_internal = boost::lexical_cast<double>(fields[3]) / 10;
-        _volts_five = boost::lexical_cast<double>(fields[4]) / 1000;
+        _volts_internal = boost::lexical_cast<double>(fields[2]) / 10;
+        _volts_five = boost::lexical_cast<double>(fields[3]) / 1000;
         // Conversion temperature MCU and bridge
-        _temp_mcu = boost::lexical_cast<double>(fields[5]);
-        _temp_bridge = boost::lexical_cast<double>(fields[6]);
+        _temp_mcu = boost::lexical_cast<double>(fields[4]);
+        _temp_bridge = boost::lexical_cast<double>(fields[5]);
     }
     catch (std::bad_cast& e)
     {

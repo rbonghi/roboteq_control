@@ -121,6 +121,7 @@ private:
     string _type, _model;
     string _version;
     string _uid;
+    // Script version
     string _script_ver;
 
     status_flag_t _flag;
@@ -130,7 +131,6 @@ private:
 
     // stop callback
     void stop_Callback(const std_msgs::Bool::ConstPtr& msg);
-
     /**
      * @brief getRoboteqInformation Load basic information from roboteq board
      */
