@@ -80,6 +80,17 @@ public:
     }
 
     /**
+     * @brief reset Reset the Roboteq board
+     */
+    void reset()
+    {
+        // Send reset command
+        mSerial.write("%RESET 321654987");
+        // Wait one second after reset
+        ros::Duration(1).sleep();
+    }
+
+    /**
      * @brief factoryReset Factory reset of Roboteq board
      * @return the status of write
      */

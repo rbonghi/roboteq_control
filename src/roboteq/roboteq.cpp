@@ -545,9 +545,8 @@ bool Roboteq::service_Callback(roboteq_control::Service::Request &req, roboteq_c
     }
     else if(req.service.compare("reset") == 0)
     {
-//        packet_information_t frame_reset = CREATE_PACKET_RESPONSE(SYSTEM_RESET, HASHMAP_SYSTEM, PACKET_REQUEST);
-//        // Send reset
-//        mSerial->addFrame(frame_reset)->sendList();
+        // Launch reset command
+        mSerial->reset();
         // return message
         msg.information = "System reset";
     }
