@@ -446,6 +446,24 @@ void Roboteq::reconfigureCBController(roboteq_control::RoboteqControllerConfig &
         config = default_controller_config;
     }
 
+    if(config.factory_reset)
+    {
+        //if someone sets restore defaults on the parameter server, prevent looping
+        config.factory_reset = false;
+        mSerial->factoryReset();
+        // Enable load from roboteq board
+        config.load_roboteq = true;
+    }
+
+    if(config.load_from_eeprom)
+    {
+        //if someone sets again the request on the parameter server, prevent looping
+        config.load_from_eeprom = false;
+        mSerial->loadFromEEPROM();
+        // Enable load from roboteq board
+        config.load_roboteq = true;
+    }
+
     if(config.load_roboteq)
     {
         //if someone sets again the request on the parameter server, prevent looping
@@ -454,6 +472,14 @@ void Roboteq::reconfigureCBController(roboteq_control::RoboteqControllerConfig &
         getControllerFromRoboteq();
         // Skip other read
         return;
+    }
+
+    if(config.store_in_eeprom)
+    {
+        //if someone sets again the request on the parameter server, prevent looping
+        config.store_in_eeprom = false;
+        // Save all data in eeprom
+        mSerial->saveInEEPROM();
     }
 
     // Set PWM frequency PWMF [pag. 327]
