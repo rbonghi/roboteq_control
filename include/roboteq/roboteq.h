@@ -6,6 +6,7 @@
 
 #include <std_msgs/Bool.h>
 #include <roboteq_control/Service.h>
+#include <roboteq_control/Peripheral.h>
 
 #include <diagnostic_updater/diagnostic_updater.h>
 #include <diagnostic_updater/publisher.h>
@@ -104,6 +105,8 @@ private:
     serial_controller *mSerial;
     // Diagnostic
     diagnostic_updater::Updater diagnostic_updater;
+    // Publisher status periheral
+    ros::Publisher pub_peripheral;
     // stop publisher
     ros::Subscriber sub_stop;
     // Service board
@@ -172,6 +175,11 @@ private:
      * @return
      */
     bool service_Callback(roboteq_control::Service::Request &req, roboteq_control::Service::Response &msg_system);
+    /**
+     * @brief connectionCallback Check how many subscribers are connected
+     * @param pub The information about the subscriber
+     */
+    void connectionCallback(const ros::SingleSubscriberPublisher& pub);
 
 };
 

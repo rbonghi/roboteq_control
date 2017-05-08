@@ -69,9 +69,16 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
 
     // Add subscriber stop
     sub_stop = private_mNh.subscribe("emergency_stop", 1, &Roboteq::stop_Callback, this);
-
-    // Add callback
+    // Initialize the peripheral publisher
+    pub_peripheral = private_mNh.advertise<roboteq_control::Peripheral>("peripheral", 10,
+                boost::bind(&Roboteq::connectionCallback, this, _1), boost::bind(&Roboteq::connectionCallback, this, _1));
+    // Add serial reader callback
     mSerial->addCallback(&Roboteq::status, this, "S");
+}
+
+void Roboteq::connectionCallback(const ros::SingleSubscriberPublisher& pub) {
+    // Information about the subscriber
+    ROS_INFO_STREAM("Update: " << pub.getSubscriberName() << " - " << pub.getTopic());
 }
 
 void Roboteq::stop_Callback(const std_msgs::Bool::ConstPtr& msg)
