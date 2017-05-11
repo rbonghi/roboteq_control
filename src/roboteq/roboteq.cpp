@@ -98,7 +98,7 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
         mMotor[motor_name] = new Motor(private_mNh, serial, motor_name, number);
     }
     // Update size list to stream from the roboteq board
-    ROS_INFO_STREAM("Update:" << mSerial->command("VAR", "2 " + std::to_string(joint_list.size())));
+    mSerial->command("VAR", "2 " + std::to_string(joint_list.size()));
 
     // Add subscriber stop
     sub_stop = private_mNh.subscribe("emergency_stop", 1, &Roboteq::stop_Callback, this);
