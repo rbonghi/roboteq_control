@@ -61,8 +61,8 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     else
     {
         ROS_WARN("No joint list!");
-        joint_list.push_back("joint_0");
-        joint_list.push_back("joint_1");
+//        joint_list.push_back("joint_0");
+//        joint_list.push_back("joint_1");
         private_nh.setParam("joint", joint_list);
     }
     // Disable ECHO
@@ -97,6 +97,8 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
         ROS_INFO_STREAM("Motor[" << number << "] name: " << motor_name);
         mMotor[motor_name] = new Motor(private_mNh, serial, motor_name, number);
     }
+    // Update size list to stream from the roboteq board
+    ROS_INFO_STREAM("Update:" << mSerial->command("VAR", "2 " + std::to_string(joint_list.size())));
 
     // Add subscriber stop
     sub_stop = private_mNh.subscribe("emergency_stop", 1, &Roboteq::stop_Callback, this);
@@ -105,6 +107,48 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
                 boost::bind(&Roboteq::connectionCallback, this, _1), boost::bind(&Roboteq::connectionCallback, this, _1));
     // Add serial reader callback
     mSerial->addCallback(&Roboteq::status, this, "S");
+
+}
+
+string Roboteq::addJoint(string name, unsigned int num)
+{
+    // Disble script
+    mSerial->script(false);
+
+    std::vector<std::string> joint_list;
+    if(private_mNh.hasParam("joint"))
+    {
+        private_mNh.getParam("joint", joint_list);
+    } else
+    {
+        private_mNh.setParam("joint", joint_list);
+    }
+    // Add underscore if name is "joint"
+    string name_idx = name;
+    // add underscore only if the name is "joint"
+    if(name.compare("joint") == 0) name_idx += "_" + std::to_string(num);
+    while((std::find(joint_list.begin(), joint_list.end(), name_idx) != joint_list.end()))
+    {
+        num++;
+        name_idx = name + "_" + std::to_string(num);
+    }
+    joint_list.push_back(name_idx);
+    // Update joint list
+    private_mNh.setParam("joint", joint_list);
+    // Initialize the number
+    private_mNh.setParam(name_idx + "/number", (int)(num + 1));
+    ROS_INFO_STREAM("Motor[" << (num + 1) << "] name: " << name_idx);
+    // Initialize motor object
+    mMotor[name_idx] = new Motor(private_mNh, mSerial, name_idx, num + 1);
+    // Initialize parameters
+    mMotor[name_idx]->initializeMotor(true);
+    // Update
+    mSerial->command("VAR", "2 " + std::to_string(joint_list.size()));
+
+    // Enable script
+    mSerial->script(true);
+    // return the name of the new joint
+    return name_idx;
 }
 
 void Roboteq::connectionCallback(const ros::SingleSubscriberPublisher& pub) {
@@ -650,12 +694,27 @@ bool Roboteq::service_Callback(roboteq_control::Service::Request &req, roboteq_c
         // return message
         msg.information = "System reset";
     }
+    else if(req.service.compare("save") == 0)
+    {
+        // Launch reset command
+        mSerial->saveInEEPROM();
+        // return message
+        msg.information = "Parameters saved";
+    }
+    else if(req.service.compare("add_joint") == 0)
+    {
+        string name = addJoint();
+        // return message
+        msg.information = "Joint added: " + name;
+    }
     else
     {
         msg.information = "\nList of commands availabes: \n"
-                          "* info  - information about this board \n"
-                          "* reset - " + _model + " board software reset\n"
-                          "* help  - this help.";
+                          "* info      - information about this board \n"
+                          "* reset     - " + _model + " board software reset\n"
+                          "* save      - Save all paramters in EEPROM \n"
+                          "* add_joint - Add a new joint. Return the new name of this joint \n"
+                          "* help      - this help.";
     }
     return true;
 }
