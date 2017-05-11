@@ -142,6 +142,17 @@ string Roboteq::addJoint(string name, unsigned int num)
     mMotor[name_idx] = new Motor(private_mNh, mSerial, name_idx, num + 1);
     // Initialize parameters
     mMotor[name_idx]->initializeMotor(true);
+
+    /// State interface
+    joint_state_interface.registerHandle(mMotor[name_idx]->joint_state_handle);
+    /// Velocity interface
+    velocity_joint_interface.registerHandle(mMotor[name_idx]->joint_handle);
+    // Setup limits
+    mMotor[name_idx]->setupLimits(model);
+
+    //Add motor in diagnostic updater
+    diagnostic_updater.add(*(mMotor[name_idx]));
+
     // Update
     mSerial->command("VAR", "2 " + std::to_string(joint_list.size()));
 
