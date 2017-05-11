@@ -31,17 +31,19 @@
 ' EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ' Script version
-SCRIPT_VER=2
+SCRIPT_VER=3
 'Number channels
-MAX_CHANNELS=2
+MAX_CHANNELS=1
 ' Set variable version script
 setcommand(_VAR, 1, SCRIPT_VER)
+' Set variable number channels
+setcommand(_VAR, 2, MAX_CHANNELS)
 
 ' Motor controller configuration. Page numbers are a reference to this document:
 ' www.roboteq.com/index.php/docman/motor-controllers-documents-and-files/documentation/user-manual/272-roboteq-controllers-user-manual-v17/file
 
 top:
-	for ch = 1 andwhile ch <= MAX_CHANNELS evaluate ch++
+	for ch = 1 andwhile ch <= getvalue(_VAR, 2) evaluate ch++
 
 		' Send feedback for this channel at 25Hz.
 		print("F", ch)

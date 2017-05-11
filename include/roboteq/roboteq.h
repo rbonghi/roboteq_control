@@ -159,11 +159,18 @@ private:
     string _uid;
     // Script version
     string _script_ver;
-
+    // Status Roboteq board
     status_flag_t _flag;
+    // Fault flags Roboteq board
     status_fault_t _fault;
+    // Volts internal
     double _volts_internal, _volts_five;
+    // Tempearture inside the Roboteq board
     double _temp_mcu, _temp_bridge;
+
+    // GPIO enable read
+    bool _isGPIOreading;
+    roboteq_control::Peripheral msg_peripheral;
 
     // stop callback
     void stop_Callback(const std_msgs::Bool::ConstPtr& msg);

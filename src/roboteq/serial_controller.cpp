@@ -34,7 +34,7 @@
 
 // Link to generated source from Microbasic script file.
 extern const char* script_lines[];
-extern const string script_ver = "2";
+extern const string script_ver = "3";
 
 namespace roboteq {
 

@@ -72,6 +72,18 @@ public:
 
     bool query(string msg, string params="", string type="?");
 
+    string getQuery(string msg, string params="")
+    {
+        if(query(msg, params))
+        {
+            return get();
+        }
+        else
+        {
+            return "";
+        }
+    }
+
     bool setParam(string msg, string params="") {
         return command(msg, params, "^");
     }

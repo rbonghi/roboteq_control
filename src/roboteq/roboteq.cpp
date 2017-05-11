@@ -42,6 +42,8 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
 {
     // First run dynamic reconfigurator
     setup_controller = false;
+    // Initialize GPIO reading
+    _isGPIOreading = false;
     // store the script version
     _script_ver = mSerial->getVersionScript();
     // Load default configuration roboteq board
@@ -108,6 +110,8 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
 void Roboteq::connectionCallback(const ros::SingleSubscriberPublisher& pub) {
     // Information about the subscriber
     ROS_INFO_STREAM("Update: " << pub.getSubscriberName() << " - " << pub.getTopic());
+    // Check if some subscriber is connected with peripheral publisher
+    _isGPIOreading = (pub_peripheral.getNumSubscribers() >= 1);
 }
 
 void Roboteq::stop_Callback(const std_msgs::Bool::ConstPtr& msg)
@@ -130,25 +134,16 @@ void Roboteq::stop_Callback(const std_msgs::Bool::ConstPtr& msg)
 void Roboteq::getRoboteqInformation()
 {
     // Load model roboeq board
-    if(mSerial->query("TRN"))
-    {
-        string trn = mSerial->get();
-        std::vector<std::string> fields;
-        boost::split(fields, trn, boost::algorithm::is_any_of(":"));
-        _type = fields[0];
-        _model = fields[1];
-        // ROS_INFO_STREAM("Model " << _model);
-    }
+    string trn = mSerial->getQuery("TRN");
+    std::vector<std::string> fields;
+    boost::split(fields, trn, boost::algorithm::is_any_of(":"));
+    _type = fields[0];
+    _model = fields[1];
+    // ROS_INFO_STREAM("Model " << _model);
     // Load firmware version
-    if(mSerial->query("FID"))
-    {
-        _version = mSerial->get();
-    }
+    _version = mSerial->getQuery("FID");
     // Load UID
-    if(mSerial->query("UID"))
-    {
-        _uid = mSerial->get();
-    }
+    _uid = mSerial->getQuery("UID");
 }
 
 Roboteq::~Roboteq()
@@ -240,12 +235,81 @@ void Roboteq::updateDiagnostics()
 
 void Roboteq::read(const ros::Time& time, const ros::Duration& period) {
     //ROS_DEBUG_STREAM("Get measure from Roboteq");
-    for( map<string, Motor*>::iterator ii=mMotor.begin(); ii!=mMotor.end(); ++ii)
+    if(_isGPIOreading)
     {
-        // Not required now
-        // TODO
-        //(*ii).second->addRequestMeasure();
-        ROS_DEBUG_STREAM("Motor [" << (*ii).first << "] Request measures");
+        msg_peripheral.header.stamp = ros::Time::now();
+        std::vector<std::string> fields;
+        // Get Pulse in status [pag. 256]
+        string pulse_in = mSerial->getQuery("PI");
+        boost::split(fields, pulse_in, boost::algorithm::is_any_of(":"));
+        // Clear msg list
+        msg_peripheral.pulse_in.clear();
+        for(int i = 0; i < fields.size(); ++i)
+        {
+            try
+            {
+                msg_peripheral.pulse_in.push_back(boost::lexical_cast<unsigned int>(fields[i]));
+            }
+            catch (std::bad_cast& e)
+            {
+                msg_peripheral.pulse_in.push_back(0);
+            }
+        }
+        // Get analog input values [pag. 231]
+        string analog = mSerial->getQuery("AI");
+        boost::split(fields, analog, boost::algorithm::is_any_of(":"));
+        // Clear msg list
+        msg_peripheral.analog.clear();
+        for(int i = 0; i < fields.size(); ++i)
+        {
+            try
+            {
+                msg_peripheral.analog.push_back(boost::lexical_cast<double>(fields[i]) / 1000.0);
+            }
+            catch (std::bad_cast& e)
+            {
+                msg_peripheral.analog.push_back(0);
+            }
+        }
+
+        // Get Digital input values [pag. 242]
+        string digital_in = mSerial->getQuery("DI");
+        boost::split(fields, digital_in, boost::algorithm::is_any_of(":"));
+        // Clear msg list
+        msg_peripheral.digital_in.clear();
+        for(int i = 0; i < fields.size(); ++i)
+        {
+            try
+            {
+                msg_peripheral.digital_in.push_back(boost::lexical_cast<unsigned int>(fields[i]));
+            }
+            catch (std::bad_cast& e)
+            {
+                msg_peripheral.digital_in.push_back(0);
+            }
+        }
+
+        string digital_out = mSerial->getQuery("DO");
+        unsigned int num = 0;
+        try
+        {
+            num = boost::lexical_cast<unsigned int>(digital_out);
+        }
+        catch (std::bad_cast& e)
+        {
+            num = 0;
+        }
+        int mask = 0x0;
+        // Clear msg list
+        msg_peripheral.digital_out.clear();
+        for(int i = 0; i < 8; ++i)
+        {
+            msg_peripheral.digital_out.push_back((mask & num));
+            mask <<= 1;
+        }
+
+        // Send GPIO status
+        pub_peripheral.publish(msg_peripheral);
     }
 }
 
