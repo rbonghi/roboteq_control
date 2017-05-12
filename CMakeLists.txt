@@ -70,6 +70,7 @@ generate_dynamic_reconfigure_options(
     cfg/RoboteqPIDtype.cfg
     cfg/RoboteqPID.cfg
     cfg/RoboteqAnalogInput.cfg
+    cfg/RoboteqPulseInput.cfg
 )
 
 ## Generate added messages and services
