@@ -69,6 +69,7 @@ generate_dynamic_reconfigure_options(
     cfg/RoboteqEncoder.cfg
     cfg/RoboteqPIDtype.cfg
     cfg/RoboteqPID.cfg
+    cfg/RoboteqAnalogInput.cfg
 )
 
 ## Generate added messages and services
