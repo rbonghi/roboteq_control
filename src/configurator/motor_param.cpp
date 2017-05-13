@@ -30,9 +30,6 @@
 
 #include "configurator/motor_param.h"
 
-
-#define PARAM_ENCODER_STRING "/encoder"
-
 MotorParamConfigurator::MotorParamConfigurator(const ros::NodeHandle& nh, roboteq::serial_controller *serial, std::string name, unsigned int number)
     : nh_(nh)
     , mSerial(serial)
@@ -70,8 +67,6 @@ void MotorParamConfigurator::initConfigurator(bool load_from_board)
     {
         // Load parameters from roboteq
         getParamFromRoboteq();
-        // Load encoder properties from roboteq
-        getEncoderFromRoboteq();
     }
 
     // Initialize parameter dynamic reconfigure
@@ -79,35 +74,10 @@ void MotorParamConfigurator::initConfigurator(bool load_from_board)
     dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>::CallbackType cb_param = boost::bind(&MotorParamConfigurator::reconfigureCBParam, this, _1, _2);
     ds_param->setCallback(cb_param);
 
-    // Initialize encoder dynamic reconfigure
-    ds_encoder = new dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>(ros::NodeHandle(mName + PARAM_ENCODER_STRING));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>::CallbackType cb_encoder = boost::bind(&MotorParamConfigurator::reconfigureCBEncoder, this, _1, _2);
-    ds_encoder->setCallback(cb_encoder);
-
     // Initialize pid type dynamic reconfigure
     ds_pid_type = new dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>(ros::NodeHandle(mName + "/pid"));
     dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>::CallbackType cb_pid_type = boost::bind(&MotorParamConfigurator::reconfigureCBPIDtype, this, _1, _2);
     ds_pid_type->setCallback(cb_pid_type);
-
-    // Get PPR Encoder parameter
-    double ppr;
-    nh_.getParam(mName + PARAM_ENCODER_STRING + "/PPR", ppr);
-    _reduction = ppr;
-    // Check if exist ratio variable
-    if(nh_.hasParam(mName + PARAM_ENCODER_STRING + "/position"))
-    {
-        int position;
-        nh_.getParam(mName + PARAM_ENCODER_STRING + "/position", position);
-        // Read position if before (1) multiply with ratio
-        if(position) {
-            _reduction *= ratio;
-        }
-    }
-    // Multiply for quadrature
-    // TODO check for encoder with single channel
-    _reduction *= 4;
-
-    //ROS_INFO_STREAM("reduction:" << _reduction);
 }
 
 void MotorParamConfigurator::setOperativeMode(int type)
@@ -217,61 +187,6 @@ void MotorParamConfigurator::getParamFromRoboteq()
         double rpm_deceleration = ((double) rpm_deceleration_motor) / ratio;
         // Set parameter
         nh_.setParam(mName + "/max_deceleration", rpm_deceleration);
-
-    } catch (std::bad_cast& e)
-    {
-        ROS_WARN_STREAM("Failure parsing feedback data. Dropping message." << e.what());
-    }
-}
-
-void MotorParamConfigurator::getEncoderFromRoboteq() {
-    try
-    {
-        // Get Encoder Usage - reference pag. 315
-        string str_emode = mSerial->getParam("EMOD", std::to_string(mNumber));
-        // Get PPR from roboteq board
-        int emod = boost::lexical_cast<unsigned int>(str_emode);
-        // 3 modes:
-        // 0 - Unsed
-        // 1 - Command
-        // 2 - Feedback
-        int command = (emod & 0b11);
-        int motors = (emod - command) >> 4;
-        int tmp1 = ((motors & 0b1) > 0);
-        int tmp2 = ((motors & 0b10) > 0);
-        // Set parameter
-        nh_.setParam(mName + PARAM_ENCODER_STRING + "/configuration", command);
-        nh_.setParam(mName + PARAM_ENCODER_STRING + "/input_motor_one", tmp1);
-        nh_.setParam(mName + PARAM_ENCODER_STRING + "/input_motor_two", tmp2);
-
-        // Get Encoder PPR (Pulse/rev) [pag. 316]
-        string str_ppr = mSerial->getParam("EPPR", std::to_string(mNumber));
-        // Get PPR from roboteq board
-        int ppr = boost::lexical_cast<unsigned int>(str_ppr);
-        // Set parameter
-        nh_.setParam(mName + PARAM_ENCODER_STRING + "/PPR", ppr);
-
-        // Get Encoder ELL - Min limit [pag. 314]
-        string str_ell = mSerial->getParam("ELL", std::to_string(mNumber));
-        // Get PPR from roboteq board
-        int ell = boost::lexical_cast<unsigned int>(str_ell);
-        // Set parameter
-        nh_.setParam(mName + PARAM_ENCODER_STRING + "/encoder_low_count_limit", ell);
-
-        // Get Encoder EHL - Max limit [pag. 311]
-        string str_ehl = mSerial->getParam("EHL", std::to_string(mNumber));
-        // Get PPR from roboteq board
-        int ehl = boost::lexical_cast<unsigned int>(str_ehl);
-        // Set parameter
-        nh_.setParam(mName + PARAM_ENCODER_STRING + "/encoder_high_count_limit", ehl);
-
-        // Get Encoder EHOME - Home count [pag. 313]
-        string str_home = mSerial->getParam("EHOME", std::to_string(mNumber));
-        // Get PPR from roboteq board
-        int home = boost::lexical_cast<unsigned int>(str_home);
-        // Set parameter
-        nh_.setParam(mName + PARAM_ENCODER_STRING + "/encoder_home_count", home);
-
 
     } catch (std::bad_cast& e)
     {
@@ -392,74 +307,4 @@ void MotorParamConfigurator::reconfigureCBParam(roboteq_control::RoboteqParamete
 
     // Update last configuration
     _last_param_config = config;
-}
-
-void MotorParamConfigurator::reconfigureCBEncoder(roboteq_control::RoboteqEncoderConfig &config, uint32_t level) {
-
-    //The first time we're called, we just want to make sure we have the
-    //original configuration
-    if(!setup_encoder)
-    {
-      _last_encoder_config = config;
-      default_encoder_config = _last_encoder_config;
-      setup_encoder = true;
-      return;
-    }
-
-    if(config.restore_defaults)
-    {
-        //if someone sets restore defaults on the parameter server, prevent looping
-        config.restore_defaults = false;
-        // Overload default configuration
-        config = default_encoder_config;
-    }
-
-    if(config.load_roboteq)
-    {
-        ROS_INFO_STREAM("LOAD from Roboteq");
-        //if someone sets again the request on the parameter server, prevent looping
-        config.load_roboteq = false;
-        // Launch encoder load
-        getEncoderFromRoboteq();
-        // Skip other read
-        return;
-    }
-
-    // Set Encoder Usage - reference pag. 315
-    if((_last_encoder_config.configuration != config.configuration) ||
-            (_last_encoder_config.input_motor_one != config.input_motor_one) ||
-            (_last_encoder_config.input_motor_two != config.input_motor_two))
-    {
-        int configuration = config.configuration + 16*config.input_motor_one + 32*config.input_motor_two;
-        // Update operative mode
-        mSerial->setParam("EMOD", std::to_string(mNumber) + " " + std::to_string(configuration));
-    }
-    // Set Encoder PPR
-    if(_last_encoder_config.PPR != config.PPR)
-    {
-        // Update operative mode
-        mSerial->setParam("EPPR", std::to_string(mNumber) + " " + std::to_string(config.PPR));
-    }
-    // Set Encoder ELL - Min limit [pag. 314]
-    if(_last_encoder_config.encoder_low_count_limit != config.encoder_low_count_limit)
-    {
-        // Update operative mode
-        mSerial->setParam("ELL", std::to_string(mNumber) + " " + std::to_string(config.encoder_low_count_limit));
-    }
-    // Set Encoder EHL - Max limit [pag. 311]
-    if(_last_encoder_config.encoder_high_count_limit != config.encoder_high_count_limit)
-    {
-        // Update operative mode
-        mSerial->setParam("EHL", std::to_string(mNumber) + " " + std::to_string(config.encoder_high_count_limit));
-    }
-    // Set Encoder EHOME - Home count [pag. 313]
-    if(_last_encoder_config.encoder_home_count != config.encoder_home_count)
-    {
-        // Update operative mode
-        mSerial->setParam("EHOME", std::to_string(mNumber) + " " + std::to_string(config.encoder_home_count));
-    }
-
-    // Update last configuration
-    _last_encoder_config = config;
-
 }

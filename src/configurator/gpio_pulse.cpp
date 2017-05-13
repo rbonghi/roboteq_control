@@ -56,6 +56,26 @@ void GPIOPulseConfigurator::initConfigurator(bool load_from_board)
     ds_param = new dynamic_reconfigure::Server<roboteq_control::RoboteqPulseInputConfig>(ros::NodeHandle(mName));
     dynamic_reconfigure::Server<roboteq_control::RoboteqPulseInputConfig>::CallbackType cb_param = boost::bind(&GPIOPulseConfigurator::reconfigureCBParam, this, _1, _2);
     ds_param->setCallback(cb_param);
+
+    // Get PPR Encoder parameter
+    double ppr;
+    nh_.getParam(mName + PARAM_ENCODER_STRING + "/PPR", ppr);
+    _reduction = ppr;
+    // Check if exist ratio variable
+    if(nh_.hasParam(mName + PARAM_ENCODER_STRING + "/position"))
+    {
+        int position;
+        nh_.getParam(mName + PARAM_ENCODER_STRING + "/position", position);
+        // Read position if before (1) multiply with ratio
+        if(position) {
+            //_reduction *= ratio;
+        }
+    }
+    // Multiply for quadrature
+    // TODO check for encoder with single channel
+    _reduction *= 4;
+
+    //ROS_INFO_STREAM("reduction:" << _reduction);
 }
 
 void GPIOPulseConfigurator::getParamFromRoboteq()

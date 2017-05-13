@@ -68,16 +68,6 @@ public:
      */
     void setOperativeMode(int type);
 
-    // void setParam(motor_parameter_t parameter);
-
-    /**
-     * @brief getReduction Get motor reduction
-     * @return the value of reduction before encoder
-     */
-    double getReduction() {
-        return _reduction;
-    }
-
 private:
     /// Setup variable
     bool setup_param, setup_encoder, setup_pid_type;
@@ -91,9 +81,6 @@ private:
     /// Serial port
     roboteq::serial_controller* mSerial;
 
-    // reduction value
-    double _reduction;
-
     /// Dynamic reconfigure parameters
     dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig> *ds_param;
     /**
@@ -102,14 +89,6 @@ private:
      * @param level
      */
     void reconfigureCBParam(roboteq_control::RoboteqParameterConfig &config, uint32_t level);
-    /// Dynamic reconfigure encoder
-    dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig> *ds_encoder;
-    /**
-     * @brief reconfigureCBEncoder when the dynamic reconfigurator change some values start this method
-     * @param config variable with all configuration from dynamic reconfigurator
-     * @param level
-     */
-    void reconfigureCBEncoder(roboteq_control::RoboteqEncoderConfig &config, uint32_t level);
 
     /// Dynamic reconfigure PID
     dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig> *ds_pid_type;
@@ -122,15 +101,11 @@ private:
 
     // Default parameter config
     roboteq_control::RoboteqParameterConfig default_param_config, _last_param_config;
-    roboteq_control::RoboteqEncoderConfig default_encoder_config, _last_encoder_config;
     roboteq_control::RoboteqPIDtypeConfig default_pid_type_config, _last_pid_type_config;
 
     /**
      * @brief getParamFromRoboteq Load parameters from Roboteq board
      */
     void getParamFromRoboteq();
-    /**
-     * @brief getEncoderFromRoboteq Load Encoder parameters from Roboteq board
-     */
-    void getEncoderFromRoboteq();
+
 };

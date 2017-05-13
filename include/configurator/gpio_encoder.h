@@ -44,6 +44,19 @@ class GPIOEncoderConfigurator
      * @param number
      */
     GPIOEncoderConfigurator(const ros::NodeHandle& nh, roboteq::serial_controller *serial, unsigned int number);
+    /**
+     * @brief initConfigurator Initialize all parameter and syncronize parameters between ros and roboteq board
+     * @param load_from_board If true load all paramter from roboteq board
+     */
+    void initConfigurator(bool load_from_board);
+
+    /**
+     * @brief getReduction Get motor reduction
+     * @return the value of reduction before encoder
+     */
+    double getReduction() {
+        return _reduction;
+    }
 
 private:
     /// Setup variable
@@ -57,4 +70,23 @@ private:
     ros::NodeHandle nh_;
     /// Serial port
     roboteq::serial_controller* mSerial;
+
+    // reduction value
+    double _reduction;
+
+    /// Dynamic reconfigure encoder
+    dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig> *ds_encoder;
+    /**
+     * @brief reconfigureCBEncoder when the dynamic reconfigurator change some values start this method
+     * @param config variable with all configuration from dynamic reconfigurator
+     * @param level
+     */
+    void reconfigureCBEncoder(roboteq_control::RoboteqEncoderConfig &config, uint32_t level);
+
+    roboteq_control::RoboteqEncoderConfig default_encoder_config, _last_encoder_config;
+
+    /**
+     * @brief getEncoderFromRoboteq Load Encoder parameters from Roboteq board
+     */
+    void getEncoderFromRoboteq();
 };
