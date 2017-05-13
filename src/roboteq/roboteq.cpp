@@ -100,7 +100,11 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     // Update size list to stream from the roboteq board
     mSerial->command("VAR", "2 " + std::to_string(joint_list.size()));
 
-    // Launch initialization GPIO
+    // Launch initialization input/output
+//    for(int i = 0; i < 2; ++i)
+//    {
+//        _param_pulse.push_back(new GPIOPulseConfigurator(private_mNh, serial, i + 1));
+//    }
     for(int i = 0; i < 6; ++i)
     {
         _param_pulse.push_back(new GPIOPulseConfigurator(private_mNh, serial, i + 1));
