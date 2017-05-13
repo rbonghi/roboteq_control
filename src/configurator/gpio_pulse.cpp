@@ -29,3 +29,54 @@
  */
 
 #include "configurator/gpio_pulse.h"
+
+GPIOPulseConfigurator::GPIOPulseConfigurator(const ros::NodeHandle &nh, roboteq::serial_controller *serial, unsigned int number)
+    : nh_(nh)
+    , mSerial(serial)
+{
+    // Find path param
+    mName = nh_.getNamespace() + "/" + std::to_string(number);
+    // Roboteq motor number
+    mNumber = number;
+    // Set false on first run
+    setup_param = false;
+}
+
+void GPIOPulseConfigurator::initConfigurator(bool load_from_board)
+{
+    // Initialize parameter dynamic reconfigure
+    ds_param = new dynamic_reconfigure::Server<roboteq_control::RoboteqPulseInputConfig>(ros::NodeHandle(mName));
+    dynamic_reconfigure::Server<roboteq_control::RoboteqPulseInputConfig>::CallbackType cb_param = boost::bind(&GPIOPulseConfigurator::reconfigureCBParam, this, _1, _2);
+    ds_param->setCallback(cb_param);
+}
+
+void GPIOPulseConfigurator::reconfigureCBParam(roboteq_control::RoboteqPulseInputConfig &config, uint32_t level)
+{
+    //The first time we're called, we just want to make sure we have the
+    //original configuration
+    if(!setup_param)
+    {
+      _last_param_config = config;
+      default_param_config = _last_param_config;
+      setup_param = true;
+      return;
+    }
+
+    if(config.restore_defaults)
+    {
+        //if someone sets restore defaults on the parameter server, prevent looping
+        config.restore_defaults = false;
+        // Overload config with default
+        config = default_param_config;
+    }
+
+    if(config.load_roboteq)
+    {
+        //if someone sets again the request on the parameter server, prevent looping
+        config.load_roboteq = false;
+        // Launch param load
+        //getParamFromRoboteq();
+        // Skip other read
+        return;
+    }
+}

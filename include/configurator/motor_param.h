@@ -40,8 +40,18 @@
 class MotorParamConfigurator
 {
 public:
+    /**
+     * @brief MotorParamConfigurator
+     * @param nh
+     * @param serial
+     * @param name
+     * @param number
+     */
     MotorParamConfigurator(const ros::NodeHandle& nh, roboteq::serial_controller *serial, std::string name, unsigned int number);
-
+    /**
+     * @brief initConfigurator Initialize all parameter and syncronize parameters between ros and roboteq board
+     * @param load_from_board If true load all paramter from roboteq board
+     */
     void initConfigurator(bool load_from_board);
 
     int getOperativeMode();

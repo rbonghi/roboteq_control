@@ -28,7 +28,51 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#include <ros/ros.h>
+
+#include <roboteq_control/RoboteqPulseInputConfig.h>
+#include <dynamic_reconfigure/server.h>
+
+#include "roboteq/serial_controller.h"
+
 class GPIOPulseConfigurator
 {
+public:
+    /**
+     * @brief GPIOPulseConfigurator
+     * @param nh
+     * @param serial
+     * @param number
+     */
+    GPIOPulseConfigurator(const ros::NodeHandle& nh, roboteq::serial_controller *serial, unsigned int number);
+    /**
+     * @brief initConfigurator Initialize all parameter and syncronize parameters between ros and roboteq board
+     * @param load_from_board If true load all paramter from roboteq board
+     */
+    void initConfigurator(bool load_from_board);
 
+private:
+    /// Setup variable
+    bool setup_param;
+
+    /// Associate name space
+    string mName;
+    /// Number motor
+    unsigned int mNumber;
+    /// Private namespace
+    ros::NodeHandle nh_;
+    /// Serial port
+    roboteq::serial_controller* mSerial;
+
+    /// Dynamic reconfigure parameters
+    dynamic_reconfigure::Server<roboteq_control::RoboteqPulseInputConfig> *ds_param;
+    /**
+     * @brief reconfigureCBParam when the dynamic reconfigurator change some values start this method
+     * @param config variable with all configuration from dynamic reconfigurator
+     * @param level
+     */
+    void reconfigureCBParam(roboteq_control::RoboteqPulseInputConfig &config, uint32_t level);
+
+    // Default parameter config
+    roboteq_control::RoboteqPulseInputConfig default_param_config, _last_param_config;
 };
