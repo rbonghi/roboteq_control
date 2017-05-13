@@ -82,8 +82,8 @@ void GPIOPulseConfigurator::getParamFromRoboteq()
         int tmp2 = ((motors & 0b10) > 0);
         // Set parameter
         nh_.setParam(mName + "/input_use", command);
-        nh_.setParam(mName + "/input_motor_zero", tmp1);
-        nh_.setParam(mName + "/input_motor_one", tmp2);
+        nh_.setParam(mName + "/input_motor_one", tmp1);
+        nh_.setParam(mName + "/input_motor_two", tmp2);
 
         // polarity PPOL [pag. 303]
         string str_polarity = mSerial->getParam("PPOL", std::to_string(mNumber));
@@ -159,10 +159,10 @@ void GPIOPulseConfigurator::reconfigureCBParam(roboteq_control::RoboteqPulseInpu
     }
     // Set input PINA [pag. 287]
     if((_last_param_config.input_use != config.input_use) ||
-            (_last_param_config.input_motor_zero != config.input_motor_zero) ||
-            (_last_param_config.input_motor_one != config.input_motor_one))
+            (_last_param_config.input_motor_one != config.input_motor_one) ||
+            (_last_param_config.input_motor_two != config.input_motor_two))
     {
-        int input = config.input_use + 16*config.input_motor_zero + 32*config.input_motor_zero;
+        int input = config.input_use + 16*config.input_motor_one + 32*config.input_motor_two;
         mSerial->setParam("PINA", std::to_string(mNumber) + " " + std::to_string(input));
     }
     // Set polarity PPOL [pag. 303]

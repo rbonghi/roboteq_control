@@ -236,8 +236,13 @@ void MotorParamConfigurator::getEncoderFromRoboteq() {
         // 1 - Command
         // 2 - Feedback
         int command = (emod & 0b11);
+        int motors = (emod - command) >> 4;
+        int tmp1 = ((motors & 0b1) > 0);
+        int tmp2 = ((motors & 0b10) > 0);
         // Set parameter
         nh_.setParam(mName + PARAM_ENCODER_STRING + "/configuration", command);
+        nh_.setParam(mName + PARAM_ENCODER_STRING + "/input_motor_one", tmp1);
+        nh_.setParam(mName + PARAM_ENCODER_STRING + "/input_motor_two", tmp2);
 
         // Get Encoder PPR (Pulse/rev) [pag. 316]
         string str_ppr = mSerial->getParam("EPPR", std::to_string(mNumber));
@@ -421,9 +426,11 @@ void MotorParamConfigurator::reconfigureCBEncoder(roboteq_control::RoboteqEncode
     }
 
     // Set Encoder Usage - reference pag. 315
-    if(_last_encoder_config.configuration != config.configuration)
+    if((_last_encoder_config.configuration != config.configuration) ||
+            (_last_encoder_config.input_motor_one != config.input_motor_one) ||
+            (_last_encoder_config.input_motor_two != config.input_motor_two))
     {
-        int configuration = config.configuration + mNumber*16;
+        int configuration = config.configuration + 16*config.input_motor_one + 32*config.input_motor_two;
         // Update operative mode
         mSerial->setParam("EMOD", std::to_string(mNumber) + " " + std::to_string(configuration));
     }

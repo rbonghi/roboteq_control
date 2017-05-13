@@ -82,8 +82,8 @@ void GPIOAnalogConfigurator::getParamFromRoboteq()
         int tmp2 = ((motors & 0b10) > 0);
         // Set parameter
         nh_.setParam(mName + "/input_use", command);
-        nh_.setParam(mName + "/input_motor_zero", tmp1);
-        nh_.setParam(mName + "/input_motor_one", tmp2);
+        nh_.setParam(mName + "/input_motor_one", tmp1);
+        nh_.setParam(mName + "/input_motor_two", tmp2);
 
         // polarity APOL [pag. 293]
         string str_polarity = mSerial->getParam("APOL", std::to_string(mNumber));
@@ -159,10 +159,10 @@ void GPIOAnalogConfigurator::reconfigureCBParam(roboteq_control::RoboteqAnalogIn
     }
     // Set input AINA [pag. 287]
     if((_last_param_config.input_use != config.input_use) ||
-            (_last_param_config.input_motor_zero != config.input_motor_zero) ||
-            (_last_param_config.input_motor_one != config.input_motor_one))
+            (_last_param_config.input_motor_one != config.input_motor_one) ||
+            (_last_param_config.input_motor_two != config.input_motor_two))
     {
-        int input = config.input_use + 16*config.input_motor_zero + 32*config.input_motor_zero;
+        int input = config.input_use + 16*config.input_motor_one + 32*config.input_motor_two;
         mSerial->setParam("AINA", std::to_string(mNumber) + " " + std::to_string(input));
     }
     // Set polarity APOL [pag. 293]
