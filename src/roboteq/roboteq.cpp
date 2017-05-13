@@ -103,11 +103,11 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     // Launch initialization GPIO
     for(int i = 0; i < 6; ++i)
     {
-        _param_pulse.push_back(new GPIOPulseConfigurator(private_mNh, serial, i));
+        _param_pulse.push_back(new GPIOPulseConfigurator(private_mNh, serial, i + 1));
     }
     for(int i = 0; i < 6; ++i)
     {
-        _param_analog.push_back(new GPIOAnalogConfigurator(private_mNh, serial, i));
+        _param_analog.push_back(new GPIOAnalogConfigurator(private_mNh, serial, i + 1));
     }
 
     // Add subscriber stop

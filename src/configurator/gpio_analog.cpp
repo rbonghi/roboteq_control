@@ -30,12 +30,14 @@
 
 #include "configurator/gpio_analog.h"
 
+#define PARAM_ANALOG_STRING "/analog"
+
 GPIOAnalogConfigurator::GPIOAnalogConfigurator(const ros::NodeHandle &nh, roboteq::serial_controller *serial, unsigned int number)
     : nh_(nh)
     , mSerial(serial)
 {
     // Find path param
-    mName = nh_.getNamespace() + "/analog/" + std::to_string(number);
+    mName = nh_.getNamespace() + PARAM_ANALOG_STRING + "/" + std::to_string(number);
     // Roboteq motor number
     mNumber = number;
     // Set false on first run
@@ -60,6 +62,59 @@ void GPIOAnalogConfigurator::getParamFromRoboteq()
 {
     try
     {
+        // conversion AMOD [pag. 292]
+        string str_conversion = mSerial->getParam("AMOD", std::to_string(mNumber));
+        int conversion = boost::lexical_cast<int>(str_conversion);
+        // Set params
+        nh_.setParam(mName + "/conversion", conversion);
+
+        // input AINA [pag. 287]
+        string str_pina = mSerial->getParam("AINA", std::to_string(mNumber));
+        // Get AINA from roboteq board
+        int emod = boost::lexical_cast<unsigned int>(str_pina);
+        // 3 modes:
+        // 0 - Unsed
+        // 1 - Command
+        // 2 - Feedback
+        int command = (emod & 0b11);
+        int motors = (emod - command) >> 4;
+        int tmp1 = ((motors & 0b1) > 0);
+        int tmp2 = ((motors & 0b10) > 0);
+        // Set parameter
+        nh_.setParam(mName + "/input_use", command);
+        nh_.setParam(mName + "/input_motor_zero", tmp1);
+        nh_.setParam(mName + "/input_motor_one", tmp2);
+
+        // polarity APOL [pag. 293]
+        string str_polarity = mSerial->getParam("APOL", std::to_string(mNumber));
+        int polarity = boost::lexical_cast<int>(str_polarity);
+        // Set params
+        nh_.setParam(mName + "/conversion_polarity", polarity);
+
+        // Input deadband ADB [pag. 286]
+        string str_deadband = mSerial->getParam("ADB", std::to_string(mNumber));
+        int deadband = boost::lexical_cast<int>(str_deadband);
+        // Set params
+        nh_.setParam(mName + "/input_deadband", deadband);
+
+        // Input AMIN [pag. 290]
+        string str_min = mSerial->getParam("AMIN", std::to_string(mNumber));
+        double min = boost::lexical_cast<double>(str_min) / 1000;
+        // Set params
+        nh_.setParam(mName + "/range_input_min", min);
+
+        // Input AMAX [pag. 289]
+        string str_max = mSerial->getParam("AMAX", std::to_string(mNumber));
+        double max = boost::lexical_cast<double>(str_max) / 1000;
+        // Set params
+        nh_.setParam(mName + "/range_input_max", max);
+
+        // Input ATCR [pag. 285]
+        string str_ctr = mSerial->getParam("ACTR", std::to_string(mNumber));
+        double ctr = boost::lexical_cast<double>(str_ctr) / 1000;
+        // Set params
+        nh_.setParam(mName + "/range_input_center", ctr);
+
     } catch (std::bad_cast& e)
     {
         ROS_WARN_STREAM("Failure parsing feedback data. Dropping message." << e.what());
@@ -94,5 +149,53 @@ void GPIOAnalogConfigurator::reconfigureCBParam(roboteq_control::RoboteqAnalogIn
         getParamFromRoboteq();
         // Skip other read
         return;
+    }
+
+    // Set conversion AMOD [pag. 292]
+    if(_last_param_config.conversion != config.conversion)
+    {
+        // Update operative mode
+        mSerial->setParam("AMOD", std::to_string(mNumber) + " " + std::to_string(config.conversion));
+    }
+    // Set input AINA [pag. 287]
+    if((_last_param_config.input_use != config.input_use) ||
+            (_last_param_config.input_motor_zero != config.input_motor_zero) ||
+            (_last_param_config.input_motor_one != config.input_motor_one))
+    {
+        int input = config.input_use + 16*config.input_motor_zero + 32*config.input_motor_zero;
+        mSerial->setParam("AINA", std::to_string(mNumber) + " " + std::to_string(input));
+    }
+    // Set polarity APOL [pag. 293]
+    if(_last_param_config.conversion_polarity != config.conversion_polarity)
+    {
+        // Update operative mode
+        mSerial->setParam("APOL", std::to_string(mNumber) + " " + std::to_string(config.conversion_polarity));
+    }
+    // Set deadband ADB [pag. 286]
+    if(_last_param_config.input_deadband != config.input_deadband)
+    {
+        // Update operative mode
+        mSerial->setParam("ADB", std::to_string(mNumber) + " " + std::to_string(config.input_deadband));
+    }
+    // Set input AMIN [pag. 290]
+    if(_last_param_config.range_input_min != config.range_input_min)
+    {
+        int range_input_min = config.range_input_min * 1000;
+        // Update operative mode
+        mSerial->setParam("AMIN", std::to_string(mNumber) + " " + std::to_string(range_input_min));
+    }
+    // Set input AMAX [pag. 289]
+    if(_last_param_config.range_input_max != config.range_input_max)
+    {
+        int range_input_max = config.range_input_max * 1000;
+        // Update operative mode
+        mSerial->setParam("AMAX", std::to_string(mNumber) + " " + std::to_string(range_input_max));
+    }
+    // Set input ATCR [pag. 285]
+    if(_last_param_config.range_input_center != config.range_input_center)
+    {
+        int range_input_center = config.range_input_center * 1000;
+        // Update operative mode
+        mSerial->setParam("AMAX", std::to_string(mNumber) + " " + std::to_string(range_input_center));
     }
 }
