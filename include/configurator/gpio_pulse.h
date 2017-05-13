@@ -75,4 +75,9 @@ private:
 
     // Default parameter config
     roboteq_control::RoboteqPulseInputConfig default_param_config, _last_param_config;
+
+    /**
+     * @brief getParamFromRoboteq Load parameters from Roboteq board
+     */
+    void getParamFromRoboteq();
 };

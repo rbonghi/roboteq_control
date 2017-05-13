@@ -126,7 +126,7 @@ private:
     roboteq_control::RoboteqPIDtypeConfig default_pid_type_config, _last_pid_type_config;
 
     /**
-     * @brief getParamFromRoboteq Load Encoder parameters from Roboteq board
+     * @brief getParamFromRoboteq Load parameters from Roboteq board
      */
     void getParamFromRoboteq();
     /**

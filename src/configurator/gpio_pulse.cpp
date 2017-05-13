@@ -44,10 +44,26 @@ GPIOPulseConfigurator::GPIOPulseConfigurator(const ros::NodeHandle &nh, roboteq:
 
 void GPIOPulseConfigurator::initConfigurator(bool load_from_board)
 {
+    // Check if is required load paramers
+    if(load_from_board)
+    {
+        // Load parameters from roboteq
+        getParamFromRoboteq();
+    }
     // Initialize parameter dynamic reconfigure
     ds_param = new dynamic_reconfigure::Server<roboteq_control::RoboteqPulseInputConfig>(ros::NodeHandle(mName));
     dynamic_reconfigure::Server<roboteq_control::RoboteqPulseInputConfig>::CallbackType cb_param = boost::bind(&GPIOPulseConfigurator::reconfigureCBParam, this, _1, _2);
     ds_param->setCallback(cb_param);
+}
+
+void GPIOPulseConfigurator::getParamFromRoboteq()
+{
+    try
+    {
+    } catch (std::bad_cast& e)
+    {
+        ROS_WARN_STREAM("Failure parsing feedback data. Dropping message." << e.what());
+    }
 }
 
 void GPIOPulseConfigurator::reconfigureCBParam(roboteq_control::RoboteqPulseInputConfig &config, uint32_t level)
@@ -75,7 +91,7 @@ void GPIOPulseConfigurator::reconfigureCBParam(roboteq_control::RoboteqPulseInpu
         //if someone sets again the request on the parameter server, prevent looping
         config.load_roboteq = false;
         // Launch param load
-        //getParamFromRoboteq();
+        getParamFromRoboteq();
         // Skip other read
         return;
     }

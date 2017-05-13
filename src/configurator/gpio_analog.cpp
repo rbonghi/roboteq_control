@@ -44,10 +44,26 @@ GPIOAnalogConfigurator::GPIOAnalogConfigurator(const ros::NodeHandle &nh, robote
 
 void GPIOAnalogConfigurator::initConfigurator(bool load_from_board)
 {
+    // Check if is required load paramers
+    if(load_from_board)
+    {
+        // Load parameters from roboteq
+        getParamFromRoboteq();
+    }
     // Initialize parameter dynamic reconfigure
     ds_param = new dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig>(ros::NodeHandle(mName));
     dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig>::CallbackType cb_param = boost::bind(&GPIOAnalogConfigurator::reconfigureCBParam, this, _1, _2);
     ds_param->setCallback(cb_param);
+}
+
+void GPIOAnalogConfigurator::getParamFromRoboteq()
+{
+    try
+    {
+    } catch (std::bad_cast& e)
+    {
+        ROS_WARN_STREAM("Failure parsing feedback data. Dropping message." << e.what());
+    }
 }
 
 void GPIOAnalogConfigurator::reconfigureCBParam(roboteq_control::RoboteqAnalogInputConfig &config, uint32_t level)
@@ -75,7 +91,7 @@ void GPIOAnalogConfigurator::reconfigureCBParam(roboteq_control::RoboteqAnalogIn
         //if someone sets again the request on the parameter server, prevent looping
         config.load_roboteq = false;
         // Launch param load
-        //getParamFromRoboteq();
+        getParamFromRoboteq();
         // Skip other read
         return;
     }
