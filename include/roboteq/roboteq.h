@@ -44,6 +44,8 @@
 
 #include <roboteq_control/RoboteqControllerConfig.h>
 
+#include "configurator/gpio_analog.h"
+#include "configurator/gpio_pulse.h"
 #include "roboteq/serial_controller.h"
 #include "roboteq/motor.h"
 
@@ -176,6 +178,9 @@ private:
     // GPIO enable read
     bool _isGPIOreading;
     roboteq_control::Peripheral msg_peripheral;
+
+    std::vector<GPIOAnalogConfigurator*> _param_analog;
+    std::vector<GPIOPulseConfigurator*> _param_pulse;
 
     // stop callback
     void stop_Callback(const std_msgs::Bool::ConstPtr& msg);

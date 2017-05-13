@@ -100,6 +100,16 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     // Update size list to stream from the roboteq board
     mSerial->command("VAR", "2 " + std::to_string(joint_list.size()));
 
+    // Launch initialization GPIO
+    for(int i = 0; i < 6; ++i)
+    {
+        _param_pulse.push_back(new GPIOPulseConfigurator(private_mNh, serial, i));
+    }
+    for(int i = 0; i < 6; ++i)
+    {
+        _param_analog.push_back(new GPIOAnalogConfigurator(private_mNh, serial, i));
+    }
+
     // Add subscriber stop
     sub_stop = private_mNh.subscribe("emergency_stop", 1, &Roboteq::stop_Callback, this);
     // Initialize the peripheral publisher
@@ -219,6 +229,16 @@ void Roboteq::initialize()
     ds_controller = new dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>(private_mNh);
     dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>::CallbackType cb_controller = boost::bind(&Roboteq::reconfigureCBController, this, _1, _2);
     ds_controller->setCallback(cb_controller);
+
+    // Launch initialization GPIO
+    for(int i = 0; i < 6; ++i)
+    {
+        ((GPIOPulseConfigurator*)_param_pulse.at(i))->initConfigurator(true);
+    }
+    for(int i = 0; i < 6; ++i)
+    {
+        ((GPIOAnalogConfigurator*)_param_analog.at(i))->initConfigurator(true);
+    }
 
     // Initialize all motors in list
     for( map<string, Motor*>::iterator ii=mMotor.begin(); ii!=mMotor.end(); ++ii)

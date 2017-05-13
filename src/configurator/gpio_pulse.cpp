@@ -35,7 +35,7 @@ GPIOPulseConfigurator::GPIOPulseConfigurator(const ros::NodeHandle &nh, roboteq:
     , mSerial(serial)
 {
     // Find path param
-    mName = nh_.getNamespace() + "/" + std::to_string(number);
+    mName = nh_.getNamespace() + "/pulse/" + std::to_string(number);
     // Roboteq motor number
     mNumber = number;
     // Set false on first run
