@@ -119,6 +119,8 @@ set(roboteq_control_SRC
   src/roboteq/motor.cpp
   src/configurator/motor_param.cpp
   src/configurator/motor_pid.cpp
+  src/configurator/gpio_analog.cpp
+  src/configurator/gpio_pulse.cpp
 )
 # Include mbs script generator
 add_subdirectory(mbs)
