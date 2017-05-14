@@ -32,12 +32,12 @@
 
 #define PARAM_ENCODER_STRING "/encoder"
 
-GPIOEncoderConfigurator::GPIOEncoderConfigurator(const ros::NodeHandle &nh, roboteq::serial_controller *serial, unsigned int number)
+GPIOEncoderConfigurator::GPIOEncoderConfigurator(const ros::NodeHandle &nh, roboteq::serial_controller *serial, string name, unsigned int number)
     : nh_(nh)
     , mSerial(serial)
 {
     // Find path param
-    mName = nh_.getNamespace() + PARAM_ENCODER_STRING + "/" + std::to_string(number);
+    mName = nh_.getNamespace() + name + PARAM_ENCODER_STRING + "/" + std::to_string(number);
     // Roboteq motor number
     mNumber = number;
     // Set false on first run
@@ -54,29 +54,30 @@ void GPIOEncoderConfigurator::initConfigurator(bool load_from_board)
     }
 
     // Initialize encoder dynamic reconfigure
-    ds_encoder = new dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>(ros::NodeHandle(mName + PARAM_ENCODER_STRING));
+    ds_encoder = new dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>(ros::NodeHandle(mName));
     dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>::CallbackType cb_encoder = boost::bind(&GPIOEncoderConfigurator::reconfigureCBEncoder, this, _1, _2);
     ds_encoder->setCallback(cb_encoder);
 
     // Get PPR Encoder parameter
     double ppr;
-    nh_.getParam(mName + PARAM_ENCODER_STRING + "/PPR", ppr);
+    nh_.getParam(mName + "/PPR", ppr);
     _reduction = ppr;
+    // Multiply for quadrature
+    _reduction *= 4;
+}
+
+double GPIOEncoderConfigurator::getConversion(double reduction) {
     // Check if exist ratio variable
-    if(nh_.hasParam(mName + PARAM_ENCODER_STRING + "/position"))
+    if(nh_.hasParam(mName + "/position"))
     {
         int position;
-        nh_.getParam(mName + PARAM_ENCODER_STRING + "/position", position);
+        nh_.getParam(mName + "/position", position);
         // Read position if before (1) multiply with ratio
         if(position) {
-            //_reduction *= ratio;
+            _reduction *= reduction;
         }
     }
-    // Multiply for quadrature
-    // TODO check for encoder with single channel
-    _reduction *= 4;
-
-    //ROS_INFO_STREAM("reduction:" << _reduction);
+    return _reduction;
 }
 
 void GPIOEncoderConfigurator::getEncoderFromRoboteq() {
@@ -95,37 +96,37 @@ void GPIOEncoderConfigurator::getEncoderFromRoboteq() {
         int tmp1 = ((motors & 0b1) > 0);
         int tmp2 = ((motors & 0b10) > 0);
         // Set parameter
-        nh_.setParam(mName + PARAM_ENCODER_STRING + "/configuration", command);
-        nh_.setParam(mName + PARAM_ENCODER_STRING + "/input_motor_one", tmp1);
-        nh_.setParam(mName + PARAM_ENCODER_STRING + "/input_motor_two", tmp2);
+        nh_.setParam(mName + "/configuration", command);
+        nh_.setParam(mName + "/input_motor_one", tmp1);
+        nh_.setParam(mName + "/input_motor_two", tmp2);
 
         // Get Encoder PPR (Pulse/rev) [pag. 316]
         string str_ppr = mSerial->getParam("EPPR", std::to_string(mNumber));
         // Get PPR from roboteq board
         int ppr = boost::lexical_cast<unsigned int>(str_ppr);
         // Set parameter
-        nh_.setParam(mName + PARAM_ENCODER_STRING + "/PPR", ppr);
+        nh_.setParam(mName + "/PPR", ppr);
 
         // Get Encoder ELL - Min limit [pag. 314]
         string str_ell = mSerial->getParam("ELL", std::to_string(mNumber));
         // Get PPR from roboteq board
         int ell = boost::lexical_cast<unsigned int>(str_ell);
         // Set parameter
-        nh_.setParam(mName + PARAM_ENCODER_STRING + "/encoder_low_count_limit", ell);
+        nh_.setParam(mName + "/encoder_low_count_limit", ell);
 
         // Get Encoder EHL - Max limit [pag. 311]
         string str_ehl = mSerial->getParam("EHL", std::to_string(mNumber));
         // Get PPR from roboteq board
         int ehl = boost::lexical_cast<unsigned int>(str_ehl);
         // Set parameter
-        nh_.setParam(mName + PARAM_ENCODER_STRING + "/encoder_high_count_limit", ehl);
+        nh_.setParam(mName + "/encoder_high_count_limit", ehl);
 
         // Get Encoder EHOME - Home count [pag. 313]
         string str_home = mSerial->getParam("EHOME", std::to_string(mNumber));
         // Get PPR from roboteq board
         int home = boost::lexical_cast<unsigned int>(str_home);
         // Set parameter
-        nh_.setParam(mName + PARAM_ENCODER_STRING + "/encoder_home_count", home);
+        nh_.setParam(mName + "/encoder_home_count", home);
 
 
     } catch (std::bad_cast& e)
@@ -177,6 +178,8 @@ void GPIOEncoderConfigurator::reconfigureCBEncoder(roboteq_control::RoboteqEncod
     // Set Encoder PPR
     if(_last_encoder_config.PPR != config.PPR)
     {
+        // Update reduction value
+        _reduction = config.PPR;
         // Update operative mode
         mSerial->setParam("EPPR", std::to_string(mNumber) + " " + std::to_string(config.PPR));
     }

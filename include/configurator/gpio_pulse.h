@@ -37,8 +37,9 @@
 #include <dynamic_reconfigure/server.h>
 
 #include "roboteq/serial_controller.h"
+#include "configurator/gpio_sensor.h"
 
-class GPIOPulseConfigurator
+class GPIOPulseConfigurator : GPIOSensor
 {
 public:
     /**
@@ -47,12 +48,20 @@ public:
      * @param serial
      * @param number
      */
-    GPIOPulseConfigurator(const ros::NodeHandle& nh, roboteq::serial_controller *serial, unsigned int number);
+    GPIOPulseConfigurator(const ros::NodeHandle& nh, roboteq::serial_controller *serial, string name, unsigned int number);
     /**
      * @brief initConfigurator Initialize all parameter and syncronize parameters between ros and roboteq board
      * @param load_from_board If true load all paramter from roboteq board
      */
     void initConfigurator(bool load_from_board);
+    /**
+     * @brief getConversion Get conversion from pulse value to real value
+     * @return the value of reduction before encoder
+     */
+    double getConversion(double reduction)
+    {
+        return 0;
+    }
 
 private:
     /// Setup variable

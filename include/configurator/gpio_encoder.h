@@ -39,7 +39,7 @@
 #include "roboteq/serial_controller.h"
 #include "configurator/gpio_sensor.h"
 
-class GPIOEncoderConfigurator //: GPIOSensor
+class GPIOEncoderConfigurator : GPIOSensor
 {
 public:
     /**
@@ -48,19 +48,17 @@ public:
      * @param serial
      * @param number
      */
-    GPIOEncoderConfigurator(const ros::NodeHandle& nh, roboteq::serial_controller *serial, unsigned int number);
+    GPIOEncoderConfigurator(const ros::NodeHandle& nh, roboteq::serial_controller *serial, string name, unsigned int number);
     /**
      * @brief initConfigurator Initialize all parameter and syncronize parameters between ros and roboteq board
      * @param load_from_board If true load all paramter from roboteq board
      */
     void initConfigurator(bool load_from_board);
     /**
-     * @brief getReduction Get motor reduction
+     * @brief getConversion Get conversion from pulse value to real value
      * @return the value of reduction before encoder
      */
-    double getConversion(double reduction) {
-        return _reduction;
-    }
+    double getConversion(double reduction);
 
 private:
     /// Setup variable

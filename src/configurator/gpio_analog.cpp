@@ -32,12 +32,12 @@
 
 #define PARAM_ANALOG_STRING "/analog"
 
-GPIOAnalogConfigurator::GPIOAnalogConfigurator(const ros::NodeHandle &nh, roboteq::serial_controller *serial, unsigned int number)
+GPIOAnalogConfigurator::GPIOAnalogConfigurator(const ros::NodeHandle &nh, roboteq::serial_controller *serial, string name, unsigned int number)
     : nh_(nh)
     , mSerial(serial)
 {
     // Find path param
-    mName = nh_.getNamespace() + PARAM_ANALOG_STRING + "/" + std::to_string(number);
+    mName = nh_.getNamespace() + name + PARAM_ANALOG_STRING + "/" + std::to_string(number);
     // Roboteq motor number
     mNumber = number;
     // Set false on first run

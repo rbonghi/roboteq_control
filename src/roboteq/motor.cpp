@@ -111,11 +111,9 @@ double Motor::to_encoder_ticks(double x)
     double reduction = 0;
     // Get ratio
     mNh.getParam(mMotorName + "/ratio", reduction);
-
+    // apply the reduction convertion
     //reduction = _sensor->getConversion(reduction);
-
-
-    //double reduction = 0;//parameter->getReduction();
+    // Return the value converted
     return x * (reduction) / (2 * M_PI);
 }
 
@@ -127,7 +125,12 @@ double Motor::to_encoder_ticks(double x)
  */
 double Motor::from_encoder_ticks(double x)
 {
-    double reduction = 0;//parameter->getReduction();
+    double reduction = 0;
+    // Get ratio
+    mNh.getParam(mMotorName + "/ratio", reduction);
+    // apply the reduction convertion
+    //reduction = _sensor->getConversion(reduction);
+    // Return the value converted
     return x * (2 * M_PI) / (reduction);
 }
 

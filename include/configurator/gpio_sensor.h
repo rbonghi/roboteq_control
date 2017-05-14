@@ -33,7 +33,7 @@
 
 class GPIOSensor {
 public:
-    //virtual double getConversion(double reduction);
+    virtual double getConversion(double reduction) = 0;
 };
 
 #endif // GPIOSENSOR_H
