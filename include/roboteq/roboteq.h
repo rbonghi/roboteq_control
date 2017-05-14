@@ -101,11 +101,6 @@ public:
       */
     ~Roboteq();
     /**
-     * @brief addJoint Add new joint in list
-     * @return the name of the new joint
-     */
-    string addJoint(string name="joint", unsigned int num=0);
-    /**
      * @brief run Diagnostic thread called every request
      * @param stat the status of diagnostic updater
      */

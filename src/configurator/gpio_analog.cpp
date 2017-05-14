@@ -83,15 +83,29 @@ void GPIOAnalogConfigurator::getParamFromRoboteq()
         int tmp2 = ((motors & 0b10) > 0);
         if(tmp1)
         {
-            roboteq::Motor* motor = _motor.at(0);
-            motor->registerSensor(this);
-            ROS_INFO_STREAM("Register analog [" << mNumber << "] to: " << motor->getName());
+            for (vector<roboteq::Motor*>::iterator it = _motor.begin() ; it != _motor.end(); ++it)
+            {
+                roboteq::Motor* motor = ((roboteq::Motor*)(*it));
+                if(motor->getNumber() == 1)
+                {
+                    motor->registerSensor(this);
+                    ROS_INFO_STREAM("Register analog [" << mNumber << "] to: " << motor->getName());
+                    break;
+                }
+            }
         }
         if(tmp2)
         {
-            roboteq::Motor* motor = _motor.at(1);
-            motor->registerSensor(this);
-            ROS_INFO_STREAM("Register analog [" << mNumber << "] to: " << motor->getName());
+            for (vector<roboteq::Motor*>::iterator it = _motor.begin() ; it != _motor.end(); ++it)
+            {
+                roboteq::Motor* motor = ((roboteq::Motor*)(*it));
+                if(motor->getNumber() == 2)
+                {
+                    motor->registerSensor(this);
+                    ROS_INFO_STREAM("Register analog [" << mNumber << "] to: " << motor->getName());
+                    break;
+                }
+            }
         }
 
         // Set parameter

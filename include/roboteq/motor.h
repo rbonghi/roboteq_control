@@ -108,6 +108,14 @@ public:
      */
     void stopMotor();
     /**
+     * @brief getNumber The roboteq number
+     * @return the number associated in the roboteq board
+     */
+    int getNumber() {
+        return mNumber;
+    }
+
+    /**
      * @brief getName the name of the motor
      * @return the string with the name of the motor
      */
