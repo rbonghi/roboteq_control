@@ -28,6 +28,9 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef GPIOANALOGCONFIGURATOR_H
+#define GPIOANALOGCONFIGURATOR_H
+
 #include <ros/ros.h>
 
 #include <roboteq_control/RoboteqAnalogInputConfig.h>
@@ -81,3 +84,5 @@ private:
      */
     void getParamFromRoboteq();
 };
+
+#endif // GPIOANALOGCONFIGURATOR_H

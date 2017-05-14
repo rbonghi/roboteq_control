@@ -28,6 +28,9 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef GPIOPARAMCONFIGURATOR_H
+#define GPIOPARAMCONFIGURATOR_H
+
 #include <ros/ros.h>
 
 #include <roboteq_control/RoboteqParameterConfig.h>
@@ -70,7 +73,7 @@ public:
 
 private:
     /// Setup variable
-    bool setup_param, setup_encoder, setup_pid_type;
+    bool setup_param, setup_pid_type;
 
     /// Associate name space
     string mName;
@@ -109,3 +112,5 @@ private:
     void getParamFromRoboteq();
 
 };
+
+#endif // GPIOPARAMCONFIGURATOR_H

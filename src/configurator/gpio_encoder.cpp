@@ -37,11 +37,11 @@ GPIOEncoderConfigurator::GPIOEncoderConfigurator(const ros::NodeHandle &nh, robo
     , mSerial(serial)
 {
     // Find path param
-    mName = nh_.getNamespace() + PARAM_PULSE_STRING + "/" + std::to_string(number);
+    mName = nh_.getNamespace() + PARAM_ENCODER_STRING + "/" + std::to_string(number);
     // Roboteq motor number
     mNumber = number;
     // Set false on first run
-    setup_param = false;
+    setup_encoder = false;
 }
 
 void GPIOEncoderConfigurator::initConfigurator(bool load_from_board)
@@ -55,8 +55,28 @@ void GPIOEncoderConfigurator::initConfigurator(bool load_from_board)
 
     // Initialize encoder dynamic reconfigure
     ds_encoder = new dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>(ros::NodeHandle(mName + PARAM_ENCODER_STRING));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>::CallbackType cb_encoder = boost::bind(&MotorParamConfigurator::reconfigureCBEncoder, this, _1, _2);
+    dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>::CallbackType cb_encoder = boost::bind(&GPIOEncoderConfigurator::reconfigureCBEncoder, this, _1, _2);
     ds_encoder->setCallback(cb_encoder);
+
+    // Get PPR Encoder parameter
+    double ppr;
+    nh_.getParam(mName + PARAM_ENCODER_STRING + "/PPR", ppr);
+    _reduction = ppr;
+    // Check if exist ratio variable
+    if(nh_.hasParam(mName + PARAM_ENCODER_STRING + "/position"))
+    {
+        int position;
+        nh_.getParam(mName + PARAM_ENCODER_STRING + "/position", position);
+        // Read position if before (1) multiply with ratio
+        if(position) {
+            //_reduction *= ratio;
+        }
+    }
+    // Multiply for quadrature
+    // TODO check for encoder with single channel
+    _reduction *= 4;
+
+    //ROS_INFO_STREAM("reduction:" << _reduction);
 }
 
 void GPIOEncoderConfigurator::getEncoderFromRoboteq() {

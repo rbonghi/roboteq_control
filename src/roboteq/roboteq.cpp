@@ -101,10 +101,10 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     mSerial->command("VAR", "2 " + std::to_string(joint_list.size()));
 
     // Launch initialization input/output
-//    for(int i = 0; i < 2; ++i)
-//    {
-//        _param_pulse.push_back(new GPIOPulseConfigurator(private_mNh, serial, i + 1));
-//    }
+    for(int i = 0; i < 2; ++i)
+    {
+        _param_encoder.push_back(new GPIOEncoderConfigurator(private_mNh, serial, i + 1));
+    }
     for(int i = 0; i < 6; ++i)
     {
         _param_pulse.push_back(new GPIOPulseConfigurator(private_mNh, serial, i + 1));

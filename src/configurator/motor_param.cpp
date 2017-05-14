@@ -40,7 +40,6 @@ MotorParamConfigurator::MotorParamConfigurator(const ros::NodeHandle& nh, robote
     mNumber = number;
     // Set false on first run
     setup_param = false;
-    setup_encoder = false;
 }
 
 void MotorParamConfigurator::initConfigurator(bool load_from_board)

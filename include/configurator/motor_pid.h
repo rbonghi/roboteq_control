@@ -28,6 +28,9 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef GPIOPIDCONFIGURATOR_H
+#define GPIOPICCONFIGURATOR_H
+
 #include <ros/ros.h>
 #include <dynamic_reconfigure/server.h>
 
@@ -83,3 +86,5 @@ private:
      */
     void getPIDFromRoboteq();
 };
+
+#endif // GPIOPICCONFIGURATOR_H

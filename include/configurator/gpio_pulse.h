@@ -28,6 +28,9 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef GPIOPULSECONFIGURATOR_H
+#define GPIOPULSECONFIGURATOR_H
+
 #include <ros/ros.h>
 
 #include <roboteq_control/RoboteqPulseInputConfig.h>
@@ -81,3 +84,5 @@ private:
      */
     void getParamFromRoboteq();
 };
+
+#endif // GPIOPULSECONFIGURATOR_H

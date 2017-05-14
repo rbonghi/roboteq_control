@@ -28,15 +28,20 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#ifndef GPIOENCODERCONFIGURATOR_H
+#define GPIOENCODERCONFIGURATOR_H
+
 #include <ros/ros.h>
 
 #include <roboteq_control/RoboteqEncoderConfig.h>
 #include <dynamic_reconfigure/server.h>
 
 #include "roboteq/serial_controller.h"
+#include "configurator/gpio_sensor.h"
 
-class GPIOEncoderConfigurator
+class GPIOEncoderConfigurator //: GPIOSensor
 {
+public:
     /**
      * @brief GPIOEncoderConfigurator
      * @param nh
@@ -49,18 +54,17 @@ class GPIOEncoderConfigurator
      * @param load_from_board If true load all paramter from roboteq board
      */
     void initConfigurator(bool load_from_board);
-
     /**
      * @brief getReduction Get motor reduction
      * @return the value of reduction before encoder
      */
-    double getReduction() {
+    double getConversion(double reduction) {
         return _reduction;
     }
 
 private:
     /// Setup variable
-    bool setup_param;
+    bool setup_encoder;
 
     /// Associate name space
     string mName;
@@ -90,3 +94,5 @@ private:
      */
     void getEncoderFromRoboteq();
 };
+
+#endif // GPIOENCODERCONFIGURATOR_H

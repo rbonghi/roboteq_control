@@ -108,7 +108,14 @@ void Motor::initializeMotor(bool load_from_board)
  */
 double Motor::to_encoder_ticks(double x)
 {
-    double reduction = parameter->getReduction();
+    double reduction = 0;
+    // Get ratio
+    mNh.getParam(mMotorName + "/ratio", reduction);
+
+    //reduction = _sensor->getConversion(reduction);
+
+
+    //double reduction = 0;//parameter->getReduction();
     return x * (reduction) / (2 * M_PI);
 }
 
@@ -120,7 +127,7 @@ double Motor::to_encoder_ticks(double x)
  */
 double Motor::from_encoder_ticks(double x)
 {
-    double reduction = parameter->getReduction();
+    double reduction = 0;//parameter->getReduction();
     return x * (2 * M_PI) / (reduction);
 }
 

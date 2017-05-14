@@ -44,7 +44,7 @@
 #include <roboteq_control/ControlStatus.h>
 
 #include "roboteq/serial_controller.h"
-
+#include "configurator/gpio_sensor.h"
 #include "configurator/motor_param.h"
 #include "configurator/motor_pid.h"
 
@@ -73,22 +73,45 @@ public:
      * @param number The number in Roboteq board
      */
     explicit Motor(const ros::NodeHandle &nh, serial_controller *serial, string name, unsigned int number);
-
+    /**
+     * @brief initializeMotor Initialization oh motor, this routine load parameter from ros server or load from roboteq board
+     * @param load_from_board forse the load from roboteq board
+     */
     void initializeMotor(bool load_from_board);
-
+    /**
+     * @brief run Run the diagnostic updater
+     * @param stat the stat will be updated
+     */
     void run(diagnostic_updater::DiagnosticStatusWrapper &stat);
-
+    /**
+     * @brief setupLimits setup the maximum velocity, positio and effort
+     * @param model the robot model
+     */
     void setupLimits(urdf::Model model);
-
+    /**
+     * @brief resetPosition Reset the motor in a new initial position
+     * @param position the new position
+     */
     void resetPosition(double position);
-
+    /**
+     * @brief writeCommandsToHardware Write a command to the hardware interface
+     * @param period the period update
+     */
     void writeCommandsToHardware(ros::Duration period);
-
+    /**
+     * @brief switchController Switch the controller from different type of ros controller
+     * @param type the type of ros controller
+     */
     void switchController(string type);
     /**
      * @brief stopMotor Stop the motor
      */
     void stopMotor();
+
+    void registerSensor(GPIOSensor* sensor)
+    {
+        _sensor = sensor;
+    }
 
     hardware_interface::JointStateHandle joint_state_handle;
     hardware_interface::JointHandle joint_handle;
@@ -160,6 +183,8 @@ private:
     MotorPIDConfigurator* pid_velocity;
     MotorPIDConfigurator* pid_torque;
     MotorPIDConfigurator* pid_position;
+
+    GPIOSensor* _sensor;
 
     // Reader motor message
     void read(string data);
