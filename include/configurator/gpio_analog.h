@@ -38,6 +38,7 @@
 
 #include "roboteq/serial_controller.h"
 #include "configurator/gpio_sensor.h"
+#include "roboteq/motor.h"
 
 class GPIOAnalogConfigurator : GPIOSensor
 {
@@ -48,7 +49,7 @@ public:
      * @param serial
      * @param number
      */
-    GPIOAnalogConfigurator(const ros::NodeHandle& nh, roboteq::serial_controller *serial, string name, unsigned int number);
+    GPIOAnalogConfigurator(const ros::NodeHandle& nh, roboteq::serial_controller *serial, std::vector<roboteq::Motor *> motor, string name, unsigned int number);
     /**
      * @brief initConfigurator Initialize all parameter and syncronize parameters between ros and roboteq board
      * @param load_from_board If true load all paramter from roboteq board
@@ -75,6 +76,8 @@ private:
     ros::NodeHandle nh_;
     /// Serial port
     roboteq::serial_controller* mSerial;
+    // List of all motors
+    std::vector<roboteq::Motor *> _motor;
 
     /// Dynamic reconfigure parameters
     dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig> *ds_param;

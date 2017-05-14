@@ -160,7 +160,8 @@ private:
     // Check if is the first run
     bool _first;
     // Motor definition
-    map<string, Motor*> mMotor;
+    //map<string, Motor*> mMotor;
+    std::vector<Motor*> mMotor;
 
     string _type, _model;
     string _version;

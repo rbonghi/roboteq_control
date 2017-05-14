@@ -32,9 +32,10 @@
 
 #define PARAM_ENCODER_STRING "/encoder"
 
-GPIOEncoderConfigurator::GPIOEncoderConfigurator(const ros::NodeHandle &nh, roboteq::serial_controller *serial, string name, unsigned int number)
+GPIOEncoderConfigurator::GPIOEncoderConfigurator(const ros::NodeHandle &nh, roboteq::serial_controller *serial, std::vector<roboteq::Motor *> motor, string name, unsigned int number)
     : nh_(nh)
     , mSerial(serial)
+    ,_motor(motor)
 {
     // Find path param
     mName = nh_.getNamespace() + name + PARAM_ENCODER_STRING + "/" + std::to_string(number);
@@ -74,7 +75,7 @@ double GPIOEncoderConfigurator::getConversion(double reduction) {
         nh_.getParam(mName + "/position", position);
         // Read position if before (1) multiply with ratio
         if(position) {
-            _reduction *= reduction;
+            return _reduction * reduction;
         }
     }
     return _reduction;
@@ -95,6 +96,19 @@ void GPIOEncoderConfigurator::getEncoderFromRoboteq() {
         int motors = (emod - command) >> 4;
         int tmp1 = ((motors & 0b1) > 0);
         int tmp2 = ((motors & 0b10) > 0);
+        // Register reduction
+        if(tmp1)
+        {
+            roboteq::Motor* motor = _motor.at(0);
+            motor->registerSensor(this);
+            ROS_INFO_STREAM("Register encoder [" << mNumber << "] to: " << motor->getName());
+        }
+        if(tmp2)
+        {
+            roboteq::Motor* motor = _motor.at(1);
+            motor->registerSensor(this);
+            ROS_INFO_STREAM("Register encoder [" << mNumber << "] to: " << motor->getName());
+        }
         // Set parameter
         nh_.setParam(mName + "/configuration", command);
         nh_.setParam(mName + "/input_motor_one", tmp1);
@@ -174,6 +188,19 @@ void GPIOEncoderConfigurator::reconfigureCBEncoder(roboteq_control::RoboteqEncod
         int configuration = config.configuration + 16*config.input_motor_one + 32*config.input_motor_two;
         // Update operative mode
         mSerial->setParam("EMOD", std::to_string(mNumber) + " " + std::to_string(configuration));
+
+        if(config.input_motor_one)
+        {
+            roboteq::Motor* motor = _motor.at(0);
+            motor->registerSensor(this);
+            ROS_INFO_STREAM("Register encoder [" << mNumber << "] to: " << motor->getName());
+        }
+        if(config.input_motor_two)
+        {
+            roboteq::Motor* motor = _motor.at(1);
+            motor->registerSensor(this);
+            ROS_INFO_STREAM("Register encoder [" << mNumber << "] to: " << motor->getName());
+        }
     }
     // Set Encoder PPR
     if(_last_encoder_config.PPR != config.PPR)

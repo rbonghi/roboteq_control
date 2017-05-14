@@ -37,6 +37,8 @@
 #include <dynamic_reconfigure/server.h>
 
 #include "roboteq/serial_controller.h"
+
+#include "roboteq/motor.h"
 #include "configurator/gpio_sensor.h"
 
 class GPIOEncoderConfigurator : GPIOSensor
@@ -48,7 +50,7 @@ public:
      * @param serial
      * @param number
      */
-    GPIOEncoderConfigurator(const ros::NodeHandle& nh, roboteq::serial_controller *serial, string name, unsigned int number);
+    GPIOEncoderConfigurator(const ros::NodeHandle& nh, roboteq::serial_controller *serial, std::vector<roboteq::Motor *> motor, string name, unsigned int number);
     /**
      * @brief initConfigurator Initialize all parameter and syncronize parameters between ros and roboteq board
      * @param load_from_board If true load all paramter from roboteq board
@@ -72,6 +74,8 @@ private:
     ros::NodeHandle nh_;
     /// Serial port
     roboteq::serial_controller* mSerial;
+    // List of all motors
+    std::vector<roboteq::Motor *> _motor;
 
     // reduction value
     double _reduction;

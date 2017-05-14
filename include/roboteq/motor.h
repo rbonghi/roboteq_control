@@ -107,7 +107,17 @@ public:
      * @brief stopMotor Stop the motor
      */
     void stopMotor();
-
+    /**
+     * @brief getName the name of the motor
+     * @return the string with the name of the motor
+     */
+    string getName() {
+        return mMotorName;
+    }
+    /**
+     * @brief registerSensor register the sensor
+     * @param sensor the sensor interface
+     */
     void registerSensor(GPIOSensor* sensor)
     {
         _sensor = sensor;

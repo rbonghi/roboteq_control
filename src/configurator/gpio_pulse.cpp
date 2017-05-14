@@ -32,9 +32,10 @@
 
 #define PARAM_PULSE_STRING "/pulse"
 
-GPIOPulseConfigurator::GPIOPulseConfigurator(const ros::NodeHandle &nh, roboteq::serial_controller *serial, string name, unsigned int number)
+GPIOPulseConfigurator::GPIOPulseConfigurator(const ros::NodeHandle &nh, roboteq::serial_controller *serial, std::vector<roboteq::Motor *> motor, string name, unsigned int number)
     : nh_(nh)
     , mSerial(serial)
+    ,_motor(motor)
 {
     // Find path param
     mName = nh_.getNamespace() + name + PARAM_PULSE_STRING + "/" + std::to_string(number);
@@ -80,6 +81,19 @@ void GPIOPulseConfigurator::getParamFromRoboteq()
         int motors = (emod - command) >> 4;
         int tmp1 = ((motors & 0b1) > 0);
         int tmp2 = ((motors & 0b10) > 0);
+        if(tmp1)
+        {
+            roboteq::Motor* motor = _motor.at(0);
+            motor->registerSensor(this);
+            ROS_INFO_STREAM("Register pulse input [" << mNumber << "] to: " << motor->getName());
+        }
+        if(tmp2)
+        {
+            roboteq::Motor* motor = _motor.at(1);
+            motor->registerSensor(this);
+            ROS_INFO_STREAM("Register pulse input [" << mNumber << "] to: " << motor->getName());
+        }
+
         // Set parameter
         nh_.setParam(mName + "/input_use", command);
         nh_.setParam(mName + "/input_motor_one", tmp1);
@@ -164,6 +178,19 @@ void GPIOPulseConfigurator::reconfigureCBParam(roboteq_control::RoboteqPulseInpu
     {
         int input = config.input_use + 16*config.input_motor_one + 32*config.input_motor_two;
         mSerial->setParam("PINA", std::to_string(mNumber) + " " + std::to_string(input));
+
+        if(config.input_motor_one)
+        {
+            roboteq::Motor* motor = _motor.at(0);
+            motor->registerSensor(this);
+            ROS_INFO_STREAM("Register pulse input [" << mNumber << "] to: " << motor->getName());
+        }
+        if(config.input_motor_two)
+        {
+            roboteq::Motor* motor = _motor.at(1);
+            motor->registerSensor(this);
+            ROS_INFO_STREAM("Register pulse input [" << mNumber << "] to: " << motor->getName());
+        }
     }
     // Set polarity PPOL [pag. 303]
     if(_last_param_config.conversion_polarity != config.conversion_polarity)

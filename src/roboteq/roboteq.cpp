@@ -95,7 +95,8 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
         }
 
         ROS_INFO_STREAM("Motor[" << number << "] name: " << motor_name);
-        mMotor[motor_name] = new Motor(private_mNh, serial, motor_name, number);
+        //mMotor[motor_name] = new Motor(private_mNh, serial, motor_name, number);
+        mMotor.push_back(new Motor(private_mNh, serial, motor_name, number));
     }
     // Update size list to stream from the roboteq board
     mSerial->command("VAR", "2 " + std::to_string(joint_list.size()));
@@ -103,15 +104,15 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     // Launch initialization input/output
     for(int i = 0; i < 6; ++i)
     {
-        _param_pulse.push_back(new GPIOPulseConfigurator(private_mNh, serial, "/InOut", i+1));
+        _param_pulse.push_back(new GPIOPulseConfigurator(private_mNh, serial, mMotor, "/InOut", i+1));
     }
     for(int i = 0; i < 6; ++i)
     {
-        _param_analog.push_back(new GPIOAnalogConfigurator(private_mNh, serial, "/InOut", i+1));
+        _param_analog.push_back(new GPIOAnalogConfigurator(private_mNh, serial, mMotor, "/InOut", i+1));
     }
     for(int i = 0; i < 2; ++i)
     {
-        _param_encoder.push_back(new GPIOEncoderConfigurator(private_mNh, serial, "/InOut", i+1));
+        _param_encoder.push_back(new GPIOEncoderConfigurator(private_mNh, serial, mMotor, "/InOut", i+1));
     }
 
     // Add subscriber stop
@@ -129,51 +130,51 @@ string Roboteq::addJoint(string name, unsigned int num)
     // Disble script
     mSerial->script(false);
 
-    std::vector<std::string> joint_list;
-    if(private_mNh.hasParam("joint"))
-    {
-        private_mNh.getParam("joint", joint_list);
-    } else
-    {
-        private_mNh.setParam("joint", joint_list);
-    }
-    // Add underscore if name is "joint"
-    string name_idx = name;
-    // add underscore only if the name is "joint"
-    if(name.compare("joint") == 0) name_idx += "_" + std::to_string(num);
-    while((std::find(joint_list.begin(), joint_list.end(), name_idx) != joint_list.end()))
-    {
-        num++;
-        name_idx = name + "_" + std::to_string(num);
-    }
-    joint_list.push_back(name_idx);
-    // Update joint list
-    private_mNh.setParam("joint", joint_list);
-    // Initialize the number
-    private_mNh.setParam(name_idx + "/number", (int)(num + 1));
-    ROS_INFO_STREAM("Motor[" << (num + 1) << "] name: " << name_idx);
-    // Initialize motor object
-    mMotor[name_idx] = new Motor(private_mNh, mSerial, name_idx, num + 1);
-    // Initialize parameters
-    mMotor[name_idx]->initializeMotor(true);
+//    std::vector<std::string> joint_list;
+//    if(private_mNh.hasParam("joint"))
+//    {
+//        private_mNh.getParam("joint", joint_list);
+//    } else
+//    {
+//        private_mNh.setParam("joint", joint_list);
+//    }
+//    // Add underscore if name is "joint"
+//    string name_idx = name;
+//    // add underscore only if the name is "joint"
+//    if(name.compare("joint") == 0) name_idx += "_" + std::to_string(num);
+//    while((std::find(joint_list.begin(), joint_list.end(), name_idx) != joint_list.end()))
+//    {
+//        num++;
+//        name_idx = name + "_" + std::to_string(num);
+//    }
+//    joint_list.push_back(name_idx);
+//    // Update joint list
+//    private_mNh.setParam("joint", joint_list);
+//    // Initialize the number
+//    private_mNh.setParam(name_idx + "/number", (int)(num + 1));
+//    ROS_INFO_STREAM("Motor[" << (num + 1) << "] name: " << name_idx);
+//    // Initialize motor object
+//    mMotor[name_idx] = new Motor(private_mNh, mSerial, name_idx, num + 1);
+//    // Initialize parameters
+//    mMotor[name_idx]->initializeMotor(true);
 
-    /// State interface
-    joint_state_interface.registerHandle(mMotor[name_idx]->joint_state_handle);
-    /// Velocity interface
-    velocity_joint_interface.registerHandle(mMotor[name_idx]->joint_handle);
-    // Setup limits
-    mMotor[name_idx]->setupLimits(model);
+//    /// State interface
+//    joint_state_interface.registerHandle(mMotor[name_idx]->joint_state_handle);
+//    /// Velocity interface
+//    velocity_joint_interface.registerHandle(mMotor[name_idx]->joint_handle);
+//    // Setup limits
+//    mMotor[name_idx]->setupLimits(model);
 
-    //Add motor in diagnostic updater
-    diagnostic_updater.add(*(mMotor[name_idx]));
+//    //Add motor in diagnostic updater
+//    diagnostic_updater.add(*(mMotor[name_idx]));
 
-    // Update
-    mSerial->command("VAR", "2 " + std::to_string(joint_list.size()));
+//    // Update
+//    mSerial->command("VAR", "2 " + std::to_string(joint_list.size()));
 
     // Enable script
     mSerial->script(true);
     // return the name of the new joint
-    return name_idx;
+    return "name_idx";
 }
 
 void Roboteq::connectionCallback(const ros::SingleSubscriberPublisher& pub) {
@@ -235,26 +236,34 @@ void Roboteq::initialize()
     ds_controller->setCallback(cb_controller);
 
     // Launch initialization GPIO
-    for(int i = 0; i < 6; ++i)
+    for (vector<GPIOPulseConfigurator*>::iterator it = _param_pulse.begin() ; it != _param_pulse.end(); ++it)
     {
-        ((GPIOPulseConfigurator*)_param_pulse.at(i))->initConfigurator(true);
+        ((GPIOPulseConfigurator*)(*it))->initConfigurator(true);
     }
-    for(int i = 0; i < 6; ++i)
+    for (vector<GPIOAnalogConfigurator*>::iterator it = _param_analog.begin() ; it != _param_analog.end(); ++it)
     {
-        ((GPIOAnalogConfigurator*)_param_analog.at(i))->initConfigurator(true);
+        ((GPIOAnalogConfigurator*)(*it))->initConfigurator(true);
     }
-    for(int i = 0; i < 2; ++i)
+    for (vector<GPIOEncoderConfigurator*>::iterator it = _param_encoder.begin() ; it != _param_encoder.end(); ++it)
     {
-        ((GPIOEncoderConfigurator*)_param_encoder.at(i))->initConfigurator(true);
+        ((GPIOEncoderConfigurator*)(*it))->initConfigurator(true);
     }
 
     // Initialize all motors in list
-    for( map<string, Motor*>::iterator ii=mMotor.begin(); ii!=mMotor.end(); ++ii)
+    for (vector<Motor*>::iterator it = mMotor.begin() ; it != mMotor.end(); ++it)
     {
+        Motor* motor = ((Motor*)(*it));
         // Launch initialization motors
-        (*ii).second->initializeMotor(_first);
-        ROS_DEBUG_STREAM("Motor [" << (*ii).first << "] Initialized");
+        motor->initializeMotor(_first);
+        ROS_DEBUG_STREAM("Motor [" << motor->getName() << "] Initialized");
     }
+
+//    for( map<string, Motor*>::iterator ii=mMotor.begin(); ii!=mMotor.end(); ++ii)
+//    {
+//        // Launch initialization motors
+//        (*ii).second->initializeMotor(_first);
+//        ROS_DEBUG_STREAM("Motor [" << (*ii).first << "] Initialized");
+//    }
     // Enable script
     mSerial->script(true);
 }
@@ -272,25 +281,46 @@ void Roboteq::initializeInterfaces()
         ROS_INFO_STREAM("/robot_description found! " << model.name_ << " parsed!");
     }
 
-    for( map<string, Motor*>::iterator ii=mMotor.begin(); ii!=mMotor.end(); ++ii)
+    for (vector<Motor*>::iterator it = mMotor.begin() ; it != mMotor.end(); ++it)
     {
+        Motor* motor = ((Motor*)(*it));
         /// State interface
-        joint_state_interface.registerHandle(((*ii).second)->joint_state_handle);
+        joint_state_interface.registerHandle(motor->joint_state_handle);
         /// Velocity interface
-        velocity_joint_interface.registerHandle(((*ii).second)->joint_handle);
+        velocity_joint_interface.registerHandle(motor->joint_handle);
 
         // Setup limits
-        ((*ii).second)->setupLimits(model);
+        motor->setupLimits(model);
 
         // reset position joint
         double position = 0;
-        ROS_DEBUG_STREAM("Motor [" << (*ii).first << "] reset position to: " << position);
-        ((*ii).second)->resetPosition(position);
+        ROS_DEBUG_STREAM("Motor [" << motor->getName() << "] reset position to: " << position);
+        motor->resetPosition(position);
 
         //Add motor in diagnostic updater
-        diagnostic_updater.add(*((*ii).second));
-        ROS_DEBUG_STREAM("Motor [" << (*ii).first << "] Registered");
+        diagnostic_updater.add(*(motor));
+        ROS_DEBUG_STREAM("Motor [" << motor->getName() << "] Registered");
     }
+
+//    for( map<string, Motor*>::iterator ii=mMotor.begin(); ii!=mMotor.end(); ++ii)
+//    {
+//        /// State interface
+//        joint_state_interface.registerHandle(((*ii).second)->joint_state_handle);
+//        /// Velocity interface
+//        velocity_joint_interface.registerHandle(((*ii).second)->joint_handle);
+
+//        // Setup limits
+//        ((*ii).second)->setupLimits(model);
+
+//        // reset position joint
+//        double position = 0;
+//        ROS_DEBUG_STREAM("Motor [" << (*ii).first << "] reset position to: " << position);
+//        ((*ii).second)->resetPosition(position);
+
+//        //Add motor in diagnostic updater
+//        diagnostic_updater.add(*((*ii).second));
+//        ROS_DEBUG_STREAM("Motor [" << (*ii).first << "] Registered");
+//    }
     ROS_DEBUG_STREAM("Send all Constraint configuration");
 
     /// Register interfaces
@@ -398,10 +428,13 @@ void Roboteq::read(const ros::Time& time, const ros::Duration& period) {
 
 void Roboteq::write(const ros::Time& time, const ros::Duration& period) {
     //ROS_DEBUG_STREAM("Write command to Roboteq");
-    for( map<string, Motor*>::iterator ii=mMotor.begin(); ii!=mMotor.end(); ++ii)
+
+    for (vector<Motor*>::iterator it = mMotor.begin() ; it != mMotor.end(); ++it)
     {
-        (*ii).second->writeCommandsToHardware(period);
-        ROS_DEBUG_STREAM("Motor [" << (*ii).first << "] Send commands");
+        Motor* motor = ((Motor*)(*it));
+        // Launch initialization motors
+        motor->writeCommandsToHardware(period);
+        ROS_DEBUG_STREAM("Motor [" << motor->getName() << "] Send commands");
     }
 }
 
@@ -421,7 +454,17 @@ void Roboteq::doSwitch(const std::list<hardware_interface::ControllerInfo>& star
         for (std::set<std::string>::const_iterator res_it = iface_res.resources.begin(); res_it != iface_res.resources.end(); ++res_it)
         {
             ROS_INFO_STREAM(it->name << "[" << *res_it << "] STOP");
-            mMotor[*res_it]->switchController("disable");
+
+            for (vector<Motor*>::iterator m_it = mMotor.begin() ; m_it != mMotor.end(); ++m_it)
+            {
+                Motor* motor = ((Motor*)(*m_it));
+                if(motor->getName().compare(*res_it) == 0)
+                {
+                    // switch initialization motors
+                    motor->switchController("disable");
+                    break;
+                }
+            }
         }
     }
     // Stop script
@@ -436,7 +479,17 @@ void Roboteq::doSwitch(const std::list<hardware_interface::ControllerInfo>& star
         for (std::set<std::string>::const_iterator res_it = iface_res.resources.begin(); res_it != iface_res.resources.end(); ++res_it)
         {
             ROS_INFO_STREAM(it->name << "[" << *res_it << "] START");
-            mMotor[*res_it]->switchController(it->type);
+
+            for (vector<Motor*>::iterator m_it = mMotor.begin() ; m_it != mMotor.end(); ++m_it)
+            {
+                Motor* motor = ((Motor*)(*m_it));
+                if(motor->getName().compare(*res_it) == 0)
+                {
+                    // switch initialization motors
+                    motor->switchController(it->type);
+                    break;
+                }
+            }
         }
     }
     // Run script
