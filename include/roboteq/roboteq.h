@@ -161,8 +161,6 @@ private:
     string _type, _model;
     string _version;
     string _uid;
-    // Script version
-    string _script_ver;
     // Status Roboteq board
     status_flag_t _flag;
     // Fault flags Roboteq board

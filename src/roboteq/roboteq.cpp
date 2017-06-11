@@ -44,8 +44,6 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     setup_controller = false;
     // Initialize GPIO reading
     _isGPIOreading = false;
-    // store the script version
-    _script_ver = mSerial->getVersionScript();
     // Load default configuration roboteq board
     getRoboteqInformation();
 
@@ -531,8 +529,6 @@ void Roboteq::run(diagnostic_updater::DiagnosticStatusWrapper &stat)
     stat.add("Version", _version);
     stat.add("UID", _uid);
 
-    stat.add("Script", _script_ver);
-
     stat.add("Temp MCU (deg)", _temp_mcu);
     stat.add("Temp Bridge (deg)", _temp_bridge);
 
@@ -769,8 +765,7 @@ bool Roboteq::service_Callback(roboteq_control::Service::Request &req, roboteq_c
         msg.information = "\nBoard type: " + _type + "\n"
                           "Name board: " + _model + "\n"
                           "Version: " + _version + "\n"
-                          "UID: " + _uid + "\n"
-                          "Script: " + _script_ver + "\n";
+                          "UID: " + _uid + "\n";
     }
     else if(req.service.compare("reset") == 0)
     {
