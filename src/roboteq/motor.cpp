@@ -68,7 +68,7 @@ Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, 
     pub_control = mNh.advertise<roboteq_control::ControlStatus>(mMotorName + "/control", 10);
 
     // Add callback
-    mSerial->addCallback(&Motor::read, this, "F" + std::to_string(mNumber));
+    // mSerial->addCallback(&Motor::read, this, "F" + std::to_string(mNumber));
 }
 
 void Motor::connectionCallback(const ros::SingleSubscriberPublisher& pub)
@@ -347,11 +347,17 @@ void Motor::writeCommandsToHardware(ros::Duration period)
 }
 
 void Motor::read(string data) {
+    std::vector<std::string> fields;
+    boost::split(fields, data, boost::algorithm::is_any_of(":"));
+    // Decode list
+    readVector(fields);
+}
+
+void Motor::readVector(std::vector<std::string> fields) {
     double ratio, max_rpm;
     // ROS_INFO_STREAM("Motor" << mNumber << " " << data);
 
-    std::vector<std::string> fields;
-    boost::split(fields, data, boost::algorithm::is_any_of(":"));
+
     // Get ratio
     mNh.getParam(mMotorName + "/ratio", ratio);
     // Get encoder max speed parameter
@@ -406,9 +412,9 @@ void Motor::read(string data) {
         // reference command TR <-> _TR [pag. 260]
         msg_status.track = boost::lexical_cast<long>(fields[9]);
 
-        // ROS_INFO_STREAM("[" << mNumber << "] track:" << msg_status.track);
-        // ROS_INFO_STREAM("[" << mNumber << "] volts:" << msg_status.volts << " - amps:" << msg_status.amps_motor);
-        // ROS_INFO_STREAM("[" << mNumber << "] status:" << status << " - pos:"<< position << " - vel:" << velocity << " - torque:");
+        //ROS_INFO_STREAM("[" << mNumber << "] track:" << msg_status.track);
+        //ROS_INFO_STREAM("[" << mNumber << "] volts:" << msg_status.volts << " - amps:" << msg_status.amps_motor);
+        //ROS_INFO_STREAM("[" << mNumber << "] status:" << status << " - pos:"<< position << " - vel:" << velocity << " - torque:");
     }
     catch (std::bad_cast& e)
     {

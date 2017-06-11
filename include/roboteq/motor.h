@@ -130,10 +130,17 @@ public:
     {
         _sensor = sensor;
     }
+    /**
+     * @brief readVector Decode vector data list
+     * @param fields field of measures
+     */
+    void readVector(std::vector<std::string> fields);
 
     hardware_interface::JointStateHandle joint_state_handle;
     hardware_interface::JointHandle joint_handle;
 
+    // Number of motor
+    unsigned int mNumber;
 protected:
   /**
    * @param x Angular velocity in radians/s.
@@ -177,8 +184,6 @@ private:
     string mMotorName;
     // Serial controller communication
     serial_controller *mSerial;
-    // Number of motor
-    unsigned int mNumber;
     // State of the motor
     double position, max_position;
     double velocity, max_velocity;

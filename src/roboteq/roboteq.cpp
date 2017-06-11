@@ -99,7 +99,7 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
         mMotor.push_back(new Motor(private_mNh, serial, motor_name, number));
     }
     // Update size list to stream from the roboteq board
-    mSerial->command("VAR", "2 " + std::to_string(joint_list.size()));
+    // mSerial->command("VAR", "2 " + std::to_string(joint_list.size()));
 
     // Launch initialization input/output
     for(int i = 0; i < 6; ++i)
@@ -121,7 +121,7 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     pub_peripheral = private_mNh.advertise<roboteq_control::Peripheral>("peripheral", 10,
                 boost::bind(&Roboteq::connectionCallback, this, _1), boost::bind(&Roboteq::connectionCallback, this, _1));
     // Add serial reader callback
-    mSerial->addCallback(&Roboteq::status, this, "S");
+    // mSerial->addCallback(&Roboteq::status, this, "S");
 
 }
 
@@ -206,7 +206,7 @@ void Roboteq::initialize()
         ROS_DEBUG_STREAM("Motor [" << motor->getName() << "] Initialized");
     }
     // Enable script
-    mSerial->script(true);
+    // mSerial->script(true);
 }
 
 void Roboteq::initializeInterfaces()
@@ -243,25 +243,6 @@ void Roboteq::initializeInterfaces()
         ROS_DEBUG_STREAM("Motor [" << motor->getName() << "] Registered");
     }
 
-//    for( map<string, Motor*>::iterator ii=mMotor.begin(); ii!=mMotor.end(); ++ii)
-//    {
-//        /// State interface
-//        joint_state_interface.registerHandle(((*ii).second)->joint_state_handle);
-//        /// Velocity interface
-//        velocity_joint_interface.registerHandle(((*ii).second)->joint_handle);
-
-//        // Setup limits
-//        ((*ii).second)->setupLimits(model);
-
-//        // reset position joint
-//        double position = 0;
-//        ROS_DEBUG_STREAM("Motor [" << (*ii).first << "] reset position to: " << position);
-//        ((*ii).second)->resetPosition(position);
-
-//        //Add motor in diagnostic updater
-//        diagnostic_updater.add(*((*ii).second));
-//        ROS_DEBUG_STREAM("Motor [" << (*ii).first << "] Registered");
-//    }
     ROS_DEBUG_STREAM("Send all Constraint configuration");
 
     /// Register interfaces
@@ -289,6 +270,89 @@ void Roboteq::updateDiagnostics()
 
 void Roboteq::read(const ros::Time& time, const ros::Duration& period) {
     //ROS_DEBUG_STREAM("Get measure from Roboteq");
+
+    std::vector<std::string> motors[mMotor.size()];
+    std::vector<std::string> fields;
+
+    // Read status motor
+    // motor status flags [pag. 246]
+    string str_status = mSerial->getQuery("FM");
+    // ROS_INFO_STREAM("FM=" << str_status);
+    boost::split(fields, str_status, boost::algorithm::is_any_of(":"));
+    for(int i = 0; i < fields.size(); ++i) {
+        motors[i].push_back(fields[i]);
+    }
+    // motor command [pag. 250]
+    string str_motor = mSerial->getQuery("M");
+    // ROS_INFO_STREAM("M =" << str_motor);
+    boost::split(fields, str_motor, boost::algorithm::is_any_of(":"));
+    for(int i = 0; i < fields.size(); ++i) {
+        motors[i].push_back(fields[i]);
+    }
+    // motor feedback [pag. 244]
+    string str_feedback = mSerial->getQuery("F");
+    //ROS_INFO_STREAM("F =" << str_feedback);
+    boost::split(fields, str_feedback, boost::algorithm::is_any_of(":"));
+    for(int i = 0; i < fields.size(); ++i) {
+        motors[i].push_back(fields[i]);
+    }
+    // motor loop error [pag. 244]
+    string str_loop_error = mSerial->getQuery("E");
+    // ROS_INFO_STREAM("E =" << str_loop_error);
+    boost::split(fields, str_loop_error, boost::algorithm::is_any_of(":"));
+    for(int i = 0; i < fields.size(); ++i) {
+        motors[i].push_back(fields[i]);
+    }
+    // motor power [pag. 255]
+    string str_motor_power = mSerial->getQuery("P");
+    // ROS_INFO_STREAM("P =" << str_motor_power);
+    boost::split(fields, str_motor_power, boost::algorithm::is_any_of(":"));
+    for(int i = 0; i < fields.size(); ++i) {
+        motors[i].push_back(fields[i]);
+    }
+    // power supply voltage [pag. 262]
+    string str_voltage_supply = mSerial->getQuery("V", "2");
+    //ROS_INFO_STREAM("V2=" << str_voltage_supply);
+    for(int i = 0; i < fields.size(); ++i) {
+        motors[i].push_back(str_voltage_supply);
+    }
+    // motor Amps [pag. 230]
+    string str_motor_amps = mSerial->getQuery("A");
+    //ROS_INFO_STREAM("A =" << str_motor_amps);
+    boost::split(fields, str_motor_amps, boost::algorithm::is_any_of(":"));
+    for(int i = 0; i < fields.size(); ++i) {
+        motors[i].push_back(fields[i]);
+    }
+    // motor battery amps [pag. 233]
+    string str_motor_battery_amps = mSerial->getQuery("BA");
+    //ROS_INFO_STREAM("BA=" << str_motor_battery_amps);
+    boost::split(fields, str_motor_battery_amps, boost::algorithm::is_any_of(":"));
+    for(int i = 0; i < fields.size(); ++i) {
+        motors[i].push_back(fields[i]);
+    }
+    // position encoder value [pag. 236]
+    string str_position_encoder_absolute = mSerial->getQuery("C");
+    //ROS_INFO_STREAM("C =" << str_position_encoder_absolute);
+    boost::split(fields, str_position_encoder_absolute, boost::algorithm::is_any_of(":"));
+    for(int i = 0; i < fields.size(); ++i) {
+        motors[i].push_back(fields[i]);
+    }
+    // motor track [pag. 260]
+    string str_motor_track = mSerial->getQuery("TR");
+    //ROS_INFO_STREAM("TR=" << str_motor_track);
+    boost::split(fields, str_motor_track, boost::algorithm::is_any_of(":"));
+    for(int i = 0; i < fields.size(); ++i) {
+        motors[i].push_back(fields[i]);
+    }
+    // send list
+    for(int i = 0; i < mMotor.size(); ++i) {
+        //get number motor initialization
+        unsigned int idx = mMotor[i]->mNumber-1;
+        // Read and decode vector
+        mMotor[i]->readVector(motors[idx]);
+    }
+
+    // Read data from GPIO
     if(_isGPIOreading)
     {
         msg_peripheral.header.stamp = ros::Time::now();
@@ -409,7 +473,7 @@ void Roboteq::doSwitch(const std::list<hardware_interface::ControllerInfo>& star
         }
     }
     // Stop script
-    mSerial->script(false);
+    // mSerial->script(false);
     // Stop motors
     mSerial->command("EX");
     // Run all new controllers
@@ -434,7 +498,7 @@ void Roboteq::doSwitch(const std::list<hardware_interface::ControllerInfo>& star
         }
     }
     // Run script
-    mSerial->script(true);
+    // mSerial->script(true);
     // Enable motor
     mSerial->command("MG");
 }
