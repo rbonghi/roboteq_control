@@ -32,10 +32,6 @@
 
 #include <regex>
 
-// Link to generated source from Microbasic script file.
-extern const char* script_lines[];
-extern const string script_ver = "3";
-
 namespace roboteq {
 
 const std::string eol("\r");
@@ -87,6 +83,7 @@ bool serial_controller::start()
     first = std::thread(&serial_controller::async_reader, this);
     ROS_DEBUG_STREAM( "Serial port ready" );
 
+    /*
     // Launch script and check version
     script(true);
     if(query("VAR", "1"))
@@ -112,6 +109,7 @@ bool serial_controller::start()
             ROS_DEBUG_STREAM("Script V" << _script_ver);
         }
     }
+    */
     return true;
 }
 
@@ -169,6 +167,7 @@ bool serial_controller::downloadScript()
         ROS_DEBUG("Writing script...");
         // Launch write script
         int line_num = 0;
+        /*
         while(script_lines[line_num]) {
             // Build string
             std::string line(script_lines[line_num]);
@@ -181,6 +180,7 @@ bool serial_controller::downloadScript()
             // Go to second line
             line_num++;
         }
+        */
         ROS_DEBUG("...complete!");
         return true;
     }

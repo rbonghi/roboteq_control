@@ -107,11 +107,6 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/roboteq_control.cpp
-# )
-
 set(roboteq_control_SRC
   src/roboteq_control.cpp
   src/roboteq/serial_controller.cpp
@@ -123,13 +118,11 @@ set(roboteq_control_SRC
   src/configurator/gpio_pulse.cpp
   src/configurator/gpio_encoder.cpp
 )
-# Include mbs script generator
-add_subdirectory(mbs)
 
 # Declare a cpp executable
 add_executable(${PROJECT_NAME}_node ${roboteq_control_SRC})
-add_dependencies(${PROJECT_NAME}_node ${PROJECT_NAME}_script ${${PROJECT_NAME}_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME}_node ${PROJECT_NAME}_script ${catkin_LIBRARIES} ${Boost_LIBRARIES})
+add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}_node ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME driver_node PREFIX "")
 
 ## Declare a cpp executable
