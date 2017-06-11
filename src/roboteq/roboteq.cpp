@@ -70,7 +70,8 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     // Disable Script and wait to load all parameters
     mSerial->script(false);
     // Stop motors
-    ROS_DEBUG_STREAM("Stop motor: " << (mSerial->command("EX") ? "true" : "false"));
+    bool stop_motor = mSerial->command("EX");
+    ROS_DEBUG_STREAM("Stop motor: " << (stop_motor ? "true" : "false"));
 
     // Initialize Joints
     for(unsigned i=0; i < joint_list.size(); ++i)
@@ -98,8 +99,6 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
         //mMotor[motor_name] = new Motor(private_mNh, serial, motor_name, number);
         mMotor.push_back(new Motor(private_mNh, serial, motor_name, number));
     }
-    // Update size list to stream from the roboteq board
-    // mSerial->command("VAR", "2 " + std::to_string(joint_list.size()));
 
     // Launch initialization input/output
     for(int i = 0; i < 6; ++i)
@@ -120,8 +119,6 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     // Initialize the peripheral publisher
     pub_peripheral = private_mNh.advertise<roboteq_control::Peripheral>("peripheral", 10,
                 boost::bind(&Roboteq::connectionCallback, this, _1), boost::bind(&Roboteq::connectionCallback, this, _1));
-    // Add serial reader callback
-    // mSerial->addCallback(&Roboteq::status, this, "S");
 
 }
 
@@ -205,8 +202,6 @@ void Roboteq::initialize()
         motor->initializeMotor(_first);
         ROS_DEBUG_STREAM("Motor [" << motor->getName() << "] Initialized");
     }
-    // Enable script
-    // mSerial->script(true);
 }
 
 void Roboteq::initializeInterfaces()
@@ -264,6 +259,36 @@ void Roboteq::initializeDiagnostic()
 void Roboteq::updateDiagnostics()
 {
     ROS_DEBUG_STREAM("Update diagnostic");
+
+    // Scale factors as outlined in the relevant portions of the user manual, please
+    // see mbs/script.mbs for URL and specific page references.
+    try
+    {
+        // Fault flag [pag. 245]
+        string fault_flag = mSerial->getQuery("FF");
+        unsigned char fault = boost::lexical_cast<unsigned int>(fault_flag);
+        memcpy(&_fault, &fault, sizeof(fault));
+        // Status flag [pag. 247]
+        string status_flag = mSerial->getQuery("FS");
+        unsigned char status = boost::lexical_cast<unsigned int>(status_flag);
+        memcpy(&_flag, &status, sizeof(status));
+        // power supply voltage
+        string supply_voltage_1 = mSerial->getQuery("V", "1");
+        _volts_internal = boost::lexical_cast<double>(supply_voltage_1) / 10;
+        string supply_voltage_3 = mSerial->getQuery("V", "3");
+        _volts_five = boost::lexical_cast<double>(supply_voltage_3) / 1000;
+        // temperature channels [pag. 259]
+        string temperature_1 = mSerial->getQuery("T", "1");
+        _temp_mcu = boost::lexical_cast<double>(temperature_1);
+        string temperature_2 = mSerial->getQuery("T", "2");
+        _temp_bridge = boost::lexical_cast<double>(temperature_2);
+    }
+    catch (std::bad_cast& e)
+    {
+      ROS_WARN("Failure parsing feedback data. Dropping message.");
+      return;
+    }
+
     // Force update all diagnostic parts
     diagnostic_updater.force_update();
 }
@@ -472,8 +497,6 @@ void Roboteq::doSwitch(const std::list<hardware_interface::ControllerInfo>& star
             }
         }
     }
-    // Stop script
-    // mSerial->script(false);
     // Stop motors
     mSerial->command("EX");
     // Run all new controllers
@@ -497,8 +520,6 @@ void Roboteq::doSwitch(const std::list<hardware_interface::ControllerInfo>& star
             }
         }
     }
-    // Run script
-    // mSerial->script(true);
     // Enable motor
     mSerial->command("MG");
 }
@@ -583,39 +604,6 @@ void Roboteq::run(diagnostic_updater::DiagnosticStatusWrapper &stat)
     if(_fault.short_circuit)
     {
         stat.mergeSummary(diagnostic_msgs::DiagnosticStatus::ERROR, "Short circuit");
-    }
-}
-
-void Roboteq::status(string data)
-{
-    // Temporary plot status
-    // ROS_INFO_STREAM("STATUS=" << data);
-
-    // Split data
-    std::vector<std::string> fields;
-    boost::split(fields, data, boost::algorithm::is_any_of(":"));
-
-    // Scale factors as outlined in the relevant portions of the user manual, please
-    // see mbs/script.mbs for URL and specific page references.
-    try
-    {
-        // Status fault flags status_fault_t
-        unsigned char fault = boost::lexical_cast<unsigned int>(fields[0]);
-        memcpy(&_fault, &fault, sizeof(fault));
-        // Status flags status_flag_t
-        unsigned char status = boost::lexical_cast<unsigned int>(fields[1]);
-        memcpy(&_flag, &status, sizeof(status));
-        // Volt controller
-        _volts_internal = boost::lexical_cast<double>(fields[2]) / 10;
-        _volts_five = boost::lexical_cast<double>(fields[3]) / 1000;
-        // Conversion temperature MCU and bridge
-        _temp_mcu = boost::lexical_cast<double>(fields[4]);
-        _temp_bridge = boost::lexical_cast<double>(fields[5]);
-    }
-    catch (std::bad_cast& e)
-    {
-      ROS_WARN("Failure parsing feedback data. Dropping message.");
-      return;
     }
 }
 

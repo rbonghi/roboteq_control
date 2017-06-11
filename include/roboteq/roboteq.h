@@ -203,12 +203,6 @@ private:
     // Default parameter config
     roboteq_control::RoboteqControllerConfig default_controller_config, _last_controller_config;
 
-
-    /**
-     * @brief status The status associated of roboteq board
-     * @param data The data to decode
-     */
-    void status(string data);
     /**
      * @brief getPIDFromRoboteq Load PID parameters from Roboteq board
      */
