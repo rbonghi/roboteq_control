@@ -20,6 +20,12 @@ env:
   matrix:
     - ROS_DISTRO="lunar" ROS_REPO=ros CATKIN_CONFIG="-DCMAKE_BUILD_TYPE=Release" DOCKER_BASE_IMAGE=ros:lunar-perception
     - ROS_DISTRO="melodic" ROS_REPO=ros CATKIN_CONFIG="-DCMAKE_BUILD_TYPE=Release" DOCKER_BASE_IMAGE=ros:melodic-perception
+# Install all dependencies, using wstool and rosdep.
+# wstool looks for a ROSINSTALL_FILE defined in the environment variables.
+before_script:
+#Add library for Hardware Interface
+  - git clone https://github.com/wjwwood/serial.git
+
 install:
   git clone https://github.com/ros-industrial/industrial_ci.git .ci_config
 script:
