@@ -24,7 +24,9 @@ env:
 # wstool looks for a ROSINSTALL_FILE defined in the environment variables.
 before_script:
 #Add library for Hardware Interface
+  - cd ..
   - git clone https://github.com/wjwwood/serial.git
+  - cd roboteq_control
 
 install:
   git clone https://github.com/ros-industrial/industrial_ci.git .ci_config
