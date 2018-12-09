@@ -80,16 +80,16 @@ private:
     std::vector<roboteq::Motor *> _motor;
 
     /// Dynamic reconfigure parameters
-    dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig> *ds_param;
+    //dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig> *ds_param;
     /**
      * @brief reconfigureCBParam when the dynamic reconfigurator change some values start this method
      * @param config variable with all configuration from dynamic reconfigurator
      * @param level
      */
-    void reconfigureCBParam(roboteq_control::RoboteqAnalogInputConfig &config, uint32_t level);
+    //void reconfigureCBParam(roboteq_control::RoboteqAnalogInputConfig &config, uint32_t level);
 
     // Default parameter config
-    roboteq_control::RoboteqAnalogInputConfig default_param_config, _last_param_config;
+    //roboteq_control::RoboteqAnalogInputConfig default_param_config, _last_param_config;
 
     /**
      * @brief getParamFromRoboteq Load parameters from Roboteq board

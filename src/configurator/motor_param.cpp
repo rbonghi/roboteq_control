@@ -58,7 +58,7 @@ void MotorParamConfigurator::initConfigurator(bool load_from_board)
         // Set Ratio
         ratio = 1.0;
         // Send alter ratio value
-        ROS_WARN_STREAM("Default Ratio is " << ratio);
+        //ROS_WARN_STREAM("Default Ratio is " << ratio);
     }
 
     // Check if is required load paramers
@@ -69,14 +69,14 @@ void MotorParamConfigurator::initConfigurator(bool load_from_board)
     }
 
     // Initialize parameter dynamic reconfigure
-    ds_param = new dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>(ros::NodeHandle(mName));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>::CallbackType cb_param = boost::bind(&MotorParamConfigurator::reconfigureCBParam, this, _1, _2);
-    ds_param->setCallback(cb_param);
+    //ds_param = new dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>(ros::NodeHandle(mName));
+    //dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>::CallbackType cb_param = boost::bind(&MotorParamConfigurator::reconfigureCBParam, this, _1, _2);
+    //ds_param->setCallback(cb_param);
 
     // Initialize pid type dynamic reconfigure
-    ds_pid_type = new dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>(ros::NodeHandle(mName + "/pid"));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>::CallbackType cb_pid_type = boost::bind(&MotorParamConfigurator::reconfigureCBPIDtype, this, _1, _2);
-    ds_pid_type->setCallback(cb_pid_type);
+    //ds_pid_type = new dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>(ros::NodeHandle(mName + "/pid"));
+    //dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>::CallbackType cb_pid_type = boost::bind(&MotorParamConfigurator::reconfigureCBPIDtype, this, _1, _2);
+    //ds_pid_type->setCallback(cb_pid_type);
 }
 
 void MotorParamConfigurator::setOperativeMode(int type)
@@ -97,7 +97,7 @@ int MotorParamConfigurator::getOperativeMode()
     return mode;
 }
 
-void MotorParamConfigurator::reconfigureCBPIDtype(roboteq_control::RoboteqPIDtypeConfig &config, uint32_t level)
+/*void MotorParamConfigurator::reconfigureCBPIDtype(roboteq_control::RoboteqPIDtypeConfig &config, uint32_t level)
 {
     //The first time we're called, we just want to make sure we have the
     //original configuration
@@ -116,7 +116,7 @@ void MotorParamConfigurator::reconfigureCBPIDtype(roboteq_control::RoboteqPIDtyp
         // Overload config with default
         config = default_pid_type_config;
     }
-}
+}*/
 
 void MotorParamConfigurator::getParamFromRoboteq()
 {
@@ -168,6 +168,7 @@ void MotorParamConfigurator::getParamFromRoboteq()
         double max_rpm = ((double) rpm_motor) / ratio;
         // Set parameter
         nh_.setParam(mName + "/max_speed", max_rpm);
+        //ROS_ERROR("MAX SPEED !! %f", max_rpm);
 
         // Get Max RPM acceleration rate
         string str_rpm_acceleration_motor = mSerial->getParam("MAC", std::to_string(mNumber));
@@ -193,7 +194,7 @@ void MotorParamConfigurator::getParamFromRoboteq()
     }
 }
 
-void MotorParamConfigurator::reconfigureCBParam(roboteq_control::RoboteqParameterConfig &config, uint32_t level) {
+/*void MotorParamConfigurator::reconfigureCBParam(roboteq_control::RoboteqParameterConfig &config, uint32_t level) {
 
     //The first time we're called, we just want to make sure we have the
     //original configuration
@@ -306,4 +307,4 @@ void MotorParamConfigurator::reconfigureCBParam(roboteq_control::RoboteqParamete
 
     // Update last configuration
     _last_param_config = config;
-}
+}*/

@@ -64,17 +64,17 @@ Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, 
     pid_position = new MotorPIDConfigurator(nh, serial, mMotorName, "position", number);
 
     // Add a status motor publisher
-    pub_status = mNh.advertise<roboteq_control::MotorStatus>(mMotorName + "/status", 10);
-    pub_control = mNh.advertise<roboteq_control::ControlStatus>(mMotorName + "/control", 10);
+    //pub_status = mNh.advertise<roboteq_control::MotorStatus>(mMotorName + "/status", 10);
+    //pub_control = mNh.advertise<roboteq_control::ControlStatus>(mMotorName + "/control", 10);
 
     // Add callback
     // mSerial->addCallback(&Motor::read, this, "F" + std::to_string(mNumber));
 }
 
-void Motor::connectionCallback(const ros::SingleSubscriberPublisher& pub)
+/*void Motor::connectionCallback(const ros::SingleSubscriberPublisher& pub)
 {
     ROS_DEBUG_STREAM("Update: " << pub.getSubscriberName() << " - " << pub.getTopic());
-}
+}*/
 
 void Motor::initializeMotor(bool load_from_board)
 {
@@ -160,12 +160,12 @@ void Motor::setupLimits(urdf::Model model)
     const bool urdf_soft_limits_ok = getSoftJointLimits(urdf_joint, soft_limits);
 
     if(urdf_limits_ok) {
-        ROS_INFO_STREAM("LOAD [" << mMotorName << "] limits from URDF: |" << limits.max_velocity << "| rad/s & |" << limits.max_effort << "| Nm");
+        //ROS_INFO_STREAM("LOAD [" << mMotorName << "] limits from URDF: |" << limits.max_velocity << "| rad/s & |" << limits.max_effort << "| Nm");
         state = false;
     }
 
     if(urdf_soft_limits_ok) {
-        ROS_INFO_STREAM("LOAD [" << mMotorName << "] soft limits from URDF: |" << limits.max_velocity << "| rad/s & |" << limits.max_effort << "| Nm");
+        //ROS_INFO_STREAM("LOAD [" << mMotorName << "] soft limits from URDF: |" << limits.max_velocity << "| rad/s & |" << limits.max_effort << "| Nm");
         state = false;
     }
 
@@ -174,17 +174,17 @@ void Motor::setupLimits(urdf::Model model)
     // Limits not specified in the parameter server preserve their existing values
     const bool rosparam_limits_ok = getJointLimits(mMotorName, mNh, limits);
     if(rosparam_limits_ok) {
-        ROS_WARN_STREAM("OVERLOAD [" << mMotorName << "] limits from ROSPARAM: |" << limits.max_velocity << "| rad/s & |" << limits.max_effort << "| Nm");
+        //ROS_WARN_STREAM("OVERLOAD [" << mMotorName << "] limits from ROSPARAM: |" << limits.max_velocity << "| rad/s & |" << limits.max_effort << "| Nm");
         state = false;
     }
     else
     {
-        ROS_DEBUG("Setup limits, PARAM NOT available");
+        //ROS_DEBUG("Setup limits, PARAM NOT available");
     }
     // If does not read any parameter from URDF or rosparm load default parameter
     if(state)
     {
-        ROS_WARN_STREAM("LOAD [" << mMotorName << "] with DEFAULT limit = |" << limits.max_velocity << "| rad/s & |" << limits.max_effort << "| Nm");
+        //ROS_WARN_STREAM("LOAD [" << mMotorName << "] with DEFAULT limit = |" << limits.max_velocity << "| rad/s & |" << limits.max_effort << "| Nm");
     }
 
     // Set maximum limits if doesn't have limit
@@ -328,6 +328,7 @@ void Motor::resetPosition(double position)
     // Send reset position
     double enc_conv = to_encoder_ticks(position);
     mSerial->command("C ", std::to_string(mNumber) + " " + std::to_string(enc_conv));
+    //mSerial->command("!C ", "2 " + std::to_string(enc_conv));
 }
 
 void Motor::writeCommandsToHardware(ros::Duration period)
@@ -341,7 +342,7 @@ void Motor::writeCommandsToHardware(ros::Duration period)
     // Build a command message
     long long int roboteq_velocity = static_cast<long long int>(to_rpm(command) / max_rpm * 1000.0);
 
-    // ROS_INFO_STREAM("Velocity" << mNumber << " val=" << command << " " << roboteq_velocity);
+    //ROS_INFO_STREAM("Velocity" << mNumber << " rad/s=" << command << "    roboteq=" << roboteq_velocity);
 
     mSerial->command("G ", std::to_string(mNumber) + " " + std::to_string(roboteq_velocity));
 }
@@ -422,9 +423,9 @@ void Motor::readVector(std::vector<std::string> fields) {
       return;
     }
     // Publish status motor
-    pub_status.publish(msg_status);
+    //pub_status.publish(msg_status);
     // Publish status control motor
-    pub_control.publish(msg_control);
+    //pub_control.publish(msg_control);
 }
 
 }

@@ -55,9 +55,9 @@ void MotorPIDConfigurator::initConfigurator(bool load_from_board)
     }
 
     // Initialize parameter dynamic reconfigure
-    ds_pid = new dynamic_reconfigure::Server<roboteq_control::RoboteqPIDConfig>(ros::NodeHandle(mName));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqPIDConfig>::CallbackType cb_pid = boost::bind(&MotorPIDConfigurator::reconfigureCBPID, this, _1, _2);
-    ds_pid->setCallback(cb_pid);
+    //ds_pid = new dynamic_reconfigure::Server<roboteq_control::RoboteqPIDConfig>(ros::NodeHandle(mName));
+    //dynamic_reconfigure::Server<roboteq_control::RoboteqPIDConfig>::CallbackType cb_pid = boost::bind(&MotorPIDConfigurator::reconfigureCBPID, this, _1, _2);
+    //ds_pid->setCallback(cb_pid);
 }
 
 void MotorPIDConfigurator::getPIDFromRoboteq()
@@ -169,7 +169,7 @@ void MotorPIDConfigurator::setPIDconfiguration()
     mSerial->setParam("CLERD", std::to_string(mNumber) + " " + std::to_string(clerd));
 }
 
-void MotorPIDConfigurator::reconfigureCBPID(roboteq_control::RoboteqPIDConfig &config, uint32_t level)
+/*void MotorPIDConfigurator::reconfigureCBPID(roboteq_control::RoboteqPIDConfig &config, uint32_t level)
 {
     //The first time we're called, we just want to make sure we have the
     //original configuration
@@ -269,3 +269,4 @@ void MotorPIDConfigurator::reconfigureCBPID(roboteq_control::RoboteqPIDConfig &c
     // Update last configuration
     _last_pid_config = config;
 }
+*/

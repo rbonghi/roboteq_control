@@ -54,9 +54,9 @@ void GPIOAnalogConfigurator::initConfigurator(bool load_from_board)
         getParamFromRoboteq();
     }
     // Initialize parameter dynamic reconfigure
-    ds_param = new dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig>(ros::NodeHandle(mName));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig>::CallbackType cb_param = boost::bind(&GPIOAnalogConfigurator::reconfigureCBParam, this, _1, _2);
-    ds_param->setCallback(cb_param);
+    //ds_param = new dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig>(ros::NodeHandle(mName));
+    //dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig>::CallbackType cb_param = boost::bind(&GPIOAnalogConfigurator::reconfigureCBParam, this, _1, _2);
+    //ds_param->setCallback(cb_param);
 }
 
 void GPIOAnalogConfigurator::getParamFromRoboteq()
@@ -149,7 +149,7 @@ void GPIOAnalogConfigurator::getParamFromRoboteq()
     }
 }
 
-void GPIOAnalogConfigurator::reconfigureCBParam(roboteq_control::RoboteqAnalogInputConfig &config, uint32_t level)
+/*void GPIOAnalogConfigurator::reconfigureCBParam(roboteq_control::RoboteqAnalogInputConfig &config, uint32_t level)
 {
     //The first time we're called, we just want to make sure we have the
     //original configuration
@@ -239,4 +239,4 @@ void GPIOAnalogConfigurator::reconfigureCBParam(roboteq_control::RoboteqAnalogIn
         // Update operative mode
         mSerial->setParam("AMAX", std::to_string(mNumber) + " " + std::to_string(range_input_center));
     }
-}
+}*/

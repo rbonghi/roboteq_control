@@ -81,15 +81,15 @@ private:
     double _reduction;
 
     /// Dynamic reconfigure encoder
-    dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig> *ds_encoder;
+    //dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig> *ds_encoder;
     /**
      * @brief reconfigureCBEncoder when the dynamic reconfigurator change some values start this method
      * @param config variable with all configuration from dynamic reconfigurator
      * @param level
      */
-    void reconfigureCBEncoder(roboteq_control::RoboteqEncoderConfig &config, uint32_t level);
+    //void reconfigureCBEncoder(roboteq_control::RoboteqEncoderConfig &config, uint32_t level);
 
-    roboteq_control::RoboteqEncoderConfig default_encoder_config, _last_encoder_config;
+    //roboteq_control::RoboteqEncoderConfig default_encoder_config, _last_encoder_config;
 
     /**
      * @brief getEncoderFromRoboteq Load Encoder parameters from Roboteq board

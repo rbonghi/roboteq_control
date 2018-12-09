@@ -67,7 +67,6 @@ void controlLoop(roboteq::Roboteq &roboteq,
                  controller_manager::ControllerManager &cm,
                  time_source::time_point &last_time)
 {
-
     // Calculate monotonic time difference
     time_source::time_point this_time = time_source::now();
     boost::chrono::duration<double> elapsed_duration = this_time - last_time;
@@ -75,7 +74,7 @@ void controlLoop(roboteq::Roboteq &roboteq,
     last_time = this_time;
 
     //ROS_INFO_STREAM("CONTROL - running");
-    // Process control loop
+    /* process control loop */
     roboteq.read(ros::Time::now(), elapsed);
     cm.update(ros::Time::now(), elapsed);
     roboteq.write(ros::Time::now(), elapsed);
@@ -100,7 +99,7 @@ int main(int argc, char **argv) {
     ROS_INFO_STREAM("------------- ROBOTEQ_NODE -------------");
     //Hardware information
     double control_frequency, diagnostic_frequency;
-    private_nh.param<double>("control_frequency", control_frequency, 1.0);
+    private_nh.param<double>("control_frequency", control_frequency, 50.0);
     private_nh.param<double>("diagnostic_frequency", diagnostic_frequency, 1.0);
     ROS_INFO_STREAM("Control:" << control_frequency << "Hz - Diagnostic:" << diagnostic_frequency << "Hz");
 

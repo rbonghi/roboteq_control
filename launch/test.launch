@@ -1,0 +1,14 @@
+
+<launch>
+
+   <node name="roboteq_control" pkg="roboteq_control" type="driver_node" output="screen"/>
+
+<rosparam file="$(find roboteq_control)/config/controllers.yaml" command="load"/>
+
+
+<node name="controller_spawner" pkg="controller_manager" type="spawner" respawn="false" output="screen" args="
+    robot_state_controller
+mobile_base_controller
+        " />
+
+</launch>

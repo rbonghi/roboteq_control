@@ -70,16 +70,16 @@ private:
     roboteq::serial_controller* mSerial;
 
     /// Dynamic reconfigure PID
-    dynamic_reconfigure::Server<roboteq_control::RoboteqPIDConfig> *ds_pid;
+    //dynamic_reconfigure::Server<roboteq_control::RoboteqPIDConfig> *ds_pid;
     /**
      * @brief reconfigureCBEncoder when the dynamic reconfigurator change some values start this method
      * @param config variable with all configuration from dynamic reconfigurator
      * @param level
      */
-    void reconfigureCBPID(roboteq_control::RoboteqPIDConfig &config, uint32_t level);
+    //void reconfigureCBPID(roboteq_control::RoboteqPIDConfig &config, uint32_t level);
 
     // Default parameter config
-    roboteq_control::RoboteqPIDConfig default_pid_config, _last_pid_config;
+    //roboteq_control::RoboteqPIDConfig default_pid_config, _last_pid_config;
 
     /**
      * @brief getPIDFromRoboteq Load PID parameters from Roboteq board

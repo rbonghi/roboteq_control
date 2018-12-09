@@ -113,7 +113,8 @@ public:
      * @brief initializeInterfaces Initialize all motors.
      * Add all Control Interface availbles and add in diagnostic task
      */
-    void initializeInterfaces();
+    void initializeInterfaces(hardware_interface::JointStateInterface &joint_state_interface,
+                              hardware_interface::VelocityJointInterface &velocity_joint_interface);
     /**
      * @brief updateDiagnostics
      */
@@ -139,18 +140,18 @@ private:
     // Diagnostic
     diagnostic_updater::Updater diagnostic_updater;
     // Publisher status periheral
-    ros::Publisher pub_peripheral;
+    //ros::Publisher pub_peripheral;
     // stop publisher
     ros::Subscriber sub_stop;
     // Service board
-    ros::ServiceServer srv_board;
+    //ros::ServiceServer srv_board;
 
     /// URDF information about robot
     urdf::Model model;
 
     /// ROS Control interfaces
-    hardware_interface::JointStateInterface joint_state_interface;
-    hardware_interface::VelocityJointInterface velocity_joint_interface;
+    //hardware_interface::JointStateInterface joint_state_interface;
+    //hardware_interface::VelocityJointInterface velocity_joint_interface;
 
     // Check if is the first run
     bool _first;
@@ -169,6 +170,9 @@ private:
     double _volts_internal, _volts_five;
     // Tempearture inside the Roboteq board
     double _temp_mcu, _temp_bridge;
+
+    bool first_read_ = true;
+    double first_read_pos_[2];
 
     // GPIO enable read
     bool _isGPIOreading;
@@ -190,16 +194,16 @@ private:
     bool setup_controller;
 
     /// Dynamic reconfigure PID
-    dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig> *ds_controller;
+    //dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig> *ds_controller;
     /**
      * @brief reconfigureCBEncoder when the dynamic reconfigurator change some values start this method
      * @param config variable with all configuration from dynamic reconfigurator
      * @param level
      */
-    void reconfigureCBController(roboteq_control::RoboteqControllerConfig &config, uint32_t level);
+    //void reconfigureCBController(roboteq_control::RoboteqControllerConfig &config, uint32_t level);
 
     // Default parameter config
-    roboteq_control::RoboteqControllerConfig default_controller_config, _last_controller_config;
+    //roboteq_control::RoboteqControllerConfig default_controller_config, _last_controller_config;
 
     /**
      * @brief getPIDFromRoboteq Load PID parameters from Roboteq board
@@ -212,12 +216,12 @@ private:
      * @param msg
      * @return
      */
-    bool service_Callback(roboteq_control::Service::Request &req, roboteq_control::Service::Response &msg_system);
+    //bool service_Callback(roboteq_control::Service::Request &req, roboteq_control::Service::Response &msg_system);
     /**
      * @brief connectionCallback Check how many subscribers are connected
      * @param pub The information about the subscriber
      */
-    void connectionCallback(const ros::SingleSubscriberPublisher& pub);
+    //void connectionCallback(const ros::SingleSubscriberPublisher& pub);
 
 };
 

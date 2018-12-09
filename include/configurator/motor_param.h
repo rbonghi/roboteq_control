@@ -85,26 +85,26 @@ private:
     roboteq::serial_controller* mSerial;
 
     /// Dynamic reconfigure parameters
-    dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig> *ds_param;
+    //dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig> *ds_param;
     /**
      * @brief reconfigureCBParam when the dynamic reconfigurator change some values start this method
      * @param config variable with all configuration from dynamic reconfigurator
      * @param level
      */
-    void reconfigureCBParam(roboteq_control::RoboteqParameterConfig &config, uint32_t level);
+    //void reconfigureCBParam(roboteq_control::RoboteqParameterConfig &config, uint32_t level);
 
     /// Dynamic reconfigure PID
-    dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig> *ds_pid_type;
+    //dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig> *ds_pid_type;
     /**
      * @brief reconfigureCBEncoder when the dynamic reconfigurator change some values start this method
      * @param config variable with all configuration from dynamic reconfigurator
      * @param level
      */
-    void reconfigureCBPIDtype(roboteq_control::RoboteqPIDtypeConfig &config, uint32_t level);
+    //void reconfigureCBPIDtype(roboteq_control::RoboteqPIDtypeConfig &config, uint32_t level);
 
     // Default parameter config
-    roboteq_control::RoboteqParameterConfig default_param_config, _last_param_config;
-    roboteq_control::RoboteqPIDtypeConfig default_pid_type_config, _last_pid_type_config;
+    //roboteq_control::RoboteqParameterConfig default_param_config, _last_param_config;
+    //roboteq_control::RoboteqPIDtypeConfig default_pid_type_config, _last_pid_type_config;
 
     /**
      * @brief getParamFromRoboteq Load parameters from Roboteq board

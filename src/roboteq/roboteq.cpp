@@ -48,7 +48,7 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     getRoboteqInformation();
 
     //Services
-    srv_board = private_mNh.advertiseService("system", &Roboteq::service_Callback, this);
+    //srv_board = private_mNh.advertiseService("system", &Roboteq::service_Callback, this);
 
     _first = false;
     std::vector<std::string> joint_list;
@@ -58,18 +58,16 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     }
     else
     {
-        ROS_WARN("No joint list!");
-        joint_list.push_back("joint_0");
-        joint_list.push_back("joint_1");
+        //ROS_WARN("No joint list!");
+        joint_list.push_back("right_wheel_joint");
+        joint_list.push_back("left_wheel_joint");
         private_nh.setParam("joint", joint_list);
     }
     // Disable ECHO
     mSerial->echo(false);
     // Disable Script and wait to load all parameters
     mSerial->script(false);
-    // Stop motors
-    bool stop_motor = mSerial->command("EX");
-    ROS_DEBUG_STREAM("Stop motor: " << (stop_motor ? "true" : "false"));
+
 
     // Initialize Joints
     for(unsigned i=0; i < joint_list.size(); ++i)
@@ -77,11 +75,11 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
         string motor_name = joint_list.at(i);
         int number = i + 1;
 
-        if(!private_nh.hasParam(motor_name))
-        {
+        //if(!private_nh.hasParam(motor_name))
+        //{
             _first = true;
-            ROS_WARN_STREAM("Load " << motor_name << " parameters from Roboteq board");
-        }
+            //ROS_WARN_STREAM("Load " << motor_name << " parameters from Roboteq board");
+        //}
 
         if(private_nh.hasParam(motor_name + "/number"))
         {
@@ -89,7 +87,7 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
         }
         else
         {
-            ROS_WARN_STREAM("Default number selected for Motor: " << motor_name << " is " << number);
+            //ROS_WARN_STREAM("Default number selected for Motor: " << motor_name << " is " << number);
             private_nh.setParam(motor_name + "/number", number);
         }
 
@@ -115,17 +113,17 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     // Add subscriber stop
     sub_stop = private_mNh.subscribe("emergency_stop", 1, &Roboteq::stop_Callback, this);
     // Initialize the peripheral publisher
-    pub_peripheral = private_mNh.advertise<roboteq_control::Peripheral>("peripheral", 10,
-                boost::bind(&Roboteq::connectionCallback, this, _1), boost::bind(&Roboteq::connectionCallback, this, _1));
+    //pub_peripheral = private_mNh.advertise<roboteq_control::Peripheral>("peripheral", 10,
+    //            boost::bind(&Roboteq::connectionCallback, this, _1), boost::bind(&Roboteq::connectionCallback, this, _1));
 
 }
 
-void Roboteq::connectionCallback(const ros::SingleSubscriberPublisher& pub) {
+/*void Roboteq::connectionCallback(const ros::SingleSubscriberPublisher& pub) {
     // Information about the subscriber
-    ROS_INFO_STREAM("Update: " << pub.getSubscriberName() << " - " << pub.getTopic());
+    //ROS_INFO_STREAM("Update: " << pub.getSubscriberName() << " - " << pub.getTopic());
     // Check if some subscriber is connected with peripheral publisher
-    _isGPIOreading = (pub_peripheral.getNumSubscribers() >= 1);
-}
+    //_isGPIOreading = (pub_peripheral.getNumSubscribers() >= 1);
+}*/
 
 void Roboteq::stop_Callback(const std_msgs::Bool::ConstPtr& msg)
 {
@@ -134,12 +132,12 @@ void Roboteq::stop_Callback(const std_msgs::Bool::ConstPtr& msg)
     {
         // Send emergency stop
         mSerial->command("EX");
-        ROS_WARN_STREAM("Emergency stop");
+        ROS_WARN_STREAM("[roboteq_interface]: Emergency stop");
     } else
     {
         // Safety release
         mSerial->command("MG");
-        ROS_WARN_STREAM("Safety release");
+        ROS_WARN_STREAM("roboteq_interface]: Safety release");
     }
 
 }
@@ -162,6 +160,11 @@ void Roboteq::getRoboteqInformation()
 Roboteq::~Roboteq()
 {
     // ROS_INFO_STREAM("Script: " << script(false));
+    puts("Stopping motors");
+    mSerial->command("G 1 0");
+    mSerial->command("G 2 0");
+    mSerial->command("MS 1");
+    mSerial->command("MS 2");
 }
 
 void Roboteq::initialize()
@@ -174,9 +177,9 @@ void Roboteq::initialize()
     }
 
     // Initialize parameter dynamic reconfigure
-    ds_controller = new dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>(private_mNh);
-    dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>::CallbackType cb_controller = boost::bind(&Roboteq::reconfigureCBController, this, _1, _2);
-    ds_controller->setCallback(cb_controller);
+    //ds_controller = new dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>(private_mNh);
+    //dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>::CallbackType cb_controller = boost::bind(&Roboteq::reconfigureCBController, this, _1, _2);
+    //ds_controller->setCallback(cb_controller);
 
     // Launch initialization GPIO
     for (vector<GPIOPulseConfigurator*>::iterator it = _param_pulse.begin() ; it != _param_pulse.end(); ++it)
@@ -202,17 +205,18 @@ void Roboteq::initialize()
     }
 }
 
-void Roboteq::initializeInterfaces()
+void Roboteq::initializeInterfaces(hardware_interface::JointStateInterface &joint_state_interface,
+                                   hardware_interface::VelocityJointInterface &velocity_joint_interface)
 {
     // Initialize the diagnostic from the primitive object
     initializeDiagnostic();
 
     if (!model.initParam("/robot_description")){
-        ROS_ERROR("Failed to parse urdf file");
+        //ROS_ERROR("Failed to parse urdf file");
     }
     else
     {
-        ROS_INFO_STREAM("/robot_description found! " << model.name_ << " parsed!");
+        //ROS_INFO_STREAM("/robot_description found! " << model.name_ << " parsed!");
     }
 
     for (vector<Motor*>::iterator it = mMotor.begin() ; it != mMotor.end(); ++it)
@@ -227,26 +231,34 @@ void Roboteq::initializeInterfaces()
         motor->setupLimits(model);
 
         // reset position joint
-        double position = 0;
-        ROS_DEBUG_STREAM("Motor [" << motor->getName() << "] reset position to: " << position);
-        motor->resetPosition(position);
+        //double position = 0;
+        //ROS_DEBUG_STREAM("Motor [" << motor->getName() << "] reset position to: " << position);
+        //motor->resetPosition(position);
+
+        // Stop motors
+        /*ROS_ERROR("HERE");
+        bool stop_motor = mSerial->command("EX"); //set emergency
+        mSerial->command("!C 1 0"); //reset counters
+        mSerial->command("!C 2 0"); //reset counters
+        mSerial->command("MG"); //release emergency*/
+
+        //ROS_DEBUG_STREAM("Stop motor: " << (stop_motor ? "true" : "false"));
 
         //Add motor in diagnostic updater
         diagnostic_updater.add(*(motor));
-        ROS_DEBUG_STREAM("Motor [" << motor->getName() << "] Registered");
+        //ROS_DEBUG_STREAM("Motor [" << motor->getName() << "] Registered");
     }
 
-    ROS_DEBUG_STREAM("Send all Constraint configuration");
+    //ROS_DEBUG_STREAM("Send all Constraint configuration");
 
     /// Register interfaces
-    registerInterface(&joint_state_interface);
-    registerInterface(&velocity_joint_interface);
+    //registerInterface(&joint_state_interface);
+    //registerInterface(&velocity_joint_interface);
 }
 
 void Roboteq::initializeDiagnostic()
 {
-    ROS_INFO_STREAM("Roboteq " << _type << ":" << _model);
-    ROS_INFO_STREAM(_version);
+    ROS_INFO_STREAM("Roboteq " << _type << ":" << _model << "version: " << _version);
 
     diagnostic_updater.setHardwareID(_model);
 
@@ -256,7 +268,7 @@ void Roboteq::initializeDiagnostic()
 
 void Roboteq::updateDiagnostics()
 {
-    ROS_DEBUG_STREAM("Update diagnostic");
+   // ROS_DEBUG_STREAM("Update diagnostic");
 
     // Scale factors as outlined in the relevant portions of the user manual, please
     // see mbs/script.mbs for URL and specific page references.
@@ -367,13 +379,22 @@ void Roboteq::read(const ros::Time& time, const ros::Duration& period) {
     for(int i = 0; i < fields.size(); ++i) {
         motors[i].push_back(fields[i]);
     }
+
+
     // send list
     for(int i = 0; i < mMotor.size(); ++i) {
         //get number motor initialization
         unsigned int idx = mMotor[i]->mNumber-1;
         // Read and decode vector
         mMotor[i]->readVector(motors[idx]);
+
+        if (first_read_)
+            first_read_pos_[i] = mMotor[i]->position;
+
+        mMotor[i]->position = mMotor[i]->position - first_read_pos_[i];
     }
+    if (first_read_)
+        first_read_ = false;
 
     // Read data from GPIO
     if(_isGPIOreading)
@@ -450,7 +471,7 @@ void Roboteq::read(const ros::Time& time, const ros::Duration& period) {
         }
 
         // Send GPIO status
-        pub_peripheral.publish(msg_peripheral);
+        //pub_peripheral.publish(msg_peripheral);
     }
 }
 
@@ -462,13 +483,13 @@ void Roboteq::write(const ros::Time& time, const ros::Duration& period) {
         Motor* motor = ((Motor*)(*it));
         // Launch initialization motors
         motor->writeCommandsToHardware(period);
-        ROS_DEBUG_STREAM("Motor [" << motor->getName() << "] Send commands");
+        //ROS_DEBUG_STREAM("Motor [" << motor->getName() << "] Send commands");
     }
 }
 
 bool Roboteq::prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list, const std::list<hardware_interface::ControllerInfo>& stop_list)
 {
-    ROS_INFO_STREAM("Prepare to switch!");
+    //ROS_INFO_STREAM("Prepare to switch!");
     return true;
 }
 
@@ -481,7 +502,7 @@ void Roboteq::doSwitch(const std::list<hardware_interface::ControllerInfo>& star
         const hardware_interface::InterfaceResources& iface_res = it->claimed_resources.front();
         for (std::set<std::string>::const_iterator res_it = iface_res.resources.begin(); res_it != iface_res.resources.end(); ++res_it)
         {
-            ROS_INFO_STREAM(it->name << "[" << *res_it << "] STOP");
+            //ROS_INFO_STREAM(it->name << "[" << *res_it << "] STOP");
 
             for (vector<Motor*>::iterator m_it = mMotor.begin() ; m_it != mMotor.end(); ++m_it)
             {
@@ -504,7 +525,7 @@ void Roboteq::doSwitch(const std::list<hardware_interface::ControllerInfo>& star
         const hardware_interface::InterfaceResources& iface_res = it->claimed_resources.front();
         for (std::set<std::string>::const_iterator res_it = iface_res.resources.begin(); res_it != iface_res.resources.end(); ++res_it)
         {
-            ROS_INFO_STREAM(it->name << "[" << *res_it << "] START");
+            //ROS_INFO_STREAM(it->name << "[" << *res_it << "] START");
 
             for (vector<Motor*>::iterator m_it = mMotor.begin() ; m_it != mMotor.end(); ++m_it)
             {
@@ -654,7 +675,7 @@ void Roboteq::getControllerFromRoboteq()
     }
 }
 
-void Roboteq::reconfigureCBController(roboteq_control::RoboteqControllerConfig &config, uint32_t level)
+/*void Roboteq::reconfigureCBController(roboteq_control::RoboteqControllerConfig &config, uint32_t level)
 {
     //The first time we're called, we just want to make sure we have the
     //original configuration
@@ -754,9 +775,9 @@ void Roboteq::reconfigureCBController(roboteq_control::RoboteqControllerConfig &
 
     // Update last configuration
     _last_controller_config = config;
-}
+}*/
 
-bool Roboteq::service_Callback(roboteq_control::Service::Request &req, roboteq_control::Service::Response &msg) {
+/*bool Roboteq::service_Callback(roboteq_control::Service::Request &req, roboteq_control::Service::Response &msg) {
     // Convert to lower case
     std::transform(req.service.begin(), req.service.end(), req.service.begin(), ::tolower);
     //ROS_INFO_STREAM("Name request: " << req.service);
@@ -790,6 +811,6 @@ bool Roboteq::service_Callback(roboteq_control::Service::Request &req, roboteq_c
                           "* help      - this help.";
     }
     return true;
-}
+}*/
 
 }

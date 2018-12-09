@@ -54,9 +54,9 @@ void GPIOPulseConfigurator::initConfigurator(bool load_from_board)
         getParamFromRoboteq();
     }
     // Initialize parameter dynamic reconfigure
-    ds_param = new dynamic_reconfigure::Server<roboteq_control::RoboteqPulseInputConfig>(ros::NodeHandle(mName));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqPulseInputConfig>::CallbackType cb_param = boost::bind(&GPIOPulseConfigurator::reconfigureCBParam, this, _1, _2);
-    ds_param->setCallback(cb_param);
+    //ds_param = new dynamic_reconfigure::Server<roboteq_control::RoboteqPulseInputConfig>(ros::NodeHandle(mName));
+    //dynamic_reconfigure::Server<roboteq_control::RoboteqPulseInputConfig>::CallbackType cb_param = boost::bind(&GPIOPulseConfigurator::reconfigureCBParam, this, _1, _2);
+    //ds_param->setCallback(cb_param);
 }
 
 void GPIOPulseConfigurator::getParamFromRoboteq()
@@ -149,7 +149,7 @@ void GPIOPulseConfigurator::getParamFromRoboteq()
     }
 }
 
-void GPIOPulseConfigurator::reconfigureCBParam(roboteq_control::RoboteqPulseInputConfig &config, uint32_t level)
+/*void GPIOPulseConfigurator::reconfigureCBParam(roboteq_control::RoboteqPulseInputConfig &config, uint32_t level)
 {
     //The first time we're called, we just want to make sure we have the
     //original configuration
@@ -239,4 +239,4 @@ void GPIOPulseConfigurator::reconfigureCBParam(roboteq_control::RoboteqPulseInpu
         // Update operative mode
         mSerial->setParam("PCTR", std::to_string(mNumber) + " " + std::to_string(range_input_center));
     }
-}
+}*/

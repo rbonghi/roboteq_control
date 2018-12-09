@@ -1,0 +1,958 @@
+<?xml version="1.0" encoding="utf-8"?>
+<DeviceProfile xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ControlBoardTree>
+    <Nodes>
+      <Node Text="Start-up">
+        <Nodes>
+          <Node Text="Scripting">
+            <Nodes>
+              <Node Text="Script Auto-Start" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="Analog Start-up">
+            <Nodes>
+              <Node Text="Center Command to Start" Value="1">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="Telemetry">
+            <Nodes>
+              <Node Text="Telemetry String" Value="">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+        </Nodes>
+      </Node>
+      <Node Text="Commands">
+        <Nodes>
+          <Node Text="Command Priorities">
+            <Nodes>
+              <Node Text="Priority 1" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Priority 2" Value="1">
+                <Nodes />
+              </Node>
+              <Node Text="Priority 3" Value="2">
+                <Nodes />
+              </Node>
+              <Node Text="Priority 4" Value="4">
+                <Nodes />
+              </Node>
+              <Node Text="Default Command Value">
+                <Nodes>
+                  <Node Text="Channel 1" Value="0">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Channel 2" Value="0">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="Command Adjustments">
+            <Nodes>
+              <Node Text="Linearity 1" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Linearity 2" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="Command Safety">
+            <Nodes>
+              <Node Text="RS232 Safety">
+                <Nodes>
+                  <Node Text="Watchdog (ms)" Value="1000">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+              <Node Text="Pulse Safety">
+                <Nodes>
+                  <Node Text="Keep within Min/Max" Value="0">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+              <Node Text="Analog Safety">
+                <Nodes>
+                  <Node Text="Keep within Guard Bands" Value="1">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+            </Nodes>
+          </Node>
+        </Nodes>
+      </Node>
+      <Node Text="Spektrum RC">
+        <Nodes>
+          <Node Text="Command 1">
+            <Nodes>
+              <Node Text="Joystick Select" Value="1">
+                <Nodes />
+              </Node>
+              <Node Text="Input Min" Value="175">
+                <Nodes />
+              </Node>
+              <Node Text="Input Center" Value="512">
+                <Nodes />
+              </Node>
+              <Node Text="Input Max" Value="850">
+                <Nodes />
+              </Node>
+              <Node Text="Input Deadband" Value="5">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="Command 2">
+            <Nodes>
+              <Node Text="Joystick Select" Value="2">
+                <Nodes />
+              </Node>
+              <Node Text="Input Min" Value="175">
+                <Nodes />
+              </Node>
+              <Node Text="Input Center" Value="512">
+                <Nodes />
+              </Node>
+              <Node Text="Input Max" Value="850">
+                <Nodes />
+              </Node>
+              <Node Text="Input Deadband" Value="5">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+        </Nodes>
+      </Node>
+      <Node Text="CAN">
+        <Nodes>
+          <Node Text="CAN Mode" Value="0">
+            <Nodes />
+          </Node>
+          <Node Text="Bit Rate" Value="3">
+            <Nodes />
+          </Node>
+          <Node Text="Node ID" Value="1">
+            <Nodes />
+          </Node>
+          <Node Text="Listen Node ID" Value="4">
+            <Nodes />
+          </Node>
+          <Node Text="Heartbeat (ms)" Value="0">
+            <Nodes />
+          </Node>
+          <Node Text="MiniCAN Send Rate (ms)" Value="100">
+            <Nodes />
+          </Node>
+          <Node Text="CANOpen TPDO Send Rate">
+            <Nodes>
+              <Node Text="TPDO 1 Send Rate (ms)" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="TPDO 2 Send Rate (ms)" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="TPDO 3 Send Rate (ms)" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="TPDO 4 Send Rate (ms)" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="CANOpen Transmission Type">
+            <Nodes>
+              <Node Text="TPDO 1 Transmission Type" Value="255">
+                <Nodes />
+              </Node>
+              <Node Text="TPDO 2 Transmission Type" Value="255">
+                <Nodes />
+              </Node>
+              <Node Text="TPDO 3 Transmission Type" Value="255">
+                <Nodes />
+              </Node>
+              <Node Text="TPDO 4 Transmission Type" Value="255">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="CANOpen Autostart" Value="0">
+            <Nodes />
+          </Node>
+        </Nodes>
+      </Node>
+      <Node Text="Encoders">
+        <Nodes>
+          <Node Text="Encoder 1">
+            <Nodes>
+              <Node Text="Use" Value="18">
+                <Nodes />
+              </Node>
+              <Node Text="Pulses/Rev" Value="420">
+                <Nodes />
+              </Node>
+              <Node Text="Min Limit" Value="-2000000">
+                <Nodes />
+              </Node>
+              <Node Text="Max Limit" Value="20000000">
+                <Nodes />
+              </Node>
+              <Node Text="Home Count" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action at Min" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action at Max" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="Encoder 2">
+            <Nodes>
+              <Node Text="Use" Value="34">
+                <Nodes />
+              </Node>
+              <Node Text="Pulses/Rev" Value="420">
+                <Nodes />
+              </Node>
+              <Node Text="Min Limit" Value="-2000000">
+                <Nodes />
+              </Node>
+              <Node Text="Max Limit" Value="2000000">
+                <Nodes />
+              </Node>
+              <Node Text="Home Count" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action at Min" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action at Max" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+        </Nodes>
+      </Node>
+      <Node Text="Digital Inputs">
+        <Nodes>
+          <Node Text="DIn1" Value="">
+            <Nodes>
+              <Node Text="Active Level" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="DIn2" Value="">
+            <Nodes>
+              <Node Text="Active Level" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="DIn3" Value="">
+            <Nodes>
+              <Node Text="Active Level" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="DIn4" Value="">
+            <Nodes>
+              <Node Text="Active Level" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="DIn5" Value="">
+            <Nodes>
+              <Node Text="Active Level" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="DIn6" Value="">
+            <Nodes>
+              <Node Text="Active Level" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+        </Nodes>
+      </Node>
+      <Node Text="Analog Inputs">
+        <Nodes>
+          <Node Text="AIn1" Value="">
+            <Nodes>
+              <Node Text="Conversion Type" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Use" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Range" Value="">
+                <Nodes>
+                  <Node Text="Input Min (mV)" Value="250">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Center (mV)" Value="2500">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Max (mV)" Value="4750">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+              <Node Text="Conversion Polarity" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Deadband (%)" Value="5">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Min" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Max" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="AIn2" Value="">
+            <Nodes>
+              <Node Text="Conversion Type" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Use" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Range" Value="">
+                <Nodes>
+                  <Node Text="Input Min (mV)" Value="250">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Center (mV)" Value="2500">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Max (mV)" Value="4750">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+              <Node Text="Conversion Polarity" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Deadband (%)" Value="5">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Min" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Max" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="AIn3" Value="">
+            <Nodes>
+              <Node Text="Conversion Type" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Use" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Range" Value="">
+                <Nodes>
+                  <Node Text="Input Min (mV)" Value="250">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Center (mV)" Value="2500">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Max (mV)" Value="4750">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+              <Node Text="Conversion Polarity" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Deadband (%)" Value="5">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Min" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Max" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="AIn4" Value="">
+            <Nodes>
+              <Node Text="Conversion Type" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Use" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Range" Value="">
+                <Nodes>
+                  <Node Text="Input Min (mV)" Value="250">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Center (mV)" Value="2500">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Max (mV)" Value="4750">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+              <Node Text="Conversion Polarity" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Deadband (%)" Value="5">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Min" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Max" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="AIn5" Value="">
+            <Nodes>
+              <Node Text="Conversion Type" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Use" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Range" Value="">
+                <Nodes>
+                  <Node Text="Input Min (mV)" Value="0">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Center (mV)" Value="0">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Max (mV)" Value="0">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+              <Node Text="Conversion Polarity" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Deadband (%)" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Min" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Max" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="AIn6" Value="">
+            <Nodes>
+              <Node Text="Conversion Type" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Use" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Range" Value="">
+                <Nodes>
+                  <Node Text="Input Min (mV)" Value="0">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Center (mV)" Value="0">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Max (mV)" Value="0">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+              <Node Text="Conversion Polarity" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Deadband (%)" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Min" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Max" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+        </Nodes>
+      </Node>
+      <Node Text="Pulse Inputs">
+        <Nodes>
+          <Node Text="PIn1" Value="">
+            <Nodes>
+              <Node Text="Capture Type" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Use" Value="16">
+                <Nodes />
+              </Node>
+              <Node Text="Range" Value="">
+                <Nodes>
+                  <Node Text="Input Min" Value="1000">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Center" Value="1500">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Max" Value="2000">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+              <Node Text="Capture Polarity" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Deadband (%)" Value="5">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Min" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Max" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="PIn2" Value="">
+            <Nodes>
+              <Node Text="Capture Type" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Use" Value="32">
+                <Nodes />
+              </Node>
+              <Node Text="Range" Value="">
+                <Nodes>
+                  <Node Text="Input Min" Value="1000">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Center" Value="1500">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Max" Value="2000">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+              <Node Text="Capture Polarity" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Deadband (%)" Value="5">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Min" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Max" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="PIn3" Value="">
+            <Nodes>
+              <Node Text="Capture Type" Value="1">
+                <Nodes />
+              </Node>
+              <Node Text="Input Use" Value="17">
+                <Nodes />
+              </Node>
+              <Node Text="Range" Value="">
+                <Nodes>
+                  <Node Text="Input Min" Value="1116">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Center" Value="1503">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Max" Value="1839">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+              <Node Text="Capture Polarity" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Deadband (%)" Value="5">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Min" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Max" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="PIn4" Value="">
+            <Nodes>
+              <Node Text="Capture Type" Value="1">
+                <Nodes />
+              </Node>
+              <Node Text="Input Use" Value="33">
+                <Nodes />
+              </Node>
+              <Node Text="Range" Value="">
+                <Nodes>
+                  <Node Text="Input Min" Value="1113">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Center" Value="1508">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Max" Value="1865">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+              <Node Text="Capture Polarity" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Deadband (%)" Value="5">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Min" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Max" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="PIn5" Value="">
+            <Nodes>
+              <Node Text="Capture Type" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Use" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Range" Value="">
+                <Nodes>
+                  <Node Text="Input Min" Value="1000">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Center" Value="1500">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Max" Value="2000">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+              <Node Text="Capture Polarity" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Deadband (%)" Value="5">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Min" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Max" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="PIn6" Value="">
+            <Nodes>
+              <Node Text="Capture Type" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Use" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Range" Value="">
+                <Nodes>
+                  <Node Text="Input Min" Value="0">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Center" Value="0">
+                    <Nodes />
+                  </Node>
+                  <Node Text="Input Max" Value="0">
+                    <Nodes />
+                  </Node>
+                </Nodes>
+              </Node>
+              <Node Text="Capture Polarity" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Input Deadband (%)" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Min" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Action on Max" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+        </Nodes>
+      </Node>
+      <Node Text="Digital Outputs">
+        <Nodes>
+          <Node Text="DOut1" Value="">
+            <Nodes>
+              <Node Text="Active Level" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Activate when" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="DOut2" Value="">
+            <Nodes>
+              <Node Text="Active Level" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Activate when" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+        </Nodes>
+      </Node>
+    </Nodes>
+  </ControlBoardTree>
+  <PowerBoardTree>
+    <Nodes>
+      <Node Text="General">
+        <Nodes>
+          <Node Text="PWM Frequency (kHz)" Value="160">
+            <Nodes />
+          </Node>
+          <Node Text="Voltage Limits">
+            <Nodes>
+              <Node Text="Over Voltage Limit (V)" Value="350">
+                <Nodes />
+              </Node>
+              <Node Text="Over Voltage Hysteresis (V)" Value="50">
+                <Nodes />
+              </Node>
+              <Node Text="Under Voltage Limit (V)" Value="100">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="Brake Delay (ms)" Value="250">
+            <Nodes />
+          </Node>
+          <Node Text="Mixing" Value="0">
+            <Nodes />
+          </Node>
+        </Nodes>
+      </Node>
+      <Node Text="Motor1 Output">
+        <Nodes>
+          <Node Text="Motor Configuration">
+            <Nodes>
+              <Node Text="Motor Direction" Value="1">
+                <Nodes />
+              </Node>
+              <Node Text="Stall Detection" Value="3">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="Amps Limits">
+            <Nodes>
+              <Node Text="Amps Limit (A)" Value="200">
+                <Nodes />
+              </Node>
+              <Node Text="Amps Trigger (A)" Value="200">
+                <Nodes />
+              </Node>
+              <Node Text="Amps Trigger Delay (ms)" Value="500">
+                <Nodes />
+              </Node>
+              <Node Text="Amps Trigger Action" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="Power Adjust">
+            <Nodes>
+              <Node Text="Max Power Fwd (%)" Value="100">
+                <Nodes />
+              </Node>
+              <Node Text="Max Power Rev (%)" Value="100">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="Speed &amp;amp; Acceleration">
+            <Nodes>
+              <Node Text="Max Speed (RPM)" Value="78">
+                <Nodes />
+              </Node>
+              <Node Text="Acceleration (RPM/s)" Value="1800">
+                <Nodes />
+              </Node>
+              <Node Text="Decceleration (RPM/s)" Value="3200">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="Operating Mode" Value="1">
+            <Nodes />
+          </Node>
+          <Node Text="Closed Loop Parameters">
+            <Nodes>
+              <Node Text="Position Mode Velocity (RPM)" Value="78">
+                <Nodes />
+              </Node>
+              <Node Text="Turns Min to Max" Value="100">
+                <Nodes />
+              </Node>
+              <Node Text="Proportional Gain" Value="200">
+                <Nodes />
+              </Node>
+              <Node Text="Integral Gain" Value="80">
+                <Nodes />
+              </Node>
+              <Node Text="Differential Gain" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Integrator Limit (%)" Value="100">
+                <Nodes />
+              </Node>
+              <Node Text="Loop Error Detection" Value="3">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+        </Nodes>
+      </Node>
+      <Node Text="Motor2 Output">
+        <Nodes>
+          <Node Text="Motor Configuration">
+            <Nodes>
+              <Node Text="Motor Direction" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Stall Detection" Value="3">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="Amps Limits">
+            <Nodes>
+              <Node Text="Amps Limit (A)" Value="200">
+                <Nodes />
+              </Node>
+              <Node Text="Amps Trigger (A)" Value="200">
+                <Nodes />
+              </Node>
+              <Node Text="Amps Trigger Delay (ms)" Value="500">
+                <Nodes />
+              </Node>
+              <Node Text="Amps Trigger Action" Value="0">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="Power Adjust">
+            <Nodes>
+              <Node Text="Max Power Fwd (%)" Value="100">
+                <Nodes />
+              </Node>
+              <Node Text="Max Power Rev (%)" Value="100">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="Speed &amp;amp; Acceleration">
+            <Nodes>
+              <Node Text="Max Speed (RPM)" Value="78">
+                <Nodes />
+              </Node>
+              <Node Text="Acceleration (RPM/s)" Value="1800">
+                <Nodes />
+              </Node>
+              <Node Text="Decceleration (RPM/s)" Value="3200">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+          <Node Text="Operating Mode" Value="1">
+            <Nodes />
+          </Node>
+          <Node Text="Closed Loop Parameters">
+            <Nodes>
+              <Node Text="Position Mode Velocity (RPM)" Value="78">
+                <Nodes />
+              </Node>
+              <Node Text="Position Turns Min to Max" Value="238094">
+                <Nodes />
+              </Node>
+              <Node Text="Proportional Gain" Value="200">
+                <Nodes />
+              </Node>
+              <Node Text="Integral Gain" Value="80">
+                <Nodes />
+              </Node>
+              <Node Text="Differential Gain" Value="0">
+                <Nodes />
+              </Node>
+              <Node Text="Integrator Limit (%)" Value="100">
+                <Nodes />
+              </Node>
+              <Node Text="Loop Error Detection" Value="3">
+                <Nodes />
+              </Node>
+            </Nodes>
+          </Node>
+        </Nodes>
+      </Node>
+    </Nodes>
+  </PowerBoardTree>
+</DeviceProfile>

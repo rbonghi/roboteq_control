@@ -55,9 +55,9 @@ void GPIOEncoderConfigurator::initConfigurator(bool load_from_board)
     }
 
     // Initialize encoder dynamic reconfigure
-    ds_encoder = new dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>(ros::NodeHandle(mName));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>::CallbackType cb_encoder = boost::bind(&GPIOEncoderConfigurator::reconfigureCBEncoder, this, _1, _2);
-    ds_encoder->setCallback(cb_encoder);
+    //ds_encoder = new dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>(ros::NodeHandle(mName));
+    //dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>::CallbackType cb_encoder = boost::bind(&GPIOEncoderConfigurator::reconfigureCBEncoder, this, _1, _2);
+    //ds_encoder->setCallback(cb_encoder);
 
     // Get PPR Encoder parameter
     double ppr;
@@ -163,7 +163,7 @@ void GPIOEncoderConfigurator::getEncoderFromRoboteq() {
     }
 }
 
-void GPIOEncoderConfigurator::reconfigureCBEncoder(roboteq_control::RoboteqEncoderConfig &config, uint32_t level) {
+/*void GPIOEncoderConfigurator::reconfigureCBEncoder(roboteq_control::RoboteqEncoderConfig &config, uint32_t level) {
 
     //The first time we're called, we just want to make sure we have the
     //original configuration
@@ -246,4 +246,4 @@ void GPIOEncoderConfigurator::reconfigureCBEncoder(roboteq_control::RoboteqEncod
     // Update last configuration
     _last_encoder_config = config;
 
-}
+}*/

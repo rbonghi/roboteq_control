@@ -164,7 +164,7 @@ bool serial_controller::downloadScript()
 {
     if(enableDownload())
     {
-        ROS_DEBUG("Writing script...");
+        //ROS_DEBUG("Writing script...");
         // Launch write script
         int line_num = 0;
         /*
@@ -181,7 +181,7 @@ bool serial_controller::downloadScript()
             line_num++;
         }
         */
-        ROS_DEBUG("...complete!");
+        //ROS_DEBUG("...complete!");
         return true;
     }
     return false;
@@ -189,6 +189,7 @@ bool serial_controller::downloadScript()
 
 bool serial_controller::command(string msg, string params, string type)
 {
+
     // Lock the write mutex
     mWriteMutex.lock();
     // Build the string
@@ -209,7 +210,7 @@ bool serial_controller::command(string msg, string params, string type)
         cv.wait_for(lck, std::chrono::seconds(1));
         if(data)
         {
-            ROS_DEBUG_STREAM("N:" << (counter+1) << " CMD:" << msg << " DATA:" << sub_data_cmd);
+            //ROS_DEBUG_STREAM("N:" << (counter+1) << " CMD:" << msg << " DATA:" << sub_data_cmd);
             break;
         } else
         {
@@ -235,7 +236,7 @@ bool serial_controller::query(string msg, string params, string type) {
     unsigned int counter = 0;
     while (counter < 5)
     {
-        ROS_DEBUG_STREAM("N:" << (counter+1) << " TX: " << msg);
+        //ROS_DEBUG_STREAM("N:" << (counter+1) << " TX: " << msg);
         mSerial.write(msg2.c_str());
         data = false;
         // Set lock variable and wait a data to return
@@ -243,7 +244,7 @@ bool serial_controller::query(string msg, string params, string type) {
         cv.wait_for(lck, std::chrono::seconds(1));
         if(data)
         {
-            ROS_DEBUG_STREAM("N:" << (counter+1) << " CMD:" << msg << " DATA:" << sub_data);
+            //ROS_DEBUG_STREAM("N:" << (counter+1) << " CMD:" << msg << " DATA:" << sub_data);
             break;
         } else
         {
@@ -262,13 +263,13 @@ void serial_controller::async_reader()
 {
     while (!mStopping) {
         // Read how many byte waiting to read
-        ROS_DEBUG_STREAM_NAMED("serial", "Bytes waiting: " << mSerial.available());
+        //ROS_DEBUG_STREAM_NAMED("serial", "Bytes waiting: " << mSerial.available());
         // Read line
         std::string msg = mSerial.readline(max_line_length, eol);
         // Decode message
         if (!msg.empty())
         {
-          ROS_DEBUG_STREAM_NAMED("serial", "RX: " << msg);
+          //ROS_DEBUG_STREAM_NAMED("serial", "RX: " << msg);
           if (std::regex_match(msg, rgx_cmd))
           {
               // Decode if command return true
@@ -315,11 +316,11 @@ void serial_controller::async_reader()
           }
           else
           {
-              ROS_INFO_STREAM("Other message " << msg);
+              //ROS_INFO_STREAM("Other message " << msg);
           }
         }
     }
-    ROS_INFO("Async serial reader closed");
+    //ROS_INFO("Async serial reader closed");
 }
 
 }
