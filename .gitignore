@@ -1,5 +1,6 @@
-
-*.txt.user
-*.autosave
-build-*-Desktop-Default/
-*-build/
+*~
+*.pyc
+*CMakeLists.txt.user
+cmake-build-debug/
+build/
+.idea/
