@@ -31,7 +31,6 @@ find_package(catkin REQUIRED
                     sensor_msgs
                     std_srvs
                     std_msgs
-                    dynamic_reconfigure
                     joint_limits_interface
                     genmsg
                     urdf
@@ -43,10 +42,6 @@ find_package(Boost REQUIRED
                     system
                     thread
 )
-
-################################################
-## Declare ROS dynamic reconfigure parameters ##
-################################################
 
 ## Generate messages in the 'msg' folder
 add_message_files(
@@ -62,17 +57,6 @@ add_service_files(
    Service.srv
 )
 
-# dynamic reconfigure
-generate_dynamic_reconfigure_options(
-    cfg/RoboteqController.cfg
-    cfg/RoboteqParameter.cfg
-    cfg/RoboteqEncoder.cfg
-    cfg/RoboteqPIDtype.cfg
-    cfg/RoboteqPID.cfg
-    cfg/RoboteqAnalogInput.cfg
-    cfg/RoboteqPulseInput.cfg
-)
-
 ## Generate added messages and services
 generate_messages(DEPENDENCIES std_msgs)
 
@@ -86,7 +70,6 @@ catkin_package(
         diagnostic_updater
         std_msgs
         std_srvs
-        dynamic_reconfigure
         hardware_interface
         roscpp
         sensor_msgs
