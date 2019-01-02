@@ -177,6 +177,8 @@ protected:
   double from_encoder_ticks(double x);
 public:
     double position;
+    double velocity;
+    double effort;
 
 private:
     //Initialization object
@@ -188,8 +190,8 @@ private:
     serial_controller *mSerial;
     // State of the motor
     double max_position;
-    double velocity, max_velocity;
-    double effort, max_effort;
+    double max_velocity;
+    double max_effort;
     double command;
 
     int _control_mode;

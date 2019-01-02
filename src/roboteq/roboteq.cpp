@@ -34,7 +34,10 @@
 namespace roboteq
 {
 
-Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, serial_controller *serial)
+Roboteq::Roboteq(const ros::NodeHandle &nh,
+        const ros::NodeHandle &private_nh,
+        serial_controller *serial,
+        const vector<std::string> & wheels_joints)
     : DiagnosticTask("Roboteq")
     , mNh(nh)
     , private_mNh(private_nh)
@@ -51,18 +54,7 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     //srv_board = private_mNh.advertiseService("system", &Roboteq::service_Callback, this);
 
     _first = false;
-    std::vector<std::string> joint_list;
-    if(private_nh.hasParam("joint"))
-    {
-        private_nh.getParam("joint", joint_list);
-    }
-    else
-    {
-        //ROS_WARN("No joint list!");
-        joint_list.push_back("right_wheel_joint");
-        joint_list.push_back("left_wheel_joint");
-        private_nh.setParam("joint", joint_list);
-    }
+
     // Disable ECHO
     mSerial->echo(false);
     // Disable Script and wait to load all parameters
@@ -70,9 +62,9 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
 
 
     // Initialize Joints
-    for(unsigned i=0; i < joint_list.size(); ++i)
+    for(unsigned i=0; i < wheels_joints.size(); ++i)
     {
-        string motor_name = joint_list.at(i);
+        string motor_name = wheels_joints.at(i);
         int number = i + 1;
 
         //if(!private_nh.hasParam(motor_name))
@@ -674,108 +666,6 @@ void Roboteq::getControllerFromRoboteq()
         ROS_WARN_STREAM("Failure parsing feedback data. Dropping message." << e.what());
     }
 }
-
-/*void Roboteq::reconfigureCBController(roboteq_control::RoboteqControllerConfig &config, uint32_t level)
-{
-    //The first time we're called, we just want to make sure we have the
-    //original configuration
-    if(!setup_controller)
-    {
-      _last_controller_config = config;
-      default_controller_config = _last_controller_config;
-      setup_controller = true;
-      return;
-    }
-
-    if(config.restore_defaults)
-    {
-        //if someone sets restore defaults on the parameter server, prevent looping
-        config.restore_defaults = false;
-        // Overload config with default
-        config = default_controller_config;
-    }
-
-    if(config.factory_reset)
-    {
-        //if someone sets restore defaults on the parameter server, prevent looping
-        config.factory_reset = false;
-        mSerial->factoryReset();
-        // Enable load from roboteq board
-        config.load_roboteq = true;
-    }
-
-    if(config.load_from_eeprom)
-    {
-        //if someone sets again the request on the parameter server, prevent looping
-        config.load_from_eeprom = false;
-        mSerial->loadFromEEPROM();
-        // Enable load from roboteq board
-        config.load_roboteq = true;
-    }
-
-    if(config.load_roboteq)
-    {
-        //if someone sets again the request on the parameter server, prevent looping
-        config.load_roboteq = false;
-        // Launch param load
-        getControllerFromRoboteq();
-        // Skip other read
-        return;
-    }
-
-    if(config.store_in_eeprom)
-    {
-        //if someone sets again the request on the parameter server, prevent looping
-        config.store_in_eeprom = false;
-        // Save all data in eeprom
-        mSerial->saveInEEPROM();
-    }
-
-    // Set PWM frequency PWMF [pag. 327]
-    if(_last_controller_config.pwm_frequency != config.pwm_frequency)
-    {
-        // Update PWM
-        int pwm = config.pwm_frequency * 10;
-        mSerial->setParam("PWMF", std::to_string(pwm));
-    }
-    // Set over voltage limit OVL [pag. 326]
-    if(_last_controller_config.over_voltage_limit != config.over_voltage_limit)
-    {
-        // Update over voltage limit
-        int ovl = config.over_voltage_limit * 10;
-        mSerial->setParam("OVL", std::to_string(ovl));
-    }
-    // Set over voltage hystersis OVH [pag. 326]
-    if(_last_controller_config.over_voltage_hysteresis != config.over_voltage_hysteresis)
-    {
-        // Update over voltage hysteresis
-        int ovh = config.over_voltage_hysteresis * 10;
-        mSerial->setParam("OVH", std::to_string(ovh));
-    }
-    // Set under voltage limit UVL [pag. 328]
-    if(_last_controller_config.under_voltage_limit != config.under_voltage_limit)
-    {
-        // Update under voltage limit
-        int uvl = config.under_voltage_limit * 10;
-        mSerial->setParam("UVL", std::to_string(uvl));
-    }
-    // Set brake activation delay BKD [pag. 309]
-    if(_last_controller_config.break_delay != config.break_delay)
-    {
-        // Update brake activation delay
-        mSerial->setParam("BKD", std::to_string(config.break_delay));
-    }
-
-    // Set Mixing mode MXMD [pag. 322]
-    if(_last_controller_config.mixing != config.mixing)
-    {
-        // Update brake activation delay
-        mSerial->setParam("MXMD", std::to_string(config.mixing) + ":0");
-    }
-
-    // Update last configuration
-    _last_controller_config = config;
-}*/
 
 /*bool Roboteq::service_Callback(roboteq_control::Service::Request &req, roboteq_control::Service::Response &msg) {
     // Convert to lower case

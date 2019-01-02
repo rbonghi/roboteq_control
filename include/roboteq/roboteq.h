@@ -42,8 +42,6 @@
 #include <diagnostic_updater/publisher.h>
 #include <hardware_interface/robot_hw.h>
 
-#include <roboteq_control/RoboteqControllerConfig.h>
-
 #include "configurator/gpio_analog.h"
 #include "configurator/gpio_pulse.h"
 #include "configurator/gpio_encoder.h"
@@ -95,7 +93,10 @@ public:
      * @param private_nh the ROS  private node handle
      * @param serial The serial controller
      */
-    Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, serial_controller *serial);
+    Roboteq(const ros::NodeHandle &nh,
+            const ros::NodeHandle &private_nh,
+            serial_controller *serial,
+            const vector<std::string> & wheels_joints);
     /**
       * @brief The deconstructor
       */
@@ -129,6 +130,8 @@ public:
     bool prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list, const std::list<hardware_interface::ControllerInfo>& stop_list);
 
     void doSwitch(const std::list<hardware_interface::ControllerInfo>& start_list, const std::list<hardware_interface::ControllerInfo>& stop_list);
+
+    void getMotors(std::vector<roboteq::Motor*> * motors) { motors = &mMotor; }
 
 private:
     //Initialization object
