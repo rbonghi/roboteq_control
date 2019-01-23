@@ -4,21 +4,6 @@ project(roboteq_control)
 ## Add support for C++11, supported in ROS Kinetic and newer
 add_definitions(-std=c++11)
 
-#########################################################
-## Options
-option( DEBUG_ACTIVE "Enable Debug build" ON )
-
-if(DEBUG_ACTIVE)
-    MESSAGE( "Debug compilation active" )
-    set(ROS_BUILD_TYPE Debug)
-    set(CMAKE_BUILD_TYPE Debug)
-else()
-    MESSAGE( "Release compilation active" )
-    set(ROS_BUILD_TYPE Release)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-#########################################################
-
 ## Find catkin macros and librariess
 find_package(catkin REQUIRED
                 COMPONENTS
