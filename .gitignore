@@ -3,3 +3,5 @@
 *.autosave
 build-*-Desktop-Default/
 *-build/
+# Visual studio code
+.vscode/

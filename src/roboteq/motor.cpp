@@ -29,7 +29,8 @@
  */
 
 #include "roboteq/motor.h"
-
+#include <boost/algorithm/algorithm.hpp>
+#include <boost/algorithm/string.hpp>
 #include <hardware_interface/joint_state_interface.h>
 #include <hardware_interface/joint_command_interface.h>
 
@@ -155,7 +156,7 @@ void Motor::setupLimits(urdf::Model model)
     // Limits specified in URDF overwrite existing values in 'limits' and 'soft_limits'
     // Limits not specified in URDF preserve their existing values
 
-    boost::shared_ptr<const urdf::Joint> urdf_joint = model.getJoint(mMotorName);
+    urdf::JointConstSharedPtr urdf_joint = model.getJoint(mMotorName);
     const bool urdf_limits_ok = getJointLimits(urdf_joint, limits);
     const bool urdf_soft_limits_ok = getSoftJointLimits(urdf_joint, soft_limits);
 

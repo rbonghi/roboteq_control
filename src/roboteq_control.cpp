@@ -37,6 +37,7 @@
 #include "roboteq/roboteq.h"
 
 #include <boost/chrono.hpp>
+#include <boost/algorithm/algorithm.hpp>
 
 using namespace std;
 

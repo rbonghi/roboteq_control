@@ -4,36 +4,18 @@ project(roboteq_control)
 ## Add support for C++11, supported in ROS Kinetic and newer
 add_definitions(-std=c++11)
 
-#########################################################
-## Options
-option( DEBUG_ACTIVE "Enable Debug build" ON )
-
-if(DEBUG_ACTIVE)
-    MESSAGE( "Debug compilation active" )
-    set(ROS_BUILD_TYPE Debug)
-    set(CMAKE_BUILD_TYPE Debug)
-else()
-    MESSAGE( "Release compilation active" )
-    set(ROS_BUILD_TYPE Release)
-    set(CMAKE_BUILD_TYPE Release)
-endif()
-#########################################################
-
 ## Find catkin macros and librariess
 find_package(catkin REQUIRED
                 COMPONENTS
-                    controller_manager
-                    hardware_interface
-                    diagnostic_updater
-                    roslaunch
-                    serial
                     roscpp
-                    sensor_msgs
-                    std_srvs
-                    std_msgs
-                    dynamic_reconfigure
-                    joint_limits_interface
                     genmsg
+                    dynamic_reconfigure
+                    serial
+                    joint_limits_interface
+                    controller_manager
+                    diagnostic_updater
+                    hardware_interface
+                    std_msgs
                     urdf
 )
 ## System dependencies are found with CMake's conventions
@@ -83,14 +65,13 @@ catkin_package(
     INCLUDE_DIRS
         include
     CATKIN_DEPENDS
-        diagnostic_updater
-        std_msgs
-        std_srvs
-        dynamic_reconfigure
-        hardware_interface
         roscpp
-        sensor_msgs
+        dynamic_reconfigure
+        serial
         joint_limits_interface
+        controller_manager
+        diagnostic_updater
+        hardware_interface
     DEPENDS
         Boost
 )

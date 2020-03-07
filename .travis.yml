@@ -1,11 +1,10 @@
-# This config file for Travis CI utilizes ros-industrial/industrial_ci package.
-# For more info for the package, see https://github.com/ros-industrial/industrial_ci/blob/master/README.rst
+# This config uses industrial_ci (https://github.com/ros-industrial/industrial_ci.git).
+# For troubleshooting, see readme (https://github.com/ros-industrial/industrial_ci/blob/master/README.rst)
 
-# Use ubuntu trusty (14.04) with sudo privileges.
-dist: trusty
-sudo: required
-language:
-  - generic
+language: generic # optional, just removes the language badge
+
+services:
+  - docker
 
 notifications:
   email:
@@ -14,12 +13,14 @@ notifications:
     on_success: change #[always|never|change] # default: change
     on_failure: always #[always|never|change] # default: always
 
-compiler:
-  - gcc
 env:
   matrix:
-    - ROS_DISTRO="kinetic" ROS_REPO=ros CATKIN_CONFIG="-DCMAKE_BUILD_TYPE=Release" DOCKER_BASE_IMAGE=ros:kinetic-perception
+    - ROS_DISTRO="melodic"
+
+# clone and run industrial_ci
 install:
-  git clone https://github.com/ros-industrial/industrial_ci.git .ci_config
+  - git clone --quiet --depth 1 https://github.com/ros-industrial/industrial_ci.git .industrial_ci
 script:
-  source .ci_config/travis.sh
+  - .industrial_ci/travis.sh
+
+  
