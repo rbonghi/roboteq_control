@@ -1,34 +1,35 @@
 <?xml version="1.0"?>
 <package format="2">
   <name>roboteq_control</name>
-  <version>0.0.2</version>
-  <description>The roboteq_control package connect all type of Roboteq boards in ROS using the ros control</description>
+  <version>1.0.0</version>
+  <description>roboteq_control is a ros control package to control your roboteq_board</description>
 
     <maintainer email="raffaello@rnext.it">Raffaello Bonghi</maintainer>
-    <license>BSD</license>
-    <url type="website">http://rnext.it/project/roboteq</url>
+    <license>MIT</license>
+
+    <url type="website">https://rnext.it/</url>
+    <url type="repository">https://github.com/rbonghi/roboteq_control</url>
     <author email="raffaello@rnext.it">Raffaello Bonghi</author>
 
     <buildtool_depend>catkin</buildtool_depend>
 
-    <depend>serial</depend>
-    <depend>controller_manager</depend>
-    <depend>diagnostic_updater</depend>
-    <depend>diagnostic_msgs</depend>
+    <build_depend>genmsg</build_depend>
+
     <depend>roscpp</depend>
+    <depend>serial</depend>
     <depend>joint_limits_interface</depend>
+    <depend>controller_manager</depend>
+    <!--<depend>diagnostic_updater</depend>
+    <depend>diagnostic_msgs</depend>
     <depend>hardware_interface</depend>
     <depend>dynamic_reconfigure</depend>
     <depend>sensor_msgs</depend>
-    <depend>std_srvs</depend>
     <depend>std_msgs</depend>
-    <depend>geometry_msgs</depend>
-
     <build_depend>urdf</build_depend>
-  
+
     <exec_depend>diagnostic_aggregator</exec_depend>
     <exec_depend>roslaunch</exec_depend>
     <exec_depend>diff_drive_controller</exec_depend>
-    <exec_depend>topic_tools</exec_depend>
+    <exec_depend>topic_tools</exec_depend>-->
 
 </package>
