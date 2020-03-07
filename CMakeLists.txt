@@ -13,10 +13,10 @@ find_package(catkin REQUIRED
                     serial
                     joint_limits_interface
                     controller_manager
-#                    hardware_interface
-#                    diagnostic_updater
-#                    std_msgs
-#                    urdf
+                    diagnostic_updater
+                    hardware_interface
+                    std_msgs
+                    urdf
 )
 ## System dependencies are found with CMake's conventions
 find_package(Boost REQUIRED
@@ -65,14 +65,13 @@ catkin_package(
     INCLUDE_DIRS
         include
     CATKIN_DEPENDS
-        diagnostic_updater
-        std_msgs
-        std_srvs
-        dynamic_reconfigure
-        hardware_interface
         roscpp
-        sensor_msgs
+        dynamic_reconfigure
+        serial
         joint_limits_interface
+        controller_manager
+        diagnostic_updater
+        hardware_interface
     DEPENDS
         Boost
 )

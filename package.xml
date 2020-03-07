@@ -16,20 +16,13 @@
     <build_depend>genmsg</build_depend>
 
     <depend>roscpp</depend>
+    <depend>std_msgs</depend>
+    <depend>diagnostic_msgs</depend>
     <depend>serial</depend>
     <depend>joint_limits_interface</depend>
     <depend>controller_manager</depend>
-    <!--<depend>diagnostic_updater</depend>
-    <depend>diagnostic_msgs</depend>
-    <depend>hardware_interface</depend>
     <depend>dynamic_reconfigure</depend>
-    <depend>sensor_msgs</depend>
-    <depend>std_msgs</depend>
-    <build_depend>urdf</build_depend>
-
-    <exec_depend>diagnostic_aggregator</exec_depend>
-    <exec_depend>roslaunch</exec_depend>
-    <exec_depend>diff_drive_controller</exec_depend>
-    <exec_depend>topic_tools</exec_depend>-->
+    <depend>diagnostic_updater</depend>
+    <depend>hardware_interface</depend>
 
 </package>
