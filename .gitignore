@@ -1,6 +1,9 @@
 
 *.txt.user
 *.autosave
+
+# Build folders
+build/
 build-*-Desktop-Default/
 *-build/
 # Visual studio code

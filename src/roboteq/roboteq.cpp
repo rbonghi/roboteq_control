@@ -208,12 +208,12 @@ void Roboteq::initializeInterfaces()
     // Initialize the diagnostic from the primitive object
     initializeDiagnostic();
 
-    if (!model.initParam("/robot_description")){
+    if (!model.initParam("robot_description")){
         ROS_ERROR("Failed to parse urdf file");
     }
     else
     {
-        ROS_INFO_STREAM("/robot_description found! " << model.name_ << " parsed!");
+        ROS_INFO_STREAM("robot_description found! " << model.name_ << " parsed!");
     }
 
     for (vector<Motor*>::iterator it = mMotor.begin() ; it != mMotor.end(); ++it)
