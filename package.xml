@@ -53,6 +53,4 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     
     <exec_depend>xacro</exec_depend>
     <exec_depend>robot_state_publisher</exec_depend>
-    <exec_depend>base_controller_spawner</exec_depend>
-
 </package>
