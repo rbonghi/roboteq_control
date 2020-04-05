@@ -28,7 +28,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <launch>
    <!-- roboteq configuration -->
    <arg name="port"        default="/dev/ttyUSB0" />
-   <arg name="rviz"        default="false" />
+   <arg name="rviz"        default="true" />
    <!-- You can setup here the example your differential drive robot
         The parameters avaible in this example are:
          - size: Robot radius

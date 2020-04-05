@@ -1,15 +1,74 @@
 roboteq control [![Build Status](https://travis-ci.org/rbonghi/roboteq_control.svg?branch=master)](https://travis-ci.org/rbonghi/roboteq_control)
 =======
 
-### WORKING PROGRESS - NOW WORKS ONLY WITH SDC2130 with two encoders
+roboteq_control is a Roboteq motor control **[ros_control][ros_control]** based.
+This package use a Roboteq device with a serial port.
 
-ROS driver for serial Roboteq motor controllers, working with **ROS Control**. This driver is suitable for use with Roboteq's
-Advanced Digital Motor Controllers, as described in [this document][1]. Devices include:
+All parameters, GPIO, Analogs port are controlled by this driver and from dynamic_reconfigure you can setup as you wish this board.
 
-Brushed DC: HDC24xx, VDC24xx, MDC22xx, LDC22xx, LDC14xx, SDC1130, SDC21xx  
-Brushless DC: HBL16xx, VBL16xx, HBL23xx, VBL23xx, LBL13xx, MBL16xx, SBL13xx  
-Sepex: VSX18xx
+Device included:
 
-The node works by downloading a MicroBasic script to the driver, which then publishes ASCII sentences at 10Hz and 50Hz with the data corresponding to the Status and per-channel Feedback messages published by the driver.
+| Brushed DC | Brushless DC | Sepex |
+| ---------- | ------------ | ----- |
+| HDC24xx, VDC24xx, MDC22xx, LDC22xx, LDC14xx, SDC1130, SDC21xx | HBL16xx, VBL16xx, HBL23xx, VBL23xx, LBL13xx, MBL16xx, SBL13xx | VSX18xx |
 
-[1]: https://www.roboteq.com/index.php/docman/motor-controllers-documents-and-files/documentation/user-manual/272-roboteq-controllers-user-manual-v17/file
+Advanced Digital Motor Controllers, as described in [this document][roboteq_manual]. 
+
+# Install
+
+Clone on your catkin workspace this repository, download all dependencies and compile!
+
+```bash
+# Make catkin workspace if does not exist and clone this repo
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws/src
+git clone https://github.com/rbonghi/roboteq_control.git
+# Install all dependecies
+cd ..
+rosdep install --from-paths src --ignore-src -r -y
+# Compile package
+catkin_make
+```
+
+Don't forget to add in your bash your catkin sources
+
+```bash
+echo "source ~/catkin_ws/devel/setup.bash" >> ~/.bashrc
+source ~/.bashrc
+```
+
+# Run
+
+```bash
+roslaunch roboteq_control roboteq.launch
+```
+
+:rocket: That's it!
+
+This launch file can load different parameters such as:
+ * port - Serial port (defaut: /dev/ttyUSB0)
+ * config - Configuration file (Example in config file)
+
+This driver include a dynamic_reconfigure topics to dynamically update all parameters of your robot
+
+![roboteq_control](https://github.com/rbonghi/roboteq_control/wiki/images/dynamic_reconfigure.png)
+
+Detailed information are available on [wiki](https://github.com/rbonghi/roboteq_control/wiki)
+
+# Example
+
+This package include a differential drive example to drive a robot.
+
+![roboteq_control](https://github.com/rbonghi/roboteq_control/wiki/images/roboteq_control.png)
+
+```bash
+roslaunch roboteq_control differential_drive.launch
+```
+
+There are different parameters than you can setup:
+ * size - default: 25cm
+ * radius - default: 8cm
+ * wheelbase - default: 0.40cm
+
+[roboteq_manual]: https://www.roboteq.com/index.php/docman/motor-controllers-documents-and-files/documentation/user-manual/272-roboteq-controllers-user-manual-v17/file
+[ros_control]: http://wiki.ros.org/ros_control
