@@ -1,4 +1,4 @@
-roboteq control [![Build Status](https://travis-ci.org/rbonghi/roboteq_control.svg?branch=master)](https://travis-ci.org/rbonghi/roboteq_control)
+:gear: roboteq control [![Build Status](https://travis-ci.org/rbonghi/roboteq_control.svg?branch=master)](https://travis-ci.org/rbonghi/roboteq_control)
 =======
 
 roboteq_control is a Roboteq motor control **[ros_control][ros_control]** based.
