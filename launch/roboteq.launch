@@ -28,9 +28,9 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <launch>
     <!-- Run ROS jetson stats with default configuration -->
     <arg name="port"        default="/dev/ttyUSB0" />
-    <arg name="config"      default="$(find roboteq_control)">
+    <arg name="config"      default="$(find roboteq_control)" />
 
-    <!-- Roboteq harware driver -->
+    <!-- Roboteq hardware driver -->
     <node pkg="roboteq_control" type="driver_node" name="roboteq" output="screen">
         <rosparam command="load" file="$(arg config)/config/roboteq.yaml" />
         <rosparam subst_value="true">

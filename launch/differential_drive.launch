@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<!--
+Copyright (C) 2020, Raffaello Bonghi <raffaello@rnext.it>
+All rights reserved
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+1. Redistributions of source code must retain the above copyright 
+   notice, this list of conditions and the following disclaimer.
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in the
+   documentation and/or other materials provided with the distribution.
+3. Neither the name of the copyright holder nor the names of its 
+   contributors may be used to endorse or promote products derived 
+   from this software without specific prior written permission.
+ 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND 
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, 
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
+FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; 
+OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, 
+WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE 
+OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, 
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+-->
+<launch>
+   <!-- roboteq configuration -->
+   <arg name="port"        default="/dev/ttyUSB0" />
+   <arg name="rviz"        default="false" />
+   <!-- You can setup here the example your differential drive robot
+        The parameters avaible in this example are:
+         - size: Robot radius
+         - radius: Radius wheels
+         - wheelbase: Distance between wheels
+    -->
+   <arg name="size"   default="0.25"/>
+   <arg name="radius"   default="0.08"/>
+   <arg name="wheelbase"   default="0.40"/>
+
+   <!-- Load differential drive robot URDF/XACRO to param server -->
+   <param name="robot_description"
+      command="$(find xacro)/xacro '$(find roboteq_control)/urdf/differential-robot.urdf.xacro'
+               size:=$(arg size)
+               radius:=$(arg radius)
+               wheelbase:=$(arg wheelbase)"
+   />
+   <!-- Activate node to propagate the joint state -->
+   <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+   <!-- Run roboteq_control with motors definition -->
+   <include file="$(find roboteq_control)/launch/roboteq.launch">
+      <arg name="port"        value="$(arg port)" />
+   </include>
+
+    <!-- Differential controller parameters -->
+    <rosparam command="load" file="$(find roboteq_control)/config/control.yaml" />
+    <!-- Launch and running al controller -->
+    <node name="base_controller_spawner" pkg="controller_manager" type="spawner" 
+            args="joint_publisher velocity_controller"/>
+
+    <group if="$(arg rviz)">
+        <node name="rviz" pkg="rviz" type="rviz"  args="-d $(find roboteq_control)/rviz/urdf.rviz" output="screen" required="true"/>
+    </group>
+
+</launch>
