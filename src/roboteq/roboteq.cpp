@@ -175,9 +175,16 @@ void Roboteq::initialize()
     }
 
     // Initialize parameter dynamic reconfigure
-    ds_controller = new dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>(private_mNh);
-    dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>::CallbackType cb_controller = boost::bind(&Roboteq::reconfigureCBController, this, _1, _2);
-    ds_controller->setCallback(cb_controller);
+    mDynRecServer = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>>(mDynServerMutex);
+    dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>::CallbackType f;
+    f = boost::bind(&Roboteq::reconfigureCBController, this, _1, _2);
+    mDynRecServer->setCallback(f);
+    // Update parameters
+    roboteq_control::RoboteqControllerConfig config;
+    mDynRecServer->getConfigDefault(config);
+    mDynServerMutex.lock();
+    mDynRecServer->updateConfig(config);
+    mDynServerMutex.unlock();
 
     // Launch initialization GPIO
     for (vector<GPIOPulseConfigurator*>::iterator it = _param_pulse.begin() ; it != _param_pulse.end(); ++it)

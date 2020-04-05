@@ -190,7 +190,9 @@ private:
     bool setup_controller;
 
     /// Dynamic reconfigure PID
-    dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig> *ds_controller;
+    // Dynamic reconfigure
+    boost::recursive_mutex mDynServerMutex; // To avoid Dynamic Reconfigure Server warning
+    boost::shared_ptr<dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>> mDynRecServer;
     /**
      * @brief reconfigureCBEncoder when the dynamic reconfigurator change some values start this method
      * @param config variable with all configuration from dynamic reconfigurator
