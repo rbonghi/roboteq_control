@@ -59,8 +59,6 @@ Detailed information are available on [wiki](https://github.com/rbonghi/roboteq_
 
 This package include a differential drive example to drive a robot.
 
-![roboteq_control](https://github.com/rbonghi/roboteq_control/wiki/images/roboteq_control.png)
-
 ```bash
 roslaunch roboteq_control differential_drive.launch
 ```
@@ -69,6 +67,19 @@ There are different parameters than you can setup:
  * size - default: 25cm
  * radius - default: 8cm
  * wheelbase - default: 0.40cm
+
+![roboteq_control](https://github.com/rbonghi/roboteq_control/wiki/images/roboteq_control.png)
+
+To control this robot are available this topics
+
+**Subscribers:**
+ * /velocity_controller/cmd_vel [geometry_msgs/Twist]
+ * /roboteq/emergency_stop [std_msgs/Bool]
+
+**Publishers:**
+ * /velocity_controller/odom [nav_msgs/Odometry]
+
+![roboteq_control](https://github.com/rbonghi/roboteq_control/wiki/images/rosgraph_simple.png)
 
 [roboteq_manual]: https://www.roboteq.com/index.php/docman/motor-controllers-documents-and-files/documentation/user-manual/272-roboteq-controllers-user-manual-v17/file
 [ros_control]: http://wiki.ros.org/ros_control
