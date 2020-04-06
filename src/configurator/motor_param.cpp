@@ -69,14 +69,29 @@ void MotorParamConfigurator::initConfigurator(bool load_from_board)
     }
 
     // Initialize parameter dynamic reconfigure
-    ds_param = new dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>(ros::NodeHandle(mName));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>::CallbackType cb_param = boost::bind(&MotorParamConfigurator::reconfigureCBParam, this, _1, _2);
-    ds_param->setCallback(cb_param);
+    mDynRecServer_param = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>>(mDynServerMutex_param);
+    dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>::CallbackType f_param;
+    f_param = boost::bind(&MotorParamConfigurator::reconfigureCBParam, this, _1, _2);
+    mDynRecServer_param->setCallback(f_param);
+    // Update parameters
+    roboteq_control::RoboteqParameterConfig config_param;
+    mDynRecServer_param->getConfigDefault(config_param);
+    mDynServerMutex_param.lock();
+    mDynRecServer_param->updateConfig(config_param);
+    mDynServerMutex_param.unlock();
+
 
     // Initialize pid type dynamic reconfigure
-    ds_pid_type = new dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>(ros::NodeHandle(mName + "/pid"));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>::CallbackType cb_pid_type = boost::bind(&MotorParamConfigurator::reconfigureCBPIDtype, this, _1, _2);
-    ds_pid_type->setCallback(cb_pid_type);
+    mDynRecServer_pid = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>>(mDynServerMutex_pid);
+    dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>::CallbackType f_pid;
+    f_pid = boost::bind(&MotorParamConfigurator::reconfigureCBPIDtype, this, _1, _2);
+    mDynRecServer_pid->setCallback(f_pid);
+    // Update parameters
+    roboteq_control::RoboteqPIDtypeConfig config_pid;
+    mDynRecServer_pid->getConfigDefault(config_pid);
+    mDynServerMutex_pid.lock();
+    mDynRecServer_pid->updateConfig(config_pid);
+    mDynServerMutex_pid.unlock();
 }
 
 void MotorParamConfigurator::setOperativeMode(int type)

@@ -53,10 +53,17 @@ void GPIOAnalogConfigurator::initConfigurator(bool load_from_board)
         // Load parameters from roboteq
         getParamFromRoboteq();
     }
-    // Initialize parameter dynamic reconfigure
-    ds_param = new dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig>(ros::NodeHandle(mName));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig>::CallbackType cb_param = boost::bind(&GPIOAnalogConfigurator::reconfigureCBParam, this, _1, _2);
-    ds_param->setCallback(cb_param);
+    // Initialize encoder dynamic reconfigure
+    mDynRecServer = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig>>(mDynServerMutex);
+    dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig>::CallbackType f;
+    f = boost::bind(&GPIOAnalogConfigurator::reconfigureCBParam, this, _1, _2);
+    mDynRecServer->setCallback(f);
+    // Update parameters
+    roboteq_control::RoboteqAnalogInputConfig config;
+    mDynRecServer->getConfigDefault(config);
+    mDynServerMutex.lock();
+    mDynRecServer->updateConfig(config);
+    mDynServerMutex.unlock();
 }
 
 void GPIOAnalogConfigurator::getParamFromRoboteq()

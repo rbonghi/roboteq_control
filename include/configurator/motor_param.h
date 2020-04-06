@@ -85,7 +85,8 @@ private:
     roboteq::serial_controller* mSerial;
 
     /// Dynamic reconfigure parameters
-    dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig> *ds_param;
+    boost::recursive_mutex mDynServerMutex_param; // To avoid Dynamic Reconfigure Server warning
+    boost::shared_ptr<dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>> mDynRecServer_param;
     /**
      * @brief reconfigureCBParam when the dynamic reconfigurator change some values start this method
      * @param config variable with all configuration from dynamic reconfigurator
@@ -94,7 +95,8 @@ private:
     void reconfigureCBParam(roboteq_control::RoboteqParameterConfig &config, uint32_t level);
 
     /// Dynamic reconfigure PID
-    dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig> *ds_pid_type;
+    boost::recursive_mutex mDynServerMutex_pid; // To avoid Dynamic Reconfigure Server warning
+    boost::shared_ptr<dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>> mDynRecServer_pid;
     /**
      * @brief reconfigureCBEncoder when the dynamic reconfigurator change some values start this method
      * @param config variable with all configuration from dynamic reconfigurator
