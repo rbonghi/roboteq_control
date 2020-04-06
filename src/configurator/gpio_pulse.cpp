@@ -54,9 +54,16 @@ void GPIOPulseConfigurator::initConfigurator(bool load_from_board)
         getParamFromRoboteq();
     }
     // Initialize parameter dynamic reconfigure
-    ds_param = new dynamic_reconfigure::Server<roboteq_control::RoboteqPulseInputConfig>(ros::NodeHandle(mName));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqPulseInputConfig>::CallbackType cb_param = boost::bind(&GPIOPulseConfigurator::reconfigureCBParam, this, _1, _2);
-    ds_param->setCallback(cb_param);
+    mDynRecServer = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqPulseInputConfig>>(mDynServerMutex, ros::NodeHandle(mName));
+    dynamic_reconfigure::Server<roboteq_control::RoboteqPulseInputConfig>::CallbackType f;
+    f = boost::bind(&GPIOPulseConfigurator::reconfigureCBParam, this, _1, _2);
+    mDynRecServer->setCallback(f);
+    // Update parameters
+    roboteq_control::RoboteqPulseInputConfig config;
+    mDynRecServer->getConfigDefault(config);
+    mDynServerMutex.lock();
+    mDynRecServer->updateConfig(config);
+    mDynServerMutex.unlock();
 }
 
 void GPIOPulseConfigurator::getParamFromRoboteq()
