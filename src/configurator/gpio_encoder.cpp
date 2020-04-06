@@ -55,7 +55,7 @@ void GPIOEncoderConfigurator::initConfigurator(bool load_from_board)
     }
 
     // Initialize encoder dynamic reconfigure
-    mDynRecServer = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>>(mDynServerMutex);
+    mDynRecServer = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>>(mDynServerMutex, ros::NodeHandle(mName));
     dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>::CallbackType f;
     f = boost::bind(&GPIOEncoderConfigurator::reconfigureCBEncoder, this, _1, _2);
     mDynRecServer->setCallback(f);

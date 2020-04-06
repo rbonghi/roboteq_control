@@ -175,7 +175,7 @@ void Roboteq::initialize()
     }
 
     // Initialize parameter dynamic reconfigure
-    mDynRecServer = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>>(mDynServerMutex);
+    mDynRecServer = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>>(mDynServerMutex, private_mNh);
     dynamic_reconfigure::Server<roboteq_control::RoboteqControllerConfig>::CallbackType f;
     f = boost::bind(&Roboteq::reconfigureCBController, this, _1, _2);
     mDynRecServer->setCallback(f);
