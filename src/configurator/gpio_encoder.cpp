@@ -56,15 +56,15 @@ void GPIOEncoderConfigurator::initConfigurator(bool load_from_board)
 
     // Initialize encoder dynamic reconfigure
     mDynRecServer = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>>(mDynServerMutex, ros::NodeHandle(mName));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqEncoderConfig>::CallbackType f;
-    f = boost::bind(&GPIOEncoderConfigurator::reconfigureCBEncoder, this, _1, _2);
-    mDynRecServer->setCallback(f);
-    // Update parameters
+    // Load default configuration
     roboteq_control::RoboteqEncoderConfig config;
     mDynRecServer->getConfigDefault(config);
+    // Update parameters
     mDynServerMutex.lock();
     mDynRecServer->updateConfig(config);
     mDynServerMutex.unlock();
+    // Set callback
+    mDynRecServer->setCallback(boost::bind(&GPIOEncoderConfigurator::reconfigureCBEncoder, this, _1, _2));
 
     // Get PPR Encoder parameter
     double ppr;

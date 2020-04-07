@@ -56,15 +56,15 @@ void MotorPIDConfigurator::initConfigurator(bool load_from_board)
 
     // Initialize parameter dynamic reconfigure
     mDynRecServer = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqPIDConfig>>(mDynServerMutex, ros::NodeHandle(mName));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqPIDConfig>::CallbackType f;
-    f = boost::bind(&MotorPIDConfigurator::reconfigureCBPID, this, _1, _2);
-    mDynRecServer->setCallback(f);
-    // Update parameters
+    // Load default configuration
     roboteq_control::RoboteqPIDConfig config;
     mDynRecServer->getConfigDefault(config);
+    // Update parameters
     mDynServerMutex.lock();
     mDynRecServer->updateConfig(config);
     mDynServerMutex.unlock();
+    // Set callback
+    mDynRecServer->setCallback(boost::bind(&MotorPIDConfigurator::reconfigureCBPID, this, _1, _2));
 }
 
 void MotorPIDConfigurator::getPIDFromRoboteq()

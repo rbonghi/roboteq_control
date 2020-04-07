@@ -70,28 +70,27 @@ void MotorParamConfigurator::initConfigurator(bool load_from_board)
 
     // Initialize parameter dynamic reconfigure
     mDynRecServer_param = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>>(mDynServerMutex_param, ros::NodeHandle(mName));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>::CallbackType f_param;
-    f_param = boost::bind(&MotorParamConfigurator::reconfigureCBParam, this, _1, _2);
-    mDynRecServer_param->setCallback(f_param);
-    // Update parameters
+    // Load default configuration
     roboteq_control::RoboteqParameterConfig config_param;
     mDynRecServer_param->getConfigDefault(config_param);
+    // Update parameters
     mDynServerMutex_param.lock();
     mDynRecServer_param->updateConfig(config_param);
     mDynServerMutex_param.unlock();
-
+    // Set callback
+    mDynRecServer_param->setCallback(boost::bind(&MotorParamConfigurator::reconfigureCBParam, this, _1, _2));
 
     // Initialize pid type dynamic reconfigure
     mDynRecServer_pid = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>>(mDynServerMutex_pid, ros::NodeHandle(mName + "/pid"));
-    dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>::CallbackType f_pid;
-    f_pid = boost::bind(&MotorParamConfigurator::reconfigureCBPIDtype, this, _1, _2);
-    mDynRecServer_pid->setCallback(f_pid);
-    // Update parameters
+    // Load default configuration
     roboteq_control::RoboteqPIDtypeConfig config_pid;
     mDynRecServer_pid->getConfigDefault(config_pid);
+    // Update parameters
     mDynServerMutex_pid.lock();
     mDynRecServer_pid->updateConfig(config_pid);
     mDynServerMutex_pid.unlock();
+    // Set callback
+    mDynRecServer_pid->setCallback(boost::bind(&MotorParamConfigurator::reconfigureCBPIDtype, this, _1, _2));
 }
 
 void MotorParamConfigurator::setOperativeMode(int type)
