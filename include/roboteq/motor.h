@@ -189,6 +189,8 @@ private:
     double velocity, max_velocity;
     double effort, max_effort;
     double command;
+    // Motor reduction
+    double _reduction;
 
     int _control_mode;
     motor_status_t _status;

@@ -56,6 +56,13 @@ Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, 
     effort = 0;
     // Initialize control mode
     _control_mode = -1;
+    // Initialize reduction and get ratio
+    _reduction = 0;
+    mNh.getParam(mMotorName + "/ratio", _reduction);
+    // ROS_INFO_STREAM("to_encoder_ticks:" << _reduction);
+    // apply the reduction convertion
+    if(_sensor != NULL)
+        _reduction = _sensor->getConversion(_reduction);
 
     // Initialize Dynamic reconfigurator for generic parameters
     parameter = new MotorParamConfigurator(nh, serial, mMotorName, number);
@@ -109,15 +116,8 @@ void Motor::initializeMotor(bool load_from_board)
  */
 double Motor::to_encoder_ticks(double x)
 {
-    double reduction = 0;
-    // Get ratio
-    mNh.getParam(mMotorName + "/ratio", reduction);
-    //ROS_INFO_STREAM("to_encoder_ticks:" << reduction);
-    // apply the reduction convertion
-    if(_sensor != NULL)
-        reduction = _sensor->getConversion(reduction);
     // Return the value converted
-    return x * (reduction) / (2 * M_PI);
+    return x * (_reduction) / (2 * M_PI);
 }
 
 /**
@@ -128,14 +128,8 @@ double Motor::to_encoder_ticks(double x)
  */
 double Motor::from_encoder_ticks(double x)
 {
-    double reduction = 0;
-    // Get ratio
-    mNh.getParam(mMotorName + "/ratio", reduction);
-    // apply the reduction convertion
-    if(_sensor != NULL)
-        reduction = _sensor->getConversion(reduction);
     // Return the value converted
-    return x * (2 * M_PI) / (reduction);
+    return x * (2 * M_PI) / (_reduction);
 }
 
 void Motor::setupLimits(urdf::Model model)
