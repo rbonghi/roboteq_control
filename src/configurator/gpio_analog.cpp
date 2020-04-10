@@ -54,7 +54,7 @@ void GPIOAnalogConfigurator::initConfigurator(bool load_from_board)
         getParamFromRoboteq();
     }
     // Initialize encoder dynamic reconfigure
-    mDynRecServer = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig>>(mDynServerMutex, ros::NodeHandle(mName));
+    mDynRecServer = std::make_shared<ReconfigureServer>(mDynServerMutex, ros::NodeHandle(mName));
     // Load default configuration
     roboteq_control::RoboteqAnalogInputConfig config;
     mDynRecServer->getConfigDefault(config);

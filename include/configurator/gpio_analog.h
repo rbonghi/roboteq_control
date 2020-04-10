@@ -80,8 +80,9 @@ private:
     std::vector<roboteq::Motor *> _motor;
 
     /// Dynamic reconfigure analog parameters
+    typedef dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig> ReconfigureServer;
+    std::shared_ptr<ReconfigureServer> mDynRecServer;
     boost::recursive_mutex mDynServerMutex; // To avoid Dynamic Reconfigure Server warning
-    boost::shared_ptr<dynamic_reconfigure::Server<roboteq_control::RoboteqAnalogInputConfig>> mDynRecServer;
     /**
      * @brief reconfigureCBParam when the dynamic reconfigurator change some values start this method
      * @param config variable with all configuration from dynamic reconfigurator

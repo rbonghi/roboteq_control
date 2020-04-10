@@ -70,8 +70,9 @@ private:
     roboteq::serial_controller* mSerial;
 
     /// Dynamic reconfigure PID
+    typedef dynamic_reconfigure::Server<roboteq_control::RoboteqPIDConfig> ReconfigureServer;
+    std::shared_ptr<ReconfigureServer> mDynRecServer;
     boost::recursive_mutex mDynServerMutex; // To avoid Dynamic Reconfigure Server warning
-    boost::shared_ptr<dynamic_reconfigure::Server<roboteq_control::RoboteqPIDConfig>> mDynRecServer;
     /**
      * @brief reconfigureCBEncoder when the dynamic reconfigurator change some values start this method
      * @param config variable with all configuration from dynamic reconfigurator

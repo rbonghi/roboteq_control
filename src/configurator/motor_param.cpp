@@ -69,7 +69,7 @@ void MotorParamConfigurator::initConfigurator(bool load_from_board)
     }
 
     // Initialize parameter dynamic reconfigure
-    mDynRecServer_param = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqParameterConfig>>(mDynServerMutex_param, ros::NodeHandle(mName));
+    mDynRecServer_param = std::make_shared<ReconfigureServerParam>(mDynServerMutex_param, ros::NodeHandle(mName));
     // Load default configuration
     roboteq_control::RoboteqParameterConfig config_param;
     mDynRecServer_param->getConfigDefault(config_param);
@@ -81,7 +81,7 @@ void MotorParamConfigurator::initConfigurator(bool load_from_board)
     mDynRecServer_param->setCallback(boost::bind(&MotorParamConfigurator::reconfigureCBParam, this, _1, _2));
 
     // Initialize pid type dynamic reconfigure
-    mDynRecServer_pid = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqPIDtypeConfig>>(mDynServerMutex_pid, ros::NodeHandle(mName + "/pid"));
+    mDynRecServer_pid = std::make_shared<ReconfigureServerPID>(mDynServerMutex_pid, ros::NodeHandle(mName + "/pid"));
     // Load default configuration
     roboteq_control::RoboteqPIDtypeConfig config_pid;
     mDynRecServer_pid->getConfigDefault(config_pid);

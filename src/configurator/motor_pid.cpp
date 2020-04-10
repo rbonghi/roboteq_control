@@ -55,7 +55,7 @@ void MotorPIDConfigurator::initConfigurator(bool load_from_board)
     }
 
     // Initialize parameter dynamic reconfigure
-    mDynRecServer = boost::make_shared<dynamic_reconfigure::Server<roboteq_control::RoboteqPIDConfig>>(mDynServerMutex, ros::NodeHandle(mName));
+    mDynRecServer = std::make_shared<ReconfigureServer>(mDynServerMutex, ros::NodeHandle(mName));
     // Load default configuration
     roboteq_control::RoboteqPIDConfig config;
     mDynRecServer->getConfigDefault(config);
