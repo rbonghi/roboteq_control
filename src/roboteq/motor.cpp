@@ -58,7 +58,6 @@ Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, 
     _control_mode = -1;
     // Initialize reduction and get ratio
     _reduction = 0;
-    mNh.getParam(mMotorName + "/ratio", _reduction);
 
     // Initialize Dynamic reconfigurator for generic parameters
     parameter = new MotorParamConfigurator(nh, serial, mMotorName, number);
@@ -112,6 +111,7 @@ void Motor::initializeMotor(bool load_from_board)
 void Motor::registerSensor(GPIOSensor* sensor)
 {
     _sensor = sensor;
+    mNh.getParam(mMotorName + "/ratio", _reduction);
     _reduction = _sensor->getConversion(_reduction);
 }
 
