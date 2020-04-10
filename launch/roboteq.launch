@@ -29,7 +29,7 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     <!-- Run ROS jetson stats with default configuration -->
     <arg name="port"        default="/dev/ttyUSB0" />
     <arg name="config"      default="$(find roboteq_control)/config/roboteq.yaml" />
-    <arg name="respawn"      default="false" />
+    <arg name="respawn"     default="false" />
 
     <!-- Roboteq hardware driver -->
     <node pkg="roboteq_control" type="driver_node" name="roboteq"
