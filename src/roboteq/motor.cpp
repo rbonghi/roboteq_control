@@ -59,10 +59,6 @@ Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, 
     // Initialize reduction and get ratio
     _reduction = 0;
     mNh.getParam(mMotorName + "/ratio", _reduction);
-    // ROS_INFO_STREAM("to_encoder_ticks:" << _reduction);
-    // apply the reduction convertion
-    if(_sensor != NULL)
-        _reduction = _sensor->getConversion(_reduction);
 
     // Initialize Dynamic reconfigurator for generic parameters
     parameter = new MotorParamConfigurator(nh, serial, mMotorName, number);
@@ -106,6 +102,17 @@ void Motor::initializeMotor(bool load_from_board)
 
     // stop the motor
     stopMotor();
+}
+
+/**
+ * @brief registerSensor register the sensor
+ * 
+ * @param sensor the sensor interface
+ */
+void Motor::registerSensor(GPIOSensor* sensor)
+{
+    _sensor = sensor;
+    _reduction = _sensor->getConversion(_reduction);
 }
 
 /**

@@ -241,7 +241,7 @@ void Roboteq::initializeInterfaces()
 
         //Add motor in diagnostic updater
         diagnostic_updater.add(*(motor));
-        ROS_DEBUG_STREAM("Motor [" << motor->getName() << "] Registered");
+        ROS_INFO_STREAM("Motor [" << motor->getName() << "] Registered");
     }
 
     ROS_DEBUG_STREAM("Send all Constraint configuration");

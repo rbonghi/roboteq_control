@@ -126,10 +126,7 @@ public:
      * @brief registerSensor register the sensor
      * @param sensor the sensor interface
      */
-    void registerSensor(GPIOSensor* sensor)
-    {
-        _sensor = sensor;
-    }
+    void registerSensor(GPIOSensor* sensor);
     /**
      * @brief readVector Decode vector data list
      * @param fields field of measures

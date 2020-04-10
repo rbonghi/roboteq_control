@@ -47,6 +47,13 @@ GPIOEncoderConfigurator::GPIOEncoderConfigurator(const ros::NodeHandle &nh, robo
 
 void GPIOEncoderConfigurator::initConfigurator(bool load_from_board)
 {
+    // Get PPR Encoder parameter
+    double ppr;
+    nh_.getParam(mName + "/PPR", ppr);
+    _reduction = ppr;
+    // Multiply for quadrature
+    _reduction *= 4;
+
     // Check if is required load paramers
     if(load_from_board)
     {
@@ -65,13 +72,6 @@ void GPIOEncoderConfigurator::initConfigurator(bool load_from_board)
     mDynServerMutex.unlock();
     // Set callback
     mDynRecServer->setCallback(boost::bind(&GPIOEncoderConfigurator::reconfigureCBEncoder, this, _1, _2));
-
-    // Get PPR Encoder parameter
-    double ppr;
-    nh_.getParam(mName + "/PPR", ppr);
-    _reduction = ppr;
-    // Multiply for quadrature
-    _reduction *= 4;
 }
 
 double GPIOEncoderConfigurator::getConversion(double reduction) {
