@@ -28,11 +28,13 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 <launch>
     <!-- Run ROS jetson stats with default configuration -->
     <arg name="port"        default="/dev/ttyUSB0" />
-    <arg name="config"      default="$(find roboteq_control)" />
+    <arg name="config"      default="$(find roboteq_control)/config/roboteq.yaml" />
+    <arg name="respawn"      default="false" />
 
     <!-- Roboteq hardware driver -->
-    <node pkg="roboteq_control" type="driver_node" name="roboteq" output="screen">
-        <rosparam command="load" file="$(arg config)/config/roboteq.yaml" />
+    <node pkg="roboteq_control" type="driver_node" name="roboteq"
+        output="screen" respawn="$(arg respawn)" respawn_delay="60">
+        <rosparam command="load" file="$(arg config)" />
         <rosparam subst_value="true">
             serial_port: $(arg port)
             serial_rate: 115200
