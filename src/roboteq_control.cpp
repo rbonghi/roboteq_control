@@ -46,16 +46,21 @@ typedef boost::chrono::steady_clock time_source;
 ros::Timer control_loop;
 ros::Timer diagnostic_loop;
 
+roboteq::Roboteq *interface;
 roboteq::serial_controller *rSerial;
 
 // >>>>> Ctrl+C handler
 void siginthandler(int param)
 {
     ROS_INFO("User pressed Ctrl+C Shutting down...");
+    ROS_INFO("Stop Control & Diagnostic loop");
     control_loop.stop();
     diagnostic_loop.stop();
+    ROS_INFO("Release motors");
+    // Switch off motors and release
+    interface->switch_off();
+    // Switch off serial 
     rSerial->stop();
-    ROS_INFO("Control and diagnostic loop stopped");
     ROS_INFO_STREAM("--------- ROBOTEQ_NODE STOPPED ---------");
     ros::shutdown();
 }
@@ -117,13 +122,14 @@ int main(int argc, char **argv) {
     // Check connection started
     if(start) {
         // Initialize roboteq controller
-        roboteq::Roboteq interface(nh, private_nh, rSerial);
+        //roboteq::Roboteq interface(nh, private_nh, rSerial);
+        interface = new roboteq::Roboteq(nh, private_nh, rSerial);
         // Initialize the motor parameters
-        interface.initialize();
+        interface->initialize();
         //Initialize all interfaces and setup diagnostic messages
-        interface.initializeInterfaces();
+        interface->initializeInterfaces();
 
-        controller_manager::ControllerManager cm(&interface, nh);
+        controller_manager::ControllerManager cm(interface, nh);
 
         // Setup separate queue and single-threaded spinner to process timer callbacks
         // that interface with RoboTeq hardware.
@@ -135,14 +141,14 @@ int main(int argc, char **argv) {
         time_source::time_point last_time = time_source::now();
         ros::TimerOptions control_timer(
                     ros::Duration(1 / control_frequency),
-                    boost::bind(controlLoop, boost::ref(interface), boost::ref(cm), boost::ref(last_time)),
+                    boost::bind(controlLoop, boost::ref(*interface), boost::ref(cm), boost::ref(last_time)),
                     &roboteq_queue);
         // Global variable
         control_loop = nh.createTimer(control_timer);
 
         ros::TimerOptions diagnostic_timer(
                     ros::Duration(1 / diagnostic_frequency),
-                    boost::bind(diagnosticLoop, boost::ref(interface)),
+                    boost::bind(diagnosticLoop, boost::ref(*interface)),
                     &roboteq_queue);
         diagnostic_loop = nh.createTimer(diagnostic_timer);
 
@@ -153,6 +159,8 @@ int main(int argc, char **argv) {
 
         // Process remainder of ROS callbacks separately, mainly ControlManager related
         ros::spin();
+
+        ROS_INFO_STREAM("------------------ASdadasdas asd asd----------");
     } else {
 
         ROS_ERROR_STREAM("Error connection, shutting down");

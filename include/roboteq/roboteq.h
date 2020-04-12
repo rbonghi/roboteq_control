@@ -101,6 +101,10 @@ public:
       */
     ~Roboteq();
     /**
+     * @brief Switch off roboteq board
+     */
+    void switch_off();
+    /**
      * @brief run Diagnostic thread called every request
      * @param stat the status of diagnostic updater
      */

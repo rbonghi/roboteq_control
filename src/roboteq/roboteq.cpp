@@ -129,6 +129,17 @@ void Roboteq::connectionCallback(const ros::SingleSubscriberPublisher& pub) {
     _isGPIOreading = (pub_peripheral.getNumSubscribers() >= 1);
 }
 
+void Roboteq::switch_off()
+{
+    // TODO: Add unregister all interfaces
+    // Prevent
+    // Controller Spawner error while taking down controllers: 
+    // transport error completing service call: unable to receive data from sender, check sender's logs for details
+    // Send emergency stop
+    // And release motors
+    mSerial->command("EX");
+}
+
 void Roboteq::stop_Callback(const std_msgs::Bool::ConstPtr& msg)
 {
     // Wait end motor loop
