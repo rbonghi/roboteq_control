@@ -362,17 +362,6 @@ void Motor::read(string data) {
 }
 
 void Motor::readVector(std::vector<std::string> fields) {
-    double ratio, max_rpm;
-    // ROS_INFO_STREAM("Motor" << mNumber << " " << data);
-
-
-    // Get ratio
-    ratio = ratio_;
-    //mNh.getParam(mMotorName + "/ratio", ratio);
-    // ROS_INFO_STREAM("Motor" << mNumber << " " << ratio);
-    // Get encoder max speed parameter
-    // mNh.getParam(mMotorName + "/max_speed", max_rpm);
-
     double position, vel, volts, amps_motor;
     // Scale factors as outlined in the relevant portions of the user manual, please
     // see mbs/script.mbs for URL and specific page references.
@@ -405,9 +394,9 @@ void Motor::readVector(std::vector<std::string> fields) {
         // Build messages
         msg_control.header.stamp = ros::Time::now();
         // Fill fields
-        msg_control.reference = (cmd / ratio);
-        msg_control.feedback = (vel / ratio);
-        msg_control.loop_error = (loop_error / ratio);
+        msg_control.reference = (cmd / ratio_);
+        msg_control.feedback = (vel / ratio_);
+        msg_control.loop_error = (loop_error / ratio_);
         msg_control.pwm = pwm;
         // Publish status control motor
         pub_control.publish(msg_control);
@@ -427,18 +416,18 @@ void Motor::readVector(std::vector<std::string> fields) {
         ROS_WARN_STREAM(" [" << mNumber << "] " << mMotorName << ": Failure parsing feedback data. Dropping message. " << e.what());
         // Load same values
         position = to_encoder_ticks(position_);
-        vel = ratio * velocity_;
+        vel = ratio_ * velocity_;
         volts = 0;
         amps_motor = 0;
     }
     // Update position
     position_ = from_encoder_ticks(position);
     // Update velocity motor
-    velocity_ = (vel / ratio);
+    velocity_ = (vel / ratio_);
     // Evaluate effort
     if(velocity_ != 0)
     {
-        effort_ = ((volts * amps_motor) / velocity_) * ratio;
+        effort_ = ((volts * amps_motor) / velocity_) * ratio_;
     }
     else
     {
