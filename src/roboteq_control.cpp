@@ -58,7 +58,6 @@ void siginthandler(int param)
     ROS_INFO("Control and diagnostic loop stopped");
     ROS_INFO_STREAM("--------- ROBOTEQ_NODE STOPPED ---------");
     ros::shutdown();
-
 }
 // <<<<< Ctrl+C handler
 /**
@@ -83,7 +82,7 @@ void controlLoop(roboteq::Roboteq &roboteq,
 }
 
 /**
-* Diagnostics loop for ORB boards, not realtime safe
+* Diagnostics loop for Roboteq board, not realtime safe
 */
 void diagnosticLoop(roboteq::Roboteq &roboteq)
 {

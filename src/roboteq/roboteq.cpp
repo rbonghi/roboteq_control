@@ -51,6 +51,7 @@ Roboteq::Roboteq(const ros::NodeHandle &nh, const ros::NodeHandle &private_nh, s
     //Services
     srv_board = private_mNh.advertiseService("system", &Roboteq::service_Callback, this);
 
+    motor_loop_ = false;
     _first = false;
     std::vector<std::string> joint_list;
     if(private_nh.hasParam("joint"))
@@ -130,6 +131,9 @@ void Roboteq::connectionCallback(const ros::SingleSubscriberPublisher& pub) {
 
 void Roboteq::stop_Callback(const std_msgs::Bool::ConstPtr& msg)
 {
+    // Wait end motor loop
+    while(motor_loop_);
+    // Read status message
     bool status = (int)msg.get()->data;
     if(status)
     {
@@ -142,7 +146,6 @@ void Roboteq::stop_Callback(const std_msgs::Bool::ConstPtr& msg)
         mSerial->command("MG");
         ROS_WARN_STREAM("Safety release");
     }
-
 }
 
 void Roboteq::getRoboteqInformation()
@@ -299,7 +302,8 @@ void Roboteq::updateDiagnostics()
 
 void Roboteq::read(const ros::Time& time, const ros::Duration& period) {
     //ROS_DEBUG_STREAM("Get measure from Roboteq");
-
+    motor_loop_ = true;
+    
     std::vector<std::string> motors[mMotor.size()];
     std::vector<std::string> fields;
 
@@ -458,11 +462,12 @@ void Roboteq::read(const ros::Time& time, const ros::Duration& period) {
         // Send GPIO status
         pub_peripheral.publish(msg_peripheral);
     }
+    motor_loop_ = false;
 }
 
 void Roboteq::write(const ros::Time& time, const ros::Duration& period) {
     //ROS_DEBUG_STREAM("Write command to Roboteq");
-
+    motor_loop_ = true;
     for (vector<Motor*>::iterator it = mMotor.begin() ; it != mMotor.end(); ++it)
     {
         Motor* motor = ((Motor*)(*it));
@@ -470,6 +475,7 @@ void Roboteq::write(const ros::Time& time, const ros::Duration& period) {
         motor->writeCommandsToHardware(period);
         ROS_DEBUG_STREAM("Motor [" << motor->getName() << "] Send commands");
     }
+    motor_loop_ = false;
 }
 
 bool Roboteq::prepareSwitch(const std::list<hardware_interface::ControllerInfo>& start_list, const std::list<hardware_interface::ControllerInfo>& stop_list)

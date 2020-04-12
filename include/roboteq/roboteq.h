@@ -152,6 +152,7 @@ private:
     hardware_interface::JointStateInterface joint_state_interface;
     hardware_interface::VelocityJointInterface velocity_joint_interface;
 
+    bool motor_loop_;
     // Check if is the first run
     bool _first;
     // Motor definition
