@@ -288,15 +288,13 @@ void Roboteq::updateDiagnostics()
         _temp_mcu = boost::lexical_cast<double>(temperature_1);
         string temperature_2 = mSerial->getQuery("T", "2");
         _temp_bridge = boost::lexical_cast<double>(temperature_2);
+        // Force update all diagnostic parts
+        diagnostic_updater.force_update();
     }
     catch (std::bad_cast& e)
     {
-      ROS_WARN("Failure parsing feedback data. Dropping message.");
-      return;
+      ROS_WARN_STREAM("Diagnostic: Failure parsing feedback data. Dropping message." << e.what());
     }
-
-    // Force update all diagnostic parts
-    diagnostic_updater.force_update();
 }
 
 void Roboteq::read(const ros::Time& time, const ros::Duration& period) {
