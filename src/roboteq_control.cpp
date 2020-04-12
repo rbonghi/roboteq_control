@@ -46,6 +46,7 @@ typedef boost::chrono::steady_clock time_source;
 ros::Timer control_loop;
 ros::Timer diagnostic_loop;
 
+ros::AsyncSpinner *roboteq_spinner;
 roboteq::Roboteq *interface;
 roboteq::serial_controller *rSerial;
 
@@ -56,6 +57,7 @@ void siginthandler(int param)
     ROS_INFO("Stop Control & Diagnostic loop");
     control_loop.stop();
     diagnostic_loop.stop();
+    roboteq_spinner->stop();
     ROS_INFO("Release motors");
     // Switch off motors and release
     interface->switch_off();
@@ -136,7 +138,7 @@ int main(int argc, char **argv) {
         // This avoids having to lock around hardware access, but precludes realtime safety
         // in the control loop.
         ros::CallbackQueue roboteq_queue;
-        ros::AsyncSpinner roboteq_spinner(1, &roboteq_queue);
+        roboteq_spinner = new ros::AsyncSpinner(1, &roboteq_queue);
 
         time_source::time_point last_time = time_source::now();
         ros::TimerOptions control_timer(
@@ -152,15 +154,15 @@ int main(int argc, char **argv) {
                     &roboteq_queue);
         diagnostic_loop = nh.createTimer(diagnostic_timer);
 
-        roboteq_spinner.start();
+        roboteq_spinner->start();
 
         std::string name_node = ros::this_node::getName();
         ROS_INFO("Started %s", name_node.c_str());
 
         // Process remainder of ROS callbacks separately, mainly ControlManager related
         ros::spin();
-
-        ROS_INFO_STREAM("------------------ASdadasdas asd asd----------");
+        // Close node
+        ROS_INFO_STREAM("----------------------------------------");
     } else {
 
         ROS_ERROR_STREAM("Error connection, shutting down");
