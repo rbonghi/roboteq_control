@@ -293,7 +293,7 @@ void Roboteq::updateDiagnostics()
     }
     catch (std::bad_cast& e)
     {
-      ROS_WARN_STREAM("Diagnostic: Failure parsing feedback data. Dropping message." << e.what());
+        ROS_WARN_STREAM("Diagnostic: Failure parsing feedback data. Dropping message." << e.what());
     }
 }
 
