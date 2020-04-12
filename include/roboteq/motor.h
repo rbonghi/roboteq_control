@@ -182,15 +182,18 @@ private:
     // Serial controller communication
     serial_controller *mSerial;
     // State of the motor
-    double position, max_position;
-    double velocity, max_velocity;
-    double effort, max_effort;
-    double command;
-    // Motor reduction
-    double _reduction;
+    double position_, max_position_;
+    double velocity_, max_velocity_;
+    double effort_, max_effort_;
+    double command_;
+    // Motor reduction and ratio
+    double reduction_;
+    double ratio_;
+    // max RPM
+    double max_rpm_;
 
     int _control_mode;
-    motor_status_t _status;
+    motor_status_t status_;
 
     /// ROS joint limits interface
     joint_limits_interface::VelocityJointSoftLimitsInterface vel_limits_interface;

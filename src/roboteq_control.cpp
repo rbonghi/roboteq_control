@@ -130,24 +130,24 @@ int main(int argc, char **argv) {
         // that interface with RoboTeq hardware.
         // This avoids having to lock around hardware access, but precludes realtime safety
         // in the control loop.
-        ros::CallbackQueue unav_queue;
-        ros::AsyncSpinner unav_spinner(1, &unav_queue);
+        ros::CallbackQueue roboteq_queue;
+        ros::AsyncSpinner roboteq_spinner(1, &roboteq_queue);
 
         time_source::time_point last_time = time_source::now();
         ros::TimerOptions control_timer(
                     ros::Duration(1 / control_frequency),
                     boost::bind(controlLoop, boost::ref(interface), boost::ref(cm), boost::ref(last_time)),
-                    &unav_queue);
+                    &roboteq_queue);
         // Global variable
         control_loop = nh.createTimer(control_timer);
 
         ros::TimerOptions diagnostic_timer(
                     ros::Duration(1 / diagnostic_frequency),
                     boost::bind(diagnosticLoop, boost::ref(interface)),
-                    &unav_queue);
+                    &roboteq_queue);
         diagnostic_loop = nh.createTimer(diagnostic_timer);
 
-        unav_spinner.start();
+        roboteq_spinner.start();
 
         std::string name_node = ros::this_node::getName();
         ROS_INFO("Started %s", name_node.c_str());
