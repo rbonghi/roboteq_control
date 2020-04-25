@@ -26,22 +26,28 @@ OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
 EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -->
 <launch>
-    <!-- Run ROS jetson stats with default configuration -->
-    <arg name="port"        default="/dev/ttyUSB0" />
-    <arg name="config"      default="$(find roboteq_control)/config/roboteq.yaml" />
-    <arg name="respawn"     default="false" />
-    <arg name="output"      default="log" />
+  <!-- Run ROS jetson stats with default configuration -->
+  <arg name="port"        default="/dev/ttyUSB0" />
+  <arg name="config"      default="$(find roboteq_control)/config/roboteq.yaml" />
+  <arg name="respawn"     default="false" />
+  <arg name="output"      default="log" />
+  <!-- Machine name if default run in localhost -->
+  <arg name="machine"         default="_default_" />
+  
+  <group if="$(eval arg('machine') == '_default_')">
+    <machine name="_default_" address="localhost" default="never" timeout="10"/>
+  </group>
 
-    <!-- Roboteq hardware driver -->
-    <node pkg="roboteq_control" type="driver_node" name="roboteq"
-        output="$(arg output)" respawn="$(arg respawn)" respawn_delay="60">
-        <rosparam command="load" file="$(arg config)" />
-        <rosparam subst_value="true">
-            serial_port: $(arg port)
-            serial_rate: 115200
-            control_frequency: 50.0
-            diagnostic_frequency: 5.0
-        </rosparam>
-    </node>
+  <!-- Roboteq hardware driver -->
+  <node machine="$(arg machine)" pkg="roboteq_control" type="driver_node" name="roboteq"
+          output="$(arg output)" respawn="$(arg respawn)" respawn_delay="60">
+    <rosparam command="load" file="$(arg config)" />
+    <rosparam subst_value="true">
+      serial_port: $(arg port)
+      serial_rate: 115200
+      control_frequency: 50.0
+      diagnostic_frequency: 5.0
+    </rosparam>
+  </node>
 
 </launch>
