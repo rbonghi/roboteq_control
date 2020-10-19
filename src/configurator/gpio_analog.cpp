@@ -244,6 +244,6 @@ void GPIOAnalogConfigurator::reconfigureCBParam(roboteq_control::RoboteqAnalogIn
     {
         int range_input_center = config.range_input_center * 1000;
         // Update operative mode
-        mSerial->setParam("AMAX", std::to_string(mNumber) + " " + std::to_string(range_input_center));
+        mSerial->setParam("ATCR", std::to_string(mNumber) + " " + std::to_string(range_input_center));
     }
 }
