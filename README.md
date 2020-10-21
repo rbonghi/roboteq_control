@@ -81,5 +81,5 @@ To control this robot are available this topics
 
 ![roboteq_control](https://github.com/rbonghi/roboteq_control/wiki/images/rosgraph_simple.png)
 
-[roboteq_manual]: https://www.roboteq.com/index.php/docman/motor-controllers-documents-and-files/documentation/user-manual/272-roboteq-controllers-user-manual-v17/file
+[roboteq_manual]: https://www.roboteq.com/docman-list/motor-controllers-documents-and-files/documentation/user-manual/272-roboteq-controllers-user-manual-v17/file
 [ros_control]: http://wiki.ros.org/ros_control
