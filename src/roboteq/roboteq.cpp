@@ -733,42 +733,42 @@ void Roboteq::reconfigureCBController(roboteq_control::RoboteqControllerConfig &
         mSerial->saveInEEPROM();
     }
 
-    // Set PWM frequency PWMF [pag. 327]
+    // Set PWM frequency PWMF [pag. 320]
     if(_last_controller_config.pwm_frequency != config.pwm_frequency)
     {
         // Update PWM
         int pwm = config.pwm_frequency * 10;
         mSerial->setParam("PWMF", std::to_string(pwm));
     }
-    // Set over voltage limit OVL [pag. 326]
+    // Set over voltage limit OVL [pag. 319]
     if(_last_controller_config.over_voltage_limit != config.over_voltage_limit)
     {
-        // Update over voltage limit
+        // Update over voltage limit [pag. 319]
         int ovl = config.over_voltage_limit * 10;
         mSerial->setParam("OVL", std::to_string(ovl));
     }
-    // Set over voltage hystersis OVH [pag. 326]
+    // Set over voltage hystersis OVH [pag. 318]
     if(_last_controller_config.over_voltage_hysteresis != config.over_voltage_hysteresis)
     {
         // Update over voltage hysteresis
         int ovh = config.over_voltage_hysteresis * 10;
         mSerial->setParam("OVH", std::to_string(ovh));
     }
-    // Set under voltage limit UVL [pag. 328]
+    // Set under voltage limit UVL [pag. 327]
     if(_last_controller_config.under_voltage_limit != config.under_voltage_limit)
     {
         // Update under voltage limit
         int uvl = config.under_voltage_limit * 10;
         mSerial->setParam("UVL", std::to_string(uvl));
     }
-    // Set brake activation delay BKD [pag. 309]
+    // Set brake activation delay BKD [pag. 301]
     if(_last_controller_config.break_delay != config.break_delay)
     {
         // Update brake activation delay
         mSerial->setParam("BKD", std::to_string(config.break_delay));
     }
 
-    // Set Mixing mode MXMD [pag. 322]
+    // Set Mixing mode MXMD [pag. 315]
     if(_last_controller_config.mixing != config.mixing)
     {
         // Update brake activation delay

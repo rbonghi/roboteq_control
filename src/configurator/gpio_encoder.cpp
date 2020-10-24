@@ -91,7 +91,7 @@ double GPIOEncoderConfigurator::getConversion(double reduction) {
 void GPIOEncoderConfigurator::getEncoderFromRoboteq() {
     try
     {
-        // Get Encoder Usage - reference pag. 315
+        // Get Encoder Usage - reference
         string str_emode = mSerial->getParam("EMOD", std::to_string(mNumber));
         // Get PPR from roboteq board
         int emod = boost::lexical_cast<unsigned int>(str_emode);
@@ -135,28 +135,28 @@ void GPIOEncoderConfigurator::getEncoderFromRoboteq() {
         nh_.setParam(mName + "/input_motor_one", tmp1);
         nh_.setParam(mName + "/input_motor_two", tmp2);
 
-        // Get Encoder PPR (Pulse/rev) [pag. 316]
+        // Get Encoder PPR (Pulse/rev)
         string str_ppr = mSerial->getParam("EPPR", std::to_string(mNumber));
         // Get PPR from roboteq board
         int ppr = boost::lexical_cast<unsigned int>(str_ppr);
         // Set parameter
         nh_.setParam(mName + "/PPR", ppr);
 
-        // Get Encoder ELL - Min limit [pag. 314]
+        // Get Encoder ELL - Min limit
         string str_ell = mSerial->getParam("ELL", std::to_string(mNumber));
         // Get PPR from roboteq board
         int ell = boost::lexical_cast<unsigned int>(str_ell);
         // Set parameter
         nh_.setParam(mName + "/encoder_low_count_limit", ell);
 
-        // Get Encoder EHL - Max limit [pag. 311]
+        // Get Encoder EHL - Max limit
         string str_ehl = mSerial->getParam("EHL", std::to_string(mNumber));
         // Get PPR from roboteq board
         int ehl = boost::lexical_cast<unsigned int>(str_ehl);
         // Set parameter
         nh_.setParam(mName + "/encoder_high_count_limit", ehl);
 
-        // Get Encoder EHOME - Home count [pag. 313]
+        // Get Encoder EHOME - Home count
         string str_home = mSerial->getParam("EHOME", std::to_string(mNumber));
         // Get PPR from roboteq board
         int home = boost::lexical_cast<unsigned int>(str_home);
@@ -201,7 +201,7 @@ void GPIOEncoderConfigurator::reconfigureCBEncoder(roboteq_control::RoboteqEncod
         return;
     }
 
-    // Set Encoder Usage - reference pag. 315
+    // Set Encoder Usage - reference pag. 307
     if((_last_encoder_config.configuration != config.configuration) ||
             (_last_encoder_config.input_motor_one != config.input_motor_one) ||
             (_last_encoder_config.input_motor_two != config.input_motor_two))
@@ -223,7 +223,7 @@ void GPIOEncoderConfigurator::reconfigureCBEncoder(roboteq_control::RoboteqEncod
             ROS_INFO_STREAM("Register encoder [" << mNumber << "] to: " << motor->getName());
         }
     }
-    // Set Encoder PPR
+    // Set Encoder PPR [pag. 308]
     if(_last_encoder_config.PPR != config.PPR)
     {
         // Update reduction value
@@ -231,19 +231,19 @@ void GPIOEncoderConfigurator::reconfigureCBEncoder(roboteq_control::RoboteqEncod
         // Update operative mode
         mSerial->setParam("EPPR", std::to_string(mNumber) + " " + std::to_string(config.PPR));
     }
-    // Set Encoder ELL - Min limit [pag. 314]
+    // Set Encoder ELL - Min limit [pag. 306]
     if(_last_encoder_config.encoder_low_count_limit != config.encoder_low_count_limit)
     {
         // Update operative mode
         mSerial->setParam("ELL", std::to_string(mNumber) + " " + std::to_string(config.encoder_low_count_limit));
     }
-    // Set Encoder EHL - Max limit [pag. 311]
+    // Set Encoder EHL - Max limit [pag. 304]
     if(_last_encoder_config.encoder_high_count_limit != config.encoder_high_count_limit)
     {
         // Update operative mode
         mSerial->setParam("EHL", std::to_string(mNumber) + " " + std::to_string(config.encoder_high_count_limit));
     }
-    // Set Encoder EHOME - Home count [pag. 313]
+    // Set Encoder EHOME - Home count [pag. 306]
     if(_last_encoder_config.encoder_home_count != config.encoder_home_count)
     {
         // Update operative mode

@@ -126,49 +126,49 @@ void MotorPIDConfigurator::getPIDFromRoboteq()
 
 void MotorPIDConfigurator::setPIDconfiguration()
 {
-    // Set Position velocity [pag. 322]
+    // Set Position velocity
     int pos_vel;
     // Set params
     nh_.getParam(mName + "/position_mode_velocity", pos_vel);
     // Update position velocity
     mSerial->setParam("MVEL", std::to_string(mNumber) + " " + std::to_string(pos_vel));
 
-    // Set number of turn between limits [pag. 325]
+    // Set number of turn between limits
     double mxtrn;
     // Set params
     nh_.getParam(mName + "/turn_min_to_max", mxtrn);
     // Update position velocity
     mSerial->setParam("MXTRN", std::to_string(mNumber) + " " + std::to_string(mxtrn * 100));
 
-    // Set KP gain = kp * 10 [pag 319]
+    // Set KP gain = kp * 10
     double kp;
     // Set params
     nh_.getParam(mName + "/Kp", kp);
     // Update gain position
     mSerial->setParam("KP", std::to_string(mNumber) + " " + std::to_string(kp * 10));
 
-    // Set KI gain = ki * 10 [pag 318]
+    // Set KI gain = ki * 10
     double ki;
     // Set params
     nh_.getParam(mName + "/Ki", ki);
     // Set KI parameter
     mSerial->setParam("KI", std::to_string(mNumber) + " " + std::to_string(ki * 10));
 
-    // Set KD gain = kd * 10 [pag 317]
+    // Set KD gain = kd * 10
     double kd;
     // Set params
     nh_.getParam(mName + "/Kd", kd);
     // Set KD parameter
     mSerial->setParam("KD", std::to_string(mNumber) + " " + std::to_string(kd * 10));
 
-    // Set Integral cap [pag. 317]
+    // Set Integral cap
     int icap;
     // Set params
     nh_.getParam(mName + "/integrator_limit", icap);
     // Update integral cap
     mSerial->setParam("ICAP", std::to_string(mNumber) + " " + std::to_string(icap));
 
-    // Set closed loop error detection [pag. 311]
+    // Set closed loop error detection
     int clerd;
     // Set params
     nh_.getParam(mName + "/loop_error_detection", clerd);
@@ -189,7 +189,7 @@ void MotorPIDConfigurator::reconfigureCBPID(roboteq_control::RoboteqPIDConfig &c
     }
 
     // Check type if the PID selected is right
-    // Operative mode reference in [pag 321]
+    // Operative mode reference in [pag 314]
     string str_mode = mSerial->getParam("MMOD", std::to_string(mNumber));
     // Get sign from roboteq board
     int mode = boost::lexical_cast<int>(str_mode);
@@ -224,34 +224,34 @@ void MotorPIDConfigurator::reconfigureCBPID(roboteq_control::RoboteqPIDConfig &c
         return;
     }
 
-    // Set Position velocity [pag. 322]
+    // Set Position velocity
     if(_last_pid_config.position_mode_velocity != config.position_mode_velocity)
     {
         // Update position velocity
         mSerial->setParam("MVEL", std::to_string(mNumber) + " " + std::to_string(config.position_mode_velocity));
     }
-    // Set number of turn between limits [pag. 325]
+    // Set number of turn between limits
     if(_last_pid_config.turn_min_to_max != config.turn_min_to_max)
     {
         // Update position velocity
         int gain = config.turn_min_to_max * 100;
         mSerial->setParam("MXTRN", std::to_string(mNumber) + " " + std::to_string(gain));
     }
-    // Set KP gain = kp * 10 [pag 319]
+    // Set KP gain = kp * 10
     if(_last_pid_config.Kp != config.Kp)
     {
         // Update gain
         int gain = config.Kp * 10;
         mSerial->setParam("KP", std::to_string(mNumber) + " " + std::to_string(gain));
     }
-    // Set KI gain = ki * 10 [pag 318]
+    // Set KI gain = ki * 10
     if(_last_pid_config.Ki != config.Ki)
     {
         // Update gain
         int gain = config.Ki * 10;
         mSerial->setParam("KI", std::to_string(mNumber) + " " + std::to_string(gain));
     }
-    // Set KD gain = kd * 10 [pag 317]
+    // Set KD gain = kd * 10
     if(_last_pid_config.Kd != config.Kd)
     {
         // Update gain
@@ -259,13 +259,13 @@ void MotorPIDConfigurator::reconfigureCBPID(roboteq_control::RoboteqPIDConfig &c
         mSerial->setParam("KD", std::to_string(mNumber) + " " + std::to_string(gain));
     }
 
-    // Set Integral cap [pag. 317]
+    // Set Integral cap
     if(_last_pid_config.integrator_limit != config.integrator_limit)
     {
         // Update integral cap
         mSerial->setParam("ICAP", std::to_string(mNumber) + " " + std::to_string(config.integrator_limit));
     }
-    // Set closed loop error detection [pag. 311]
+    // Set closed loop error detection
     if(_last_pid_config.loop_error_detection != config.loop_error_detection)
     {
         // Update integral cap
