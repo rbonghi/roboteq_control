@@ -80,6 +80,13 @@ Motor::Motor(const ros::NodeHandle& nh, serial_controller *serial, string name, 
     // mSerial->addCallback(&Motor::read, this, "F" + std::to_string(mNumber));
 }
 
+Motor::~Motor() {
+    delete parameter;
+    delete pid_velocity;
+    delete pid_torque;
+    delete pid_position;
+}
+
 void Motor::connectionCallback(const ros::SingleSubscriberPublisher& pub)
 {
     ROS_DEBUG_STREAM("Update: " << pub.getSubscriberName() << " - " << pub.getTopic());

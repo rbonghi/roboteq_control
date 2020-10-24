@@ -177,6 +177,25 @@ void Roboteq::getRoboteqInformation()
 Roboteq::~Roboteq()
 {
     // ROS_INFO_STREAM("Script: " << script(false));
+    int i = 0;
+    for ( i = 0; i < mMotor.size(); i++)
+    {
+        // Stop the motor and delete the object
+        mMotor[i]->stopMotor();
+        delete mMotor[i];
+    }
+    for ( i = 0; i < _param_pulse.size(); i++)
+    {
+        delete _param_pulse[i];
+    }
+    for ( i = 0; i < _param_analog.size(); i++)
+    {
+        delete _param_analog[i];
+    }
+    for ( i = 0; i < _param_encoder.size(); i++)
+    {
+        delete _param_encoder[i];
+    }
 }
 
 void Roboteq::initialize()
