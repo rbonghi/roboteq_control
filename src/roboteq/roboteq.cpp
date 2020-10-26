@@ -649,42 +649,43 @@ void Roboteq::getControllerFromRoboteq()
 {
     try
     {
-        // Get PWM frequency PWMF [pag. 327]
+        // Get PWM frequency PWMF
         string str_pwm = mSerial->getParam("PWMF");
         unsigned int tmp_pwm = boost::lexical_cast<unsigned int>(str_pwm);
         double pwm = ((double) tmp_pwm) / 10.0;
         // Set params
         private_mNh.setParam("pwm_frequency", pwm);
 
-        // Get over voltage limit OVL [pag. 326]
+        // Get over voltage limit OVL
         string str_ovl = mSerial->getParam("OVL");
         unsigned int tmp_ovl = boost::lexical_cast<unsigned int>(str_ovl);
         double ovl = ((double) tmp_ovl) / 10.0;
         // Set params
         private_mNh.setParam("over_voltage_limit", ovl);
 
-        // Get over voltage hystersis OVH [pag. 326]
+        // Get over voltage hystersis OVH
         string str_ovh = mSerial->getParam("OVH");
         unsigned int tmp_ovh = boost::lexical_cast<unsigned int>(str_ovh);
         double ovh = ((double) tmp_ovh) / 10.0;
         // Set params
         private_mNh.setParam("over_voltage_hysteresis", ovh);
 
-        // Get under voltage limit UVL [pag. 328]
+        // Get under voltage limit UVL
         string str_uvl = mSerial->getParam("UVL");
         unsigned int tmp_uvl = boost::lexical_cast<unsigned int>(str_uvl);
         double uvl = ((double) tmp_uvl) / 10.0;
         // Set params
         private_mNh.setParam("under_voltage_limit", uvl);
 
-        // Get brake activation delay BKD [pag. 309]
+        // Get brake activation delay BKD
         string str_break = mSerial->getParam("BKD");
         int break_delay = boost::lexical_cast<unsigned int>(str_break);
         // Set params
         private_mNh.setParam("break_delay", break_delay);
 
-        // Get Mixing mode MXMD [pag. 322]
-        string str_mxd = mSerial->getParam("MXMD", "1");
+        // Get Mixing mode MXMD
+        //string str_mxd = mSerial->getParam("MXMD", "1");
+        string str_mxd = mSerial->getParam("MXMD");
         // ROS_INFO_STREAM("MXMD "<< str_mxd);
         int mixed = boost::lexical_cast<unsigned int>(str_mxd);
         // Set params
@@ -790,8 +791,9 @@ void Roboteq::reconfigureCBController(roboteq_control::RoboteqControllerConfig &
     // Set Mixing mode MXMD [pag. 315]
     if(_last_controller_config.mixing != config.mixing)
     {
-        // Update brake activation delay
-        mSerial->setParam("MXMD", std::to_string(config.mixing) + ":0");
+        // Update Mixing mode
+        //mSerial->setParam("MXMD", std::to_string(config.mixing) + ":0");
+        mSerial->setParam("MXMD", std::to_string(config.mixing));
     }
 
     // Update last configuration
