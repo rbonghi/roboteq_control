@@ -65,8 +65,8 @@ void siginthandler(int param)
     delete interface;
     // Switch off serial 
     rSerial->stop();
-    delete rSerial;
     ROS_INFO_STREAM("--------- ROBOTEQ_NODE STOPPED ---------");
+    delete rSerial;
     ros::shutdown();
 }
 // <<<<< Ctrl+C handler
