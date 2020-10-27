@@ -73,6 +73,7 @@ public:
      * @param number The number in Roboteq board
      */
     explicit Motor(const ros::NodeHandle &nh, serial_controller *serial, string name, unsigned int number);
+    ~Motor();
     /**
      * @brief initializeMotor Initialization oh motor, this routine load parameter from ros server or load from roboteq board
      * @param load_from_board forse the load from roboteq board

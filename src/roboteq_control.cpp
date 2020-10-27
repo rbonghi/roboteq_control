@@ -58,12 +58,15 @@ void siginthandler(int param)
     control_loop.stop();
     diagnostic_loop.stop();
     roboteq_spinner->stop();
+    delete roboteq_spinner;
     ROS_INFO("Release motors");
     // Switch off motors and release
     interface->switch_off();
+    delete interface;
     // Switch off serial 
     rSerial->stop();
     ROS_INFO_STREAM("--------- ROBOTEQ_NODE STOPPED ---------");
+    delete rSerial;
     ros::shutdown();
 }
 // <<<<< Ctrl+C handler

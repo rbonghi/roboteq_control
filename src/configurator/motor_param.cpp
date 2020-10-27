@@ -147,27 +147,27 @@ void MotorParamConfigurator::getParamFromRoboteq()
         // Set parameter
         nh_.setParam(mName + "/rotation", sign);
 
-        // Stall detection [pag. 310]
+        // Stall detection
         string str_stall = mSerial->getParam("BLSTD", std::to_string(mNumber));
         int stall = boost::lexical_cast<int>(str_stall);
         // Set params
         nh_.setParam(mName + "/stall_detection", stall);
 
-        // Get Max Amper limit = alim / 10 [pag 306]
+        // Get Max Amper limit = alim / 10
         string str_alim = mSerial->getParam("ALIM", std::to_string(mNumber));
         unsigned int tmp = boost::lexical_cast<unsigned int>(str_alim);
         double alim = ((double) tmp) / 10.0;
         // Set params
         nh_.setParam(mName + "/amper_limit", alim);
 
-        // Max power forward [pag. 323]
+        // Max power forward
         string str_max_fw = mSerial->getParam("MXPF", std::to_string(mNumber));
         // Get max forward
         int max_forward = boost::lexical_cast<unsigned int>(str_max_fw);
         // Set parameter
         nh_.setParam(mName + "/max_acceleration", max_forward);
 
-        // Max power forward reverse [pag. 324]
+        // Max power forward reverse
         string str_max_re = mSerial->getParam("MXPR", std::to_string(mNumber));
         // Get max reverse
         int max_reverse = boost::lexical_cast<unsigned int>(str_max_re);

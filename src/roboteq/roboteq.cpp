@@ -177,6 +177,25 @@ void Roboteq::getRoboteqInformation()
 Roboteq::~Roboteq()
 {
     // ROS_INFO_STREAM("Script: " << script(false));
+    int i = 0;
+    for ( i = 0; i < mMotor.size(); i++)
+    {
+        // Stop the motor and delete the object
+        mMotor[i]->stopMotor();
+        delete mMotor[i];
+    }
+    for ( i = 0; i < _param_pulse.size(); i++)
+    {
+        delete _param_pulse[i];
+    }
+    for ( i = 0; i < _param_analog.size(); i++)
+    {
+        delete _param_analog[i];
+    }
+    for ( i = 0; i < _param_encoder.size(); i++)
+    {
+        delete _param_encoder[i];
+    }
 }
 
 void Roboteq::initialize()
@@ -630,42 +649,43 @@ void Roboteq::getControllerFromRoboteq()
 {
     try
     {
-        // Get PWM frequency PWMF [pag. 327]
+        // Get PWM frequency PWMF
         string str_pwm = mSerial->getParam("PWMF");
         unsigned int tmp_pwm = boost::lexical_cast<unsigned int>(str_pwm);
         double pwm = ((double) tmp_pwm) / 10.0;
         // Set params
         private_mNh.setParam("pwm_frequency", pwm);
 
-        // Get over voltage limit OVL [pag. 326]
+        // Get over voltage limit OVL
         string str_ovl = mSerial->getParam("OVL");
         unsigned int tmp_ovl = boost::lexical_cast<unsigned int>(str_ovl);
         double ovl = ((double) tmp_ovl) / 10.0;
         // Set params
         private_mNh.setParam("over_voltage_limit", ovl);
 
-        // Get over voltage hystersis OVH [pag. 326]
+        // Get over voltage hystersis OVH
         string str_ovh = mSerial->getParam("OVH");
         unsigned int tmp_ovh = boost::lexical_cast<unsigned int>(str_ovh);
         double ovh = ((double) tmp_ovh) / 10.0;
         // Set params
         private_mNh.setParam("over_voltage_hysteresis", ovh);
 
-        // Get under voltage limit UVL [pag. 328]
+        // Get under voltage limit UVL
         string str_uvl = mSerial->getParam("UVL");
         unsigned int tmp_uvl = boost::lexical_cast<unsigned int>(str_uvl);
         double uvl = ((double) tmp_uvl) / 10.0;
         // Set params
         private_mNh.setParam("under_voltage_limit", uvl);
 
-        // Get brake activation delay BKD [pag. 309]
+        // Get brake activation delay BKD
         string str_break = mSerial->getParam("BKD");
         int break_delay = boost::lexical_cast<unsigned int>(str_break);
         // Set params
         private_mNh.setParam("break_delay", break_delay);
 
-        // Get Mixing mode MXMD [pag. 322]
-        string str_mxd = mSerial->getParam("MXMD", "1");
+        // Get Mixing mode MXMD
+        //string str_mxd = mSerial->getParam("MXMD", "1");
+        string str_mxd = mSerial->getParam("MXMD");
         // ROS_INFO_STREAM("MXMD "<< str_mxd);
         int mixed = boost::lexical_cast<unsigned int>(str_mxd);
         // Set params
@@ -733,46 +753,47 @@ void Roboteq::reconfigureCBController(roboteq_control::RoboteqControllerConfig &
         mSerial->saveInEEPROM();
     }
 
-    // Set PWM frequency PWMF [pag. 327]
+    // Set PWM frequency PWMF [pag. 320]
     if(_last_controller_config.pwm_frequency != config.pwm_frequency)
     {
         // Update PWM
         int pwm = config.pwm_frequency * 10;
         mSerial->setParam("PWMF", std::to_string(pwm));
     }
-    // Set over voltage limit OVL [pag. 326]
+    // Set over voltage limit OVL [pag. 319]
     if(_last_controller_config.over_voltage_limit != config.over_voltage_limit)
     {
-        // Update over voltage limit
+        // Update over voltage limit [pag. 319]
         int ovl = config.over_voltage_limit * 10;
         mSerial->setParam("OVL", std::to_string(ovl));
     }
-    // Set over voltage hystersis OVH [pag. 326]
+    // Set over voltage hystersis OVH [pag. 318]
     if(_last_controller_config.over_voltage_hysteresis != config.over_voltage_hysteresis)
     {
         // Update over voltage hysteresis
         int ovh = config.over_voltage_hysteresis * 10;
         mSerial->setParam("OVH", std::to_string(ovh));
     }
-    // Set under voltage limit UVL [pag. 328]
+    // Set under voltage limit UVL [pag. 327]
     if(_last_controller_config.under_voltage_limit != config.under_voltage_limit)
     {
         // Update under voltage limit
         int uvl = config.under_voltage_limit * 10;
         mSerial->setParam("UVL", std::to_string(uvl));
     }
-    // Set brake activation delay BKD [pag. 309]
+    // Set brake activation delay BKD [pag. 301]
     if(_last_controller_config.break_delay != config.break_delay)
     {
         // Update brake activation delay
         mSerial->setParam("BKD", std::to_string(config.break_delay));
     }
 
-    // Set Mixing mode MXMD [pag. 322]
+    // Set Mixing mode MXMD [pag. 315]
     if(_last_controller_config.mixing != config.mixing)
     {
-        // Update brake activation delay
-        mSerial->setParam("MXMD", std::to_string(config.mixing) + ":0");
+        // Update Mixing mode
+        //mSerial->setParam("MXMD", std::to_string(config.mixing) + ":0");
+        mSerial->setParam("MXMD", std::to_string(config.mixing));
     }
 
     // Update last configuration

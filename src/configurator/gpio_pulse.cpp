@@ -70,13 +70,13 @@ void GPIOPulseConfigurator::getParamFromRoboteq()
 {
     try
     {
-        // conversion PMOD [pag. 302]
+        // conversion PMOD
         string str_conversion = mSerial->getParam("PMOD", std::to_string(mNumber));
         int conversion = boost::lexical_cast<int>(str_conversion);
         // Set params
         nh_.setParam(mName + "/conversion", conversion);
 
-        // input PINA [pag. 287]
+        // input PINA
         string str_pina = mSerial->getParam("PINA", std::to_string(mNumber));
         // Get PINA from roboteq board
         int emod = boost::lexical_cast<unsigned int>(str_pina);
@@ -120,31 +120,31 @@ void GPIOPulseConfigurator::getParamFromRoboteq()
         nh_.setParam(mName + "/input_motor_one", tmp1);
         nh_.setParam(mName + "/input_motor_two", tmp2);
 
-        // polarity PPOL [pag. 303]
+        // polarity PPOL
         string str_polarity = mSerial->getParam("PPOL", std::to_string(mNumber));
         int polarity = boost::lexical_cast<int>(str_polarity);
         // Set params
         nh_.setParam(mName + "/conversion_polarity", polarity);
 
-        // Input deadband PDB [pag. 297]
+        // Input deadband PDB
         string str_deadband = mSerial->getParam("PDB", std::to_string(mNumber));
         int deadband = boost::lexical_cast<int>(str_deadband);
         // Set params
         nh_.setParam(mName + "/input_deadband", deadband);
 
-        // Input PMIN [pag. 301]
+        // Input PMIN
         string str_min = mSerial->getParam("PMIN", std::to_string(mNumber));
         double min = boost::lexical_cast<double>(str_min) / 1000;
         // Set params
         nh_.setParam(mName + "/range_input_min", min);
 
-        // Input PMAX [pag. 300]
+        // Input PMAX
         string str_max = mSerial->getParam("PMAX", std::to_string(mNumber));
         double max = boost::lexical_cast<double>(str_max) / 1000;
         // Set params
         nh_.setParam(mName + "/range_input_max", max);
 
-        // Input PTCR [pag. 293]
+        // Input PTCR
         string str_ctr = mSerial->getParam("PCTR", std::to_string(mNumber));
         double ctr = boost::lexical_cast<double>(str_ctr) / 1000;
         // Set params
@@ -186,13 +186,13 @@ void GPIOPulseConfigurator::reconfigureCBParam(roboteq_control::RoboteqPulseInpu
         return;
     }
 
-    // Set conversion PMOD [pag. 302]
+    // Set conversion PMOD
     if(_last_param_config.conversion != config.conversion)
     {
         // Update operative mode
         mSerial->setParam("PMOD", std::to_string(mNumber) + " " + std::to_string(config.conversion));
     }
-    // Set input PINA [pag. 287]
+    // Set input PINA
     if((_last_param_config.input_use != config.input_use) ||
             (_last_param_config.input_motor_one != config.input_motor_one) ||
             (_last_param_config.input_motor_two != config.input_motor_two))
@@ -213,33 +213,33 @@ void GPIOPulseConfigurator::reconfigureCBParam(roboteq_control::RoboteqPulseInpu
             ROS_INFO_STREAM("Register pulse input [" << mNumber << "] to: " << motor->getName());
         }
     }
-    // Set polarity PPOL [pag. 303]
+    // Set polarity PPOL
     if(_last_param_config.conversion_polarity != config.conversion_polarity)
     {
         // Update operative mode
         mSerial->setParam("PPOL", std::to_string(mNumber) + " " + std::to_string(config.conversion_polarity));
     }
-    // Set deadband PDB [pag. 297]
+    // Set deadband PDB
     if(_last_param_config.input_deadband != config.input_deadband)
     {
         // Update operative mode
         mSerial->setParam("PDB", std::to_string(mNumber) + " " + std::to_string(config.input_deadband));
     }
-    // Set input PMIN [pag. 301]
+    // Set input PMIN
     if(_last_param_config.range_input_min != config.range_input_min)
     {
         int range_input_min = config.range_input_min * 1000;
         // Update operative mode
         mSerial->setParam("PMIN", std::to_string(mNumber) + " " + std::to_string(range_input_min));
     }
-    // Set input PMAX [pag. 300]
+    // Set input PMAX
     if(_last_param_config.range_input_max != config.range_input_max)
     {
         int range_input_max = config.range_input_max * 1000;
         // Update operative mode
         mSerial->setParam("PMAX", std::to_string(mNumber) + " " + std::to_string(range_input_max));
     }
-    // Set input PTCR [pag. 293]
+    // Set input PTCR
     if(_last_param_config.range_input_center != config.range_input_center)
     {
         int range_input_center = config.range_input_center * 1000;
